@@ -68,8 +68,8 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 - [x] `0001_breathing_schema.sql` átolvasása, majd futtatása a familyBudget projekten
 - [x] SQL editorban ellenőrizni: a 4 tábla létrejött, RLS mindegyiken bekapcsolva
-- [ ] `lib/supabase.ts` – kliens AsyncStorage session perzisztenciával
-- [ ] Típusgenerálás: `supabase gen types typescript --project-id eguhipjgnhbajbmnrskm > types/supabase.ts`
+- [x] `lib/supabase.ts` – kliens AsyncStorage session perzisztenciával
+- [x] Típusgenerálás: `supabase gen types typescript --project-id eguhipjgnhbajbmnrskm > types/supabase.ts`
 - [x] Kézi próba: egy teszt user regisztrálása, `breathing_children` sor beszúrása, majd
       ellenőrizni, hogy **másik** userrel nem látszik
 
@@ -216,6 +216,61 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-24 – 1. Supabase alapok
+
+**Mit:** A `breathing_` séma lefutott a familyBudget projekten (`0001`), majd egy
+követő migráció (`0002`) szűkítette a két saját `SECURITY DEFINER` függvény
+EXECUTE jogát. Elkészült a Supabase kliens AsyncStorage session-perzisztenciával
+és előtér-függő token frissítéssel, valamint a generált — `breathing_` táblákra
+szűkített — típusfájl. Két új dependency: `@supabase/supabase-js` és
+`@react-native-async-storage/async-storage` (mindkettő a CLAUDE.md tech stack
+listáján szerepel).
+
+**Fájlok:** supabase/migrations/0001_breathing_schema.sql,
+supabase/migrations/0002_breathing_function_grants.sql, lib/supabase.ts,
+types/supabase.ts, package.json, package-lock.json
+
+**Tesztelve:**
+- Séma: mind a 4 tábla létrejött, RLS mindegyiken `true`, a policy-k a helyükön
+  (children 4 db, sessions/stickers/settings 1-1 `for all`).
+- **RLS izoláció, két külön fiókkal** (szimulált JWT claim-mel, lásd lentebb):
+  A beszúrt gyereket/session-t/matricát → látja a sajátját; a trigger
+  automatikusan létrehozta a `breathing_settings` sort `medium` alapértékkel.
+  B mind a négy táblában **0 sort** lát, id szerint sem éri el A gyerekét,
+  `insert`-je A `parent_id`-jával és A gyerekéhez RLS hibára fut (42501),
+  `update`/`delete`-je 0 sort érint. Az `anon` szerep szintén 0 sort lát.
+  A tesztadat és a két teszt auth user utána törölve, az adatbázis üresen maradt.
+- A jogszűkítés után újra ellenőrizve, hogy a tulajdonos továbbra is ír és olvas
+  mind a négy táblát (a policy-k a `breathing_owns_child`-ot hívják).
+- Kliens: `npm run typecheck` és `npm run lint` hibátlan. Metro iOS dev bundle
+  (8,9 MB) hiba nélkül lefordul a klienssel együtt — a supabase-js és az
+  AsyncStorage feloldódik. **A bundle-ben csak az anon kulcs van benne**
+  (a benne talált egyetlen JWT payload-ja `"role":"anon"`), service role kulcs
+  vagy `sb_secret_` minta nincs.
+
+**Nyitva maradt:**
+- **A signUp-ot nem sikerült éles hálózaton kipróbálni:** a projekt beépített
+  SMTP-je `email rate limit exceeded` hibát ad (az e-mail megerősítés be van
+  kapcsolva, és az óránkénti keret elfogyott). Ezért az RLS-t a policy szintjén,
+  `set local role authenticated` + `set_config('request.jwt.claims', …)`
+  szimulációval ellenőriztem, ami pontosabb is, de a **valódi signUp →
+  bejelentkezés → PostgREST kör még nincs végigjátszva.** Ez a 4. szakaszban
+  (auth képernyők) úgyis sorra kerül; addigra érdemes vagy saját SMTP-t
+  beállítani, vagy a Supabase Auth beállításaiban kikapcsolni az e-mail
+  megerősítést tesztidőre.
+- A `types/supabase.ts` szűrt fájl: újragenerálás után a szűrést kézzel újra el
+  kell végezni (lásd D-007). Automatizáló script nincs hozzá.
+- Az Expo figyelmeztet, hogy a `babel-preset-expo@57.0.8` helyett `~54.0.10`
+  lenne az elvárt verzió. Nem nyúltam hozzá, mert a 0. szakaszban ezzel épült
+  minden és működik — de a következő `npx expo install --fix` ezt átírja.
+- `react-native-url-polyfill` nincs telepítve, és a supabase-js sem húzza be.
+  A dev bundle lefordul nélküle; ha éles eszközön URL-lel kapcsolatos hibát
+  látnánk, ez az első gyanúsított.
+
+**Commitok:** `db: breathing_ táblák migrációja a familyBudget projekten`,
+`feat: Supabase kliens és generált típusok`
+
 
 ## 2026-08-24 – 0. Setup szakasz
 
