@@ -54,9 +54,9 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] Expo projekt: `npx create-expo-app@latest doboz-legzes -t expo-template-blank-typescript`
 - [x] `git init`, első commit: `init`
 - [x] `.env` és `.env.example` létrehozása, `.env` a `.gitignore`-ba
-- [ ] NativeWind telepítése és konfigurálása (`tailwind.config.js`, `babel.config.js`, `global.css`)
-- [ ] Expo Router bekötése (`app/_layout.tsx`, `expo-router/entry`)
-- [ ] `react-native-reanimated` telepítése + babel plugin (**legyen a plugin lista utolsó eleme**)
+- [x] NativeWind telepítése és konfigurálása (`tailwind.config.js`, `babel.config.js`, `global.css`)
+- [x] Expo Router bekötése (`app/_layout.tsx`, `expo-router/entry`)
+- [x] `react-native-reanimated` telepítése + babel plugin (**legyen a plugin lista utolsó eleme**)
 - [ ] Betűtípusok: `@expo-google-fonts/baloo-2`, `@expo-google-fonts/nunito`, `expo-font`
 - [ ] `constants/colors.ts` és `constants/typography.ts` a `docs/design-tokens.md` alapján
 - [ ] `constants/images.ts` létrehozása (üresen is)
