@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 /**
  * A kezdőképernyő fogaskerék gombja (`00-teljes-canvas.html`, 3. képernyő):
@@ -9,6 +10,8 @@ import { shadows } from '@/constants/shadows';
  * fogaskerék. Kép asset nincs hozzá, a design is CSS-ből rajzolja.
  */
 export function GearButton({ onPress }: { onPress?: () => void }) {
+  const { pressed, pressHandlers } = usePressed();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -16,7 +19,9 @@ export function GearButton({ onPress }: { onPress?: () => void }) {
       disabled={!onPress}
       hitSlop={5}
       onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[styles.button, pressed && styles.pressed]}
     >
       <View style={styles.gear}>
         <View style={styles.ring} />

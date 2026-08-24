@@ -217,6 +217,50 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-25 – fix: a `Pressable` `style` függvényét elnyeli a NativeWind
+
+**Mit:** A kezdőképernyőn nem lehetett karaktert választani: a négy chip
+egyáltalán nem látszott. Kiderült, hogy nem a választó a hibás, hanem egy
+projekt szintű probléma: ha a `Pressable` `style` propja **függvény**
+(`style={({ pressed }) => …}`), a NativeWind interop elnyeli, és a komponens
+**teljes** stílusa elveszik — nem csak a lenyomott állapot, hanem a méret, a
+háttér és a keret is. Ezért volt láthatatlan a chip (nem volt mérete, így a
+gradiens sem kapott helyet) és a fogaskerék fehér köre, és ezért nem volt
+lila keret a kiválasztott karakteren.
+
+Mind a 11 érintett hely átállt statikus `style` tömbre; a lenyomott állapotot
+az új `hooks/usePressed.ts` adja (`onPressIn`/`onPressOut` + lokális state).
+Ez már commitolt komponenseket is javít, amiken eddig észrevétlenül hiányzott
+a stílus: `PrimaryButton` (árnyék, teljes szélesség), `Checkbox` (a sor
+elrendezése), `SegmentedChoice` (kiválasztott elem háttere), `ToggleRow`,
+valamint a bejelentkezés „Elfelejtett jelszó?" jobbra igazítása. Lásd D-026.
+
+**Fájlok:** hooks/usePressed.ts, components/CharacterPicker.tsx,
+GearButton.tsx, PrimaryButton.tsx, Checkbox.tsx, SegmentedChoice.tsx,
+ToggleRow.tsx, app/(auth)/login.tsx, app/(auth)/register.tsx,
+app/session.tsx, app/scratch-characters.tsx, docs/feature-tasks.md
+
+**Tesztelve:** **iOS szimulátoron, Expo Go-val** (iPhone 17, iOS 26) —
+ez az első alkalom, hogy az app futott. A karakterválasztás végig kipróbálva:
+koppintásra átvált a nagy karakter, a lila keret követi, és app-újraindítás
+után is megmarad (a Zustand `persist` működik). A regisztráció és a
+bejelentkezés képernyő is helyreállt. `npm run typecheck` és `npm run lint`
+hibátlan.
+
+**Hasznos a következő munkamenetnek:** a szimulátor működik fejlesztői
+ellenőrzésre. `npx expo start`, `xcrun simctl openurl booted
+"exp://127.0.0.1:8081"`, képernyőkép `xcrun simctl io booted screenshot`.
+Az auth guard mögötti képernyőket ideiglenesen az `(auth)` csoportba tett
+re-export route-tal lehet megnézni bejelentkezés nélkül.
+
+**Nyitva maradt:**
+- A `Twinkles` pöttyök helye a designhoz képest eszközön ellenőrizve: a
+  402×874-es kerethez igazított értékek iPhone 17-en jól néznek ki.
+- A szimulátoron a Supabase hívások nem futottak le (nincs bejelentkezve),
+  így a `syncFromServer` éles adattal még nincs kipróbálva.
+
+**Commit:** fix: a Pressable style függvényét elnyeli a NativeWind interop
+
 ## 2026-08-25 – 5. Kezdőképernyő (3. képernyő)
 
 **Mit:** Elkészült a kezdőképernyő a canvas 3. képernyője alapján: üdvözlés,
@@ -1040,6 +1084,29 @@ engedélyhez köti; rákérdezés után a felhasználó ezt választotta.
 padding és a CTA pozíciója is változna mind a három fő képernyőn).
 **Visszavonható?** Igen, egyetlen sor az `app/(tabs)/_layout.tsx`-ben — a
 kezdőképernyő gombjai és a tab bar meg is férnének egymás mellett.
+
+## D-026 – A `Pressable` `style` propja soha nem lehet függvény
+
+**Dátum:** 2026-08-25
+**Döntés:** ebben a projektben a `Pressable` `style`-ja mindig statikus tömb
+(`style={[styles.x, pressed && styles.pressed]}`), a lenyomott állapot pedig a
+`hooks/usePressed.ts`-ből jön (`onPressIn`/`onPressOut` + lokális state). A
+`style={({ pressed }) => …}` alak tiltott.
+**Miért:** a NativeWind (`react-native-css-interop`) a saját JSX interopján
+átvezeti minden RN komponens propjait, és a függvény alakú `style`-t elnyeli:
+a komponens **egyetlen** stílusa sem érvényesül — se méret, se háttér, se
+keret. Ez némán történik, nincs hiba és nincs figyelmeztetés, ezért négy
+komponens hetekig hibás lehetett volna. Szimulátoron mérve: statikus
+`style`-lal a 34×34-es fehér kör kirajzolódik, függvénnyel nem. Nem a React
+Compiler okozza — kikapcsolva is ugyanaz (ezért maradt bekapcsolva).
+**Alternatíva:** (1) `className`-es `active:` variáns — a `CLAUDE.md` a
+lenyomott állapotot kifejezetten StyleSheet-hez köti; (2) `TouchableOpacity`
+(beépített `activeOpacity`) — több helyen kellene komponenst cserélni, és az
+RN elavultnak tekinti; (3) NativeWind verzióváltás — nagyobb kockázat egy
+működő projektben.
+**Visszavonható?** Igen, de csak akkor érdemes, ha a NativeWind javítja az
+interopot — addig a függvény alakú `style` visszatérése azonnal láthatatlan
+UI-t okoz.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 

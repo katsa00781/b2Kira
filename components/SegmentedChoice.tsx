@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 export type SegmentedOption<T> = {
   value: T;
@@ -28,31 +29,44 @@ export function SegmentedChoice<T extends string | number>({
 }: SegmentedChoiceProps<T>) {
   return (
     <View className="flex-row gap-[8px]">
-      {options.map((option) => {
-        const selected = option.value === value;
-        return (
-          <Pressable
-            key={option.value}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            hitSlop={HIT_SLOP}
-            onPress={() => onChange(option.value)}
-            style={({ pressed }) => [
-              styles.item,
-              selected ? styles.itemSelected : styles.itemIdle,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text
-              className="text-center font-nunito-bold text-[13px]"
-              style={{ color: selected ? colors.white : colors.text.muted }}
-            >
-              {option.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+      {options.map((option) => (
+        <Segment
+          key={option.value}
+          label={option.label}
+          selected={option.value === value}
+          onSelect={() => onChange(option.value)}
+        />
+      ))}
     </View>
+  );
+}
+
+type SegmentProps = {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+};
+
+function Segment({ label, selected, onSelect }: SegmentProps) {
+  const { pressed, pressHandlers } = usePressed();
+
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      hitSlop={HIT_SLOP}
+      onPress={onSelect}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[styles.item, selected ? styles.itemSelected : styles.itemIdle, pressed && styles.pressed]}
+    >
+      <Text
+        className="text-center font-nunito-bold text-[13px]"
+        style={{ color: selected ? colors.white : colors.text.muted }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { characterComponents } from '@/components/characters';
 import type { CharacterMood } from '@/components/characters';
 import { colors } from '@/constants/colors';
+import { usePressed } from '@/hooks/usePressed';
 import { characters } from '@/data/characters';
 
 const MIN_SCALE = 0.5;
@@ -91,14 +92,14 @@ function ControlButton({
   active?: boolean;
   onPress: () => void;
 }) {
+  const { pressed, pressHandlers } = usePressed();
+
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.button,
-        active && styles.buttonActive,
-        pressed && styles.buttonPressed,
-      ]}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[styles.button, active && styles.buttonActive, pressed && styles.buttonPressed]}
     >
       <Text
         className="font-nunito-bold text-[13px]"

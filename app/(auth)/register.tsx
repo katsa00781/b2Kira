@@ -17,6 +17,7 @@ import { FormMessage } from '@/components/FormMessage';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { TextField } from '@/components/TextField';
 import { gradients } from '@/constants/colors';
+import { usePressed } from '@/hooks/usePressed';
 import { signUp } from '@/lib/auth';
 
 type Feedback = { tone: 'error' | 'success'; message: string };
@@ -31,6 +32,8 @@ export default function RegisterScreen() {
   const [consent, setConsent] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [busy, setBusy] = useState(false);
+  // A `Pressable` `style` propja nem lehet függvény — lásd D-026.
+  const loginLink = usePressed();
 
   async function handleSignUp() {
     setBusy(true);
@@ -135,7 +138,8 @@ export default function RegisterScreen() {
               accessibilityRole="link"
               hitSlop={{ top: 14, bottom: 14 }}
               onPress={() => router.push('/login')}
-              style={({ pressed }) => pressed && styles.pressed}
+              {...loginLink.pressHandlers}
+              style={loginLink.pressed && styles.pressed}
             >
               <Text className="font-nunito-semibold text-[13px] text-text-subtle">
                 Van már fiókod? <Text className="font-nunito-bold text-green-700">Bejelentkezés</Text>

@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { TextField } from '@/components/TextField';
 import { Twinkles } from '@/components/Twinkles';
 import { gradients } from '@/constants/colors';
+import { usePressed } from '@/hooks/usePressed';
 import { resetPassword, signIn } from '@/lib/auth';
 
 type Feedback = { tone: 'error' | 'success'; message: string };
@@ -21,6 +22,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [busy, setBusy] = useState(false);
+  // A `Pressable` `style` propja nem lehet függvény — lásd D-026.
+  const forgotten = usePressed();
+  const registerLink = usePressed();
 
   async function handleSignIn() {
     setBusy(true);
@@ -95,7 +99,8 @@ export default function LoginScreen() {
               disabled={busy}
               hitSlop={{ top: 12, bottom: 12, left: 12 }}
               onPress={handleForgottenPassword}
-              style={({ pressed }) => [styles.forgotten, pressed && styles.pressed]}
+              {...forgotten.pressHandlers}
+              style={[styles.forgotten, forgotten.pressed && styles.pressed]}
             >
               <Text className="font-nunito-bold text-[12px] text-purple-600">
                 Elfelejtett jelszó?
@@ -117,7 +122,8 @@ export default function LoginScreen() {
               accessibilityRole="link"
               hitSlop={{ top: 14, bottom: 14 }}
               onPress={() => router.push('/register')}
-              style={({ pressed }) => pressed && styles.pressed}
+              {...registerLink.pressHandlers}
+              style={registerLink.pressed && styles.pressed}
             >
               <Text className="font-nunito-semibold text-[13px] text-text-subtle">
                 Nincs még fiókod? <Text className="font-nunito-bold text-purple-600">Regisztrálj</Text>

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { gradients } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 export type PrimaryButtonVariant = 'purple' | 'green';
 
@@ -25,6 +26,7 @@ export function PrimaryButton({
   disabled = false,
 }: PrimaryButtonProps) {
   const gradient = variant === 'purple' ? gradients.primaryButton : gradients.greenButton;
+  const { pressed, pressHandlers } = usePressed();
 
   return (
     <Pressable
@@ -32,7 +34,9 @@ export function PrimaryButton({
       accessibilityState={{ disabled }}
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[
         styles.root,
         variant === 'purple' ? styles.shadowPurple : styles.shadowGreen,
         pressed && styles.pressed,

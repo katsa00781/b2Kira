@@ -9,6 +9,7 @@ import Animated, {
 
 import { colors } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 type ToggleRowProps = {
   label: string;
@@ -54,13 +55,17 @@ export function ToggleRow({
     transform: [{ translateX: on.value * KNOB_TRAVEL }],
   }));
 
+  const { pressed, pressHandlers } = usePressed();
+
   return (
     <Pressable
       accessibilityRole="switch"
       accessibilityState={{ checked: value }}
       accessibilityLabel={label}
       onPress={() => onValueChange(!value)}
-      style={({ pressed }) => [
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[
         styles.row,
         showDivider && styles.divider,
         pressed && styles.pressed,

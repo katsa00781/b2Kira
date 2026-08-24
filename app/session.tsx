@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, gradients } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 /**
  * FEJLESZTŐI PLACEHOLDER. A valódi légzőgyakorlat a 6. szakaszban készül el,
@@ -15,6 +16,7 @@ import { shadows } from '@/constants/shadows';
 export default function SessionScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { pressed, pressHandlers } = usePressed();
 
   return (
     <LinearGradient
@@ -28,7 +30,9 @@ export default function SessionScreen() {
           accessibilityLabel="Vissza"
           hitSlop={5}
           onPress={() => router.back()}
-          style={({ pressed }) => [styles.backButton, pressed && styles.pressed]}
+          {...pressHandlers}
+        // A `style` itt nem lehet függvény — lásd D-026.
+          style={[styles.backButton, pressed && styles.pressed]}
         >
           <View style={styles.backArrow} />
         </Pressable>

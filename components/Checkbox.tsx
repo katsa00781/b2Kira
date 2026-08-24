@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { usePressed } from '@/hooks/usePressed';
 
 type CheckboxProps = {
   checked: boolean;
@@ -19,6 +20,8 @@ const BOX_SIZE = 18;
  * A teljes sor érintésre reagál, így a célterület 44 pt fölött van (D-017).
  */
 export function Checkbox({ checked, onChange, label }: CheckboxProps) {
+  const { pressed, pressHandlers } = usePressed();
+
   return (
     <Pressable
       accessibilityRole="checkbox"
@@ -26,7 +29,9 @@ export function Checkbox({ checked, onChange, label }: CheckboxProps) {
       accessibilityLabel={label}
       hitSlop={{ top: 8, bottom: 8 }}
       onPress={() => onChange(!checked)}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[styles.row, pressed && styles.pressed]}
     >
       <View style={[styles.box, checked ? styles.boxChecked : styles.boxEmpty]}>
         {checked ? <Ionicons name="checkmark" size={13} color={colors.white} /> : null}

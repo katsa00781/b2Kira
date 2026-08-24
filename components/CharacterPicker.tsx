@@ -3,8 +3,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
-import type { CharacterId } from '@/data/characters';
+import type { Character, CharacterId } from '@/data/characters';
 import { characters } from '@/data/characters';
+import { usePressed } from '@/hooks/usePressed';
 
 type CharacterPickerProps = {
   value: CharacterId;
@@ -18,34 +19,50 @@ type CharacterPickerProps = {
 export function CharacterPicker({ value, onChange }: CharacterPickerProps) {
   return (
     <View style={styles.row}>
-      {characters.map((character) => {
-        const selected = character.id === value;
-
-        return (
-          <Pressable
-            key={character.id}
-            accessibilityRole="radio"
-            accessibilityState={{ selected }}
-            accessibilityLabel={character.name}
-            // A design 36 px-es chipje kisebb a 44 pt-os célterületnél (D-017).
-            hitSlop={4}
-            onPress={() => onChange(character.id)}
-            style={({ pressed }) => [
-              styles.chip,
-              selected ? styles.chipSelected : styles.chipPlain,
-              pressed && styles.pressed,
-            ]}
-          >
-            <LinearGradient
-              colors={character.chipColors}
-              start={GRADIENT_START}
-              end={GRADIENT_END}
-              style={styles.fill}
-            />
-          </Pressable>
-        );
-      })}
+      {characters.map((character) => (
+        <CharacterChip
+          key={character.id}
+          character={character}
+          selected={character.id === value}
+          onSelect={() => onChange(character.id)}
+        />
+      ))}
     </View>
+  );
+}
+
+type CharacterChipProps = {
+  character: Character;
+  selected: boolean;
+  onSelect: () => void;
+};
+
+function CharacterChip({ character, selected, onSelect }: CharacterChipProps) {
+  const { pressed, pressHandlers } = usePressed();
+
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={character.name}
+      // A design 36 px-es chipje kisebb a 44 pt-os célterületnél (D-017).
+      hitSlop={4}
+      onPress={onSelect}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[
+        styles.chip,
+        selected ? styles.chipSelected : styles.chipPlain,
+        pressed && styles.pressed,
+      ]}
+    >
+      <LinearGradient
+        colors={character.chipColors}
+        start={GRADIENT_START}
+        end={GRADIENT_END}
+        style={styles.fill}
+      />
+    </Pressable>
   );
 }
 
