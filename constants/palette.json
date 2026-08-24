@@ -1,0 +1,67 @@
+{
+  "purple": {
+    "900": "#5B3E8C",
+    "700": "#6A44B0",
+    "600": "#8B5FD9",
+    "400": "#C9A6F5",
+    "150": "#EEE3FB",
+    "100": "#EFE6FE",
+    "75": "#F1ECFA",
+    "50": "#F3EEFA"
+  },
+  "text": {
+    "heading": "#5B3E8C",
+    "body": "#3E3556",
+    "label": "#7A6C99",
+    "muted": "#8B7AA8",
+    "subtle": "#9A8CB8",
+    "placeholder": "#C3B8DC"
+  },
+  "pink": {
+    "600": "#C6497D",
+    "500": "#FF8FA3",
+    "400": "#FF9FCB",
+    "300": "#FFAFD1",
+    "250": "#FFB6D9",
+    "200": "#FFD3E8",
+    "150": "#FFD9E8",
+    "100": "#F3D8EE"
+  },
+  "green": {
+    "700": "#3E7C68",
+    "600": "#3E8C6C",
+    "500": "#6BAF9A",
+    "400": "#5FC7A6",
+    "300": "#94E3C9",
+    "100": "#D3F5E8",
+    "50": "#DCEFE8",
+    "bg": "#EAF7F2"
+  },
+  "blue": {
+    "700": "#2E7FA0",
+    "300": "#8FD3E8",
+    "100": "#CFF0FF",
+    "50": "#EDF4FB"
+  },
+  "amber": {
+    "700": "#B9832A",
+    "600": "#E8A33D",
+    "500": "#FFB347",
+    "400": "#FFD97A",
+    "300": "#FBD98C",
+    "200": "#FFE9BF"
+  },
+  "lock": {
+    "bg": "#EDE7F6",
+    "shape": "#C9BEDD",
+    "text": "#B7AACB"
+  },
+  "toggle": {
+    "off": "#DDD3EE"
+  },
+  "screen": {
+    "stickers": "#FBF6FF",
+    "settings": "#F7F5FC"
+  },
+  "white": "#FFFFFF"
+}

@@ -58,8 +58,8 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] Expo Router bekötése (`app/_layout.tsx`, `expo-router/entry`)
 - [x] `react-native-reanimated` telepítése + babel plugin (**legyen a plugin lista utolsó eleme**)
 - [x] Betűtípusok: `@expo-google-fonts/baloo-2`, `@expo-google-fonts/nunito`, `expo-font`
-- [ ] `constants/colors.ts` és `constants/typography.ts` a `docs/design-tokens.md` alapján
-- [ ] `constants/images.ts` létrehozása (üresen is)
+- [x] `constants/colors.ts` és `constants/typography.ts` a `docs/design-tokens.md` alapján
+- [x] `constants/images.ts` létrehozása (üresen is)
 - [ ] Lint + typecheck script bekötése (`npm run lint`, `npm run typecheck`)
 - [x] `CLAUDE.md`, `docs/`, `design-reference/`, `supabase/` bemásolása a projekt gyökerébe
 - [ ] Push GitHubra (privát repó)
