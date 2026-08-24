@@ -4,9 +4,8 @@
 -- Minden tábla `breathing_` prefixet kap, hogy elkülönüljön
 -- a pénzügyi tábláktól ugyanabban a public sémában.
 --
--- FIGYELEM: ez a migráció még NINCS lefuttatva. Futtatás előtt
--- olvasd át, és a Supabase MCP `apply_migration` hívással vagy
--- a Supabase SQL editorban futtasd.
+-- Lefuttatva: 2026-08-24, Supabase MCP `apply_migration`.
+-- A folytatás a 0002_breathing_function_grants.sql-ben.
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -159,6 +158,7 @@ create policy breathing_settings_all on public.breathing_settings
 create or replace function public.breathing_touch_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();

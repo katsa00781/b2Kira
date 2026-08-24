@@ -66,11 +66,11 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 1. Supabase alapok
 
-- [ ] `0001_breathing_schema.sql` átolvasása, majd futtatása a familyBudget projekten
-- [ ] SQL editorban ellenőrizni: a 4 tábla létrejött, RLS mindegyiken bekapcsolva
+- [x] `0001_breathing_schema.sql` átolvasása, majd futtatása a familyBudget projekten
+- [x] SQL editorban ellenőrizni: a 4 tábla létrejött, RLS mindegyiken bekapcsolva
 - [ ] `lib/supabase.ts` – kliens AsyncStorage session perzisztenciával
 - [ ] Típusgenerálás: `supabase gen types typescript --project-id eguhipjgnhbajbmnrskm > types/supabase.ts`
-- [ ] Kézi próba: egy teszt user regisztrálása, `breathing_children` sor beszúrása, majd
+- [x] Kézi próba: egy teszt user regisztrálása, `breathing_children` sor beszúrása, majd
       ellenőrizni, hogy **másik** userrel nem látszik
 
 ## 2. Karakterek
@@ -389,6 +389,53 @@ félig-meddig ottfelejtett sablonkód pont a „két színforrás" hibát okozza
 amire a CLAUDE.md külön kitér.
 **Visszavonható?** Igen, a törölt fájlok a git történetben megvannak
 (`9313cda` előtti állapot).
+
+## D-007 – A generált Supabase típusok csak a `breathing_` táblákat tartalmazzák
+
+**Dátum:** 2026-08-24
+**Döntés:** a `types/supabase.ts` a `supabase gen types` teljes kimenetének
+szűrt változata: csak a négy `breathing_` tábla és a `breathing_owns_child`
+függvény marad benne. A familyBudget pénzügyi tábláinak (`products`,
+`receipts`, `invoices`, `budget_plans`, …) típusai és a `Constants` enum
+blokk kimaradnak.
+**Miért:** a teljes kimenet 1878 sor, ebből ~1650 sor idegen tábla. A CLAUDE.md
+szerint ez az app **soha** nem nyúlhat a pénzügyi táblákhoz — ha a típusuk
+nincs a `Database` típusban, akkor a `supabase.from('receipts')` már
+fordítási hibát ad, nem csak konvenció tiltja. A típus így egyben védőkorlát is.
+**Alternatíva:** a teljes kimenet változatlan beírása (ezt írja a task lista
+sora). Elvetve: 58 KB idegen típus, és a tiltott táblák így csábítóan
+autocomplete-elnének.
+**Következmény:** újragenerálás után a szűrést újra el kell végezni. A fájl
+fejlécében ez ki van írva.
+**Visszavonható?** Igen, bármikor újragenerálható szűrés nélkül.
+
+## D-008 – A `breathing_` SECURITY DEFINER függvények EXECUTE joga szűkítve
+
+**Dátum:** 2026-08-24
+**Döntés:** a migráció lefuttatása után a Supabase security linter két
+figyelmeztetést dobott a saját függvényeinkre (`0028` és `0029`): a
+`breathing_create_default_settings()` és a `breathing_owns_child(uuid)`
+`SECURITY DEFINER` függvény a PostgREST `/rest/v1/rpc/...` végponton át
+bejelentkezés nélkül is hívható volt. Egy külön migrációban
+(`0002_breathing_function_grants.sql`) visszavontuk az alapértelmezett
+PUBLIC EXECUTE jogot: a trigger függvényről mindenkiről, a segédfüggvényről
+`public`-ról és `anon`-ról, `authenticated`-nek pedig explicit `grant`.
+Emellett a `breathing_touch_updated_at()` kapott egy `set search_path = public`
+sort (linter `0011`), ez a 0001-be visszavezetve.
+**Miért:** RLS a védelem, de a felesleges támadási felület akkor is felesleges.
+A trigger függvényt sosem kell kívülről hívni; a segédfüggvényt viszont igen,
+mert az RLS policy kifejezés a **lekérdező szerepében** fut, tehát az
+`authenticated` szerepnek kell rá EXECUTE jog — ezt éles próbával
+ellenőriztem a szűkítés után (a tulajdonos továbbra is ír és olvas mind a
+négy táblát).
+**Alternatíva:** figyelmen kívül hagyni a linter figyelmeztetést (a tényleges
+kockázat kicsi: a trigger függvény RPC-ből hibát dob, a segédfüggvény anonként
+mindig `false`-t ad). Elvetve, mert a javítás két sor és nem jár kockázattal.
+**Megjegyzés:** a `0029`-es figyelmeztetés a `breathing_owns_child`-ra
+**szándékosan megmarad**, mert az `authenticated` jogosultság funkcionálisan
+szükséges. A többi listázott figyelmeztetés a familyBudget régi függvényeire
+vonatkozik, azokhoz nem nyúltunk.
+**Visszavonható?** Igen, egy `grant execute ... to public` visszaállítja.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
