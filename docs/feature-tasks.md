@@ -78,7 +78,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] `components/characters/Bunny.tsx` a `design-reference/Bunny.html` geometriája alapján
 - [x] Panda, Monkey, Lion ugyanígy
 - [x] `mood: 'happy' | 'breathing'` és `scale: number` prop mindegyiken
-- [ ] `data/characters.ts` – id, magyar név, chip gradiens színek
+- [x] `data/characters.ts` – id, magyar név, chip gradiens színek
 - [ ] Ellenőrzés: egy scratch képernyőn mind a 4 karakter megjelenik, `scale` csúszkával
 
 > Ez a legkényesebb rész. Egyesével csináld, karakterenként külön prompt, külön commit.
