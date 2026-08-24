@@ -63,5 +63,45 @@
     "stickers": "#FBF6FF",
     "settings": "#F7F5FC"
   },
-  "white": "#FFFFFF"
+  "white": "#FFFFFF",
+  "character": {
+    "bunny": {
+      "fur": "#FFFFFF",
+      "outline": "#F3D8EE",
+      "inner": "#FFD3E8",
+      "eye": "#5B3E66",
+      "cheek": "#FFC2DB",
+      "nose": "#F6A9C6",
+      "line": "#E8B8CE",
+      "shadow": "rgba(200,160,210,.3)"
+    },
+    "panda": {
+      "fur": "#FFFFFF",
+      "outline": "#E9E9E9",
+      "patch": "#3A3A3A",
+      "eye": "#FFFFFF",
+      "line": "#D8D8D8",
+      "chip": "#F2F2F2",
+      "shadow": "rgba(150,150,150,.3)"
+    },
+    "monkey": {
+      "fur": "#B98559",
+      "outline": "#A5713F",
+      "muzzle": "#F3DCB8",
+      "eye": "#4A2E17",
+      "nose": "#7A5230",
+      "line": "#8A6238",
+      "shadow": "rgba(150,110,70,.3)"
+    },
+    "lion": {
+      "fur": "#FBD98C",
+      "outline": "#E8A33D",
+      "maneDark": "#D98A26",
+      "eye": "#5B3A1A",
+      "cheek": "#FFF3DC",
+      "nose": "#8A5A2A",
+      "line": "#C98A44",
+      "shadow": "rgba(200,150,60,.3)"
+    }
+  }
 }
