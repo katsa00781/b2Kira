@@ -217,9 +217,55 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
-## ÉÉÉÉ-HH-NN – (első bejegyzés helye)
+## 2026-08-24 – 0. Setup szakasz
 
-Még nincs bejegyzés. Az első a 0. Setup szakasz lezárása után kerül ide.
+**Mit:** A projekt alapja készen áll. Az Expo SDK 54 sablon demo tartalma
+(explore/modal képernyők, themed komponensek, react-logo assetek,
+`reset-project` script) törölve. NativeWind 4.2.6 bekötve (babel jsxImportSource,
+metro `withNativeWind`, `global.css`, tailwind config), Baloo 2 és Nunito
+betűtípusok betöltése a root layoutban splash screennel, design tokenek
+(`constants/palette.json`, `colors.ts`, `typography.ts`, `images.ts`),
+`.env` + `.env.example` a Supabase anon kulccsal, `npm run lint` és
+`npm run typecheck` scriptek.
+
+**Fájlok:** app/_layout.tsx, app/(tabs)/_layout.tsx, app/(tabs)/index.tsx,
+babel.config.js, metro.config.js, tailwind.config.js, global.css,
+nativewind-env.d.ts, constants/palette.json, constants/colors.ts,
+constants/typography.ts, constants/images.ts, package.json, eslint.config.js,
+.gitignore, .env.example
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Metro dev bundle
+(iOS, `expo start` + bundle letöltés) sikeresen fordul, a NativeWind osztályok
+lefordulnak: a `bg-purple-50` és `text-text-heading` értékei (`#f3eefa`,
+`#5b3e8c`) benne vannak a bundle-ben, a Baloo betűcsalád is. A reanimated
+worklet babel plugin aktív (babel transzformáció ellenőrizve).
+**Éles iPhone-on Expo Go-val még nincs tesztelve — ez a következő lépés előtt
+esedékes.**
+
+**Nyitva maradt:**
+- **Push GitHubra** (privát repó) – nem futtattam, engedélyre vár, és nincs
+  beállítva remote.
+- `npx expo export --platform ios` (production Hermes bytecode) elhasal
+  „private properties are not supported" hibával. **Nem a mi kódunk okozza** —
+  a hiba a NativeWind bekötése *előtt*, a sablon állapotában is reprodukálható,
+  a mellékelt `hermesc` nem tudja fordítani egy függőség privát mezőit.
+  Expo Go / dev bundle működik, ez csak az EAS build előtt lesz releváns
+  (az EAS saját toolchainnel fordít).
+- `app.json` még a sablon `b2kira` nevét és `userInterfaceStyle: "automatic"`
+  beállítást tartalmazza. A design csak világos módra készült — érdemes lesz
+  `"light"`-ra állítani és a nevet „Doboz Légzés"-re cserélni, de ez nem volt
+  a 0. szakasz feladatlistáján, ezért nem nyúltam hozzá.
+- A projekt gyökerében volt egy `feature-tasks.md`, ami bájtra azonos volt a
+  `docs/feature-tasks.md`-del. Töröltem, hogy ne váljon szét a két másolat —
+  az egyetlen érvényes példány a `docs/` alatti.
+
+**Commitok:** `chore: Expo sablon boilerplate eltávolítása`,
+`docs: CLAUDE.md, docs, design-reference és supabase bemásolása a repóba`,
+`setup: .env és .env.example a Supabase kulcsoknak`,
+`setup: NativeWind konfigurálása`,
+`setup: Baloo 2 és Nunito betűtípusok betöltése`,
+`setup: design tokenek – colors, typography, images`,
+`setup: lint és typecheck script bekötése`
 
 ---
 ---
@@ -293,6 +339,56 @@ mostantól nem csak design-hűségi, hanem terápiás-megfelelési kérdés is �
 módosítani csak akkor szabad, ha a logopédus kifejezetten másképp kéri.
 **Visszavonható?** Igen, ha a logopédus a jövőben más gyakorlatot ír elő —
 akkor ez a döntés felülíródik egy új bejegyzéssel.
+
+## D-004 – A reanimated babel plugint nem adjuk hozzá kézzel
+
+**Dátum:** 2026-08-24
+**Döntés:** a `babel.config.js` csak a `babel-preset-expo` (jsxImportSource:
+nativewind) és a `nativewind/babel` preseteket tartalmazza; a reanimated /
+worklets babel plugint nem soroljuk fel külön.
+**Miért:** az SDK 54-es `babel-preset-expo` a `react-native-worklets/plugin`-t
+automatikusan bekapcsolja, ha a könyvtár telepítve van (lásd az Expo v54
+reanimated doksit). Ellenőriztem: a plugin ténylegesen fut a fordítás során.
+Kézzel felvéve duplán futna, ami hibát vagy néma félrefordítást okozhat.
+**Alternatíva:** a feature-tasks.md eredeti sora szerint kézzel a plugin lista
+utolsó elemeként felvenni – ez az SDK 53 és korábbi verziók előírása volt.
+**Visszavonható?** Igen, ha egy jövőbeli SDK megint kéri a kézi felvételt.
+
+## D-005 – A színpaletta `constants/palette.json`-ben, nem közvetlenül a colors.ts-ben
+
+**Dátum:** 2026-08-24
+**Döntés:** a nyers hex értékek a `constants/palette.json`-ben élnek. Ezt
+importálja a `constants/colors.ts` (típusosan, ezt használja a kód) és ezt
+`require`-öli a `tailwind.config.js` (ebből lesznek a NativeWind osztályok).
+**Miért:** a CLAUDE.md két szabálya csak így teljesül egyszerre: „a színeket
+mindig a constants/colors.ts-ből használd" és „használj NativeWind
+osztályokat". A tailwind config Node-ban fut, TypeScript fájlt nem tud
+beolvasni, ezért kell egy mindkettő által olvasható, nyers adatformátum.
+Így a `bg-purple-50` és a `colors.purple['50']` garantáltan ugyanaz az érték.
+**Alternatíva:** a palettát kétszer leírni (colors.ts + tailwind.config.js) –
+elvetve, mert egy design token módosítása így csendben szétcsúszhatna. Másik
+alternatíva: nincs tailwind színtéma, minden szín `style` propon megy – ez a
+NativeWind osztályok nagy részét használhatatlanná tenné.
+**Visszavonható?** Igen, a JSON bármikor beolvasztható a colors.ts-be, ha a
+tailwind témát elhagyjuk.
+
+## D-006 – Az Expo sablon demo tartalmának törlése
+
+**Dátum:** 2026-08-24
+**Döntés:** a `create-expo-app` tabs sablonjának demo része (explore és modal
+képernyő, themed-text / themed-view / parallax-scroll-view / hello-wave /
+collapsible / icon-symbol / haptic-tab komponensek, `use-color-scheme` hookok,
+`constants/theme.ts`, react-logo assetek, `reset-project` script) törölve; a
+router egy minimális Stack + egy Tabs képernyőre csökkent.
+**Miért:** a CLAUDE.md kötött mappastruktúrát ír elő, és a sablon `constants/theme.ts`-e
+ütközött volna a design tokenekkel (két, egymásnak ellentmondó színforrás).
+A demo komponensek sötét/világos témát kezelnek, amire ennek az appnak nincs
+szüksége.
+**Alternatíva:** meghagyni és fokozatosan lecserélni – elvetve, mert a
+félig-meddig ottfelejtett sablonkód pont a „két színforrás" hibát okozza,
+amire a CLAUDE.md külön kitér.
+**Visszavonható?** Igen, a törölt fájlok a git történetben megvannak
+(`9313cda` előtti állapot).
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
