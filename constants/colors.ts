@@ -37,6 +37,10 @@ export const gradients = {
   greenButton: {
     colors: [palette.blue['300'], palette.green['500']] as const,
   },
+  /** Kezdőképernyő szint-progress bar kitöltése */
+  levelProgress: {
+    colors: [palette.pink['300'], palette.purple['400']] as const,
+  },
   /** Session progress bar kitöltése */
   sessionProgress: {
     colors: [palette.green['300'], palette.green['500']] as const,

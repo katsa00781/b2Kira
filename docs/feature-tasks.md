@@ -87,7 +87,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 - [x] `PrimaryButton` (lila + zöld variáns, gradiens, árnyék)
 - [x] `TextField` (címke + input, placeholder szín, árnyék)
-- [ ] `ProgressBar` (gradiens kitöltés)
+- [x] `ProgressBar` (gradiens kitöltés)
 - [ ] `Twinkles` (animált díszpöttyök a lila képernyőkhöz)
 - [ ] `ToggleRow` (kapcsoló + címke + alcím)
 - [ ] `SegmentedChoice` (gyakorlathossz választó)
