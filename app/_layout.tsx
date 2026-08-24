@@ -1,13 +1,12 @@
-import {
-  Baloo2_700Bold,
-  Baloo2_800ExtraBold,
-} from '@expo-google-fonts/baloo-2';
+import { Baloo2_700Bold, Baloo2_800ExtraBold } from '@expo-google-fonts/baloo-2';
 import { Nunito_600SemiBold, Nunito_700Bold } from '@expo-google-fonts/nunito';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 import '../global.css';
 
@@ -24,14 +23,35 @@ export default function RootLayout() {
     Nunito_600SemiBold,
     Nunito_700Bold,
   });
+  const { session, ready } = useAuthSession();
+  const segments = useSegments();
+  const router = useRouter();
+
+  const fontsSettled = fontsLoaded || Boolean(fontError);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if (fontsSettled && ready) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsSettled, ready]);
 
-  if (!fontsLoaded && !fontError) {
+  // Auth guard: bejelentkezés nélkül csak az (auth) csoport érhető el, és
+  // bejelentkezve nincs mit keresni a bejelentkező képernyőn.
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!session && !inAuthGroup) {
+      router.replace('/login');
+    } else if (session && inAuthGroup) {
+      router.replace('/');
+    }
+  }, [ready, session, segments, router]);
+
+  if (!fontsSettled || !ready) {
     return null;
   }
 
@@ -39,6 +59,7 @@ export default function RootLayout() {
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(auth)" />
       </Stack>
       <StatusBar style="dark" />
     </>

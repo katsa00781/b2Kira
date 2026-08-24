@@ -94,15 +94,15 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 4. Auth képernyők (1–2. képernyő)
 
-- [ ] `app/(auth)/login.tsx` – design szerint pontosan
-- [ ] `app/(auth)/register.tsx` – design szerint pontosan
-- [ ] Supabase e-mail/jelszó bejelentkezés és regisztráció bekötése
-- [ ] Regisztrációkor `breathing_children` sor létrehozása (név + életkor)
-- [ ] „Elfelejtett jelszó?" – Supabase `resetPasswordForEmail`, magyar visszajelzéssel
-- [ ] Regisztráció checkbox („Elfogadom, hogy a szülő felügyeli a fiókot") kötelező mező
-- [ ] Hibaüzenetek magyarul, barátságosan (nem „Invalid credentials")
-- [ ] Session perzisztencia: app újraindítás után bejelentkezve marad
-- [ ] Auth guard: bejelentkezés nélkül a `(tabs)` nem érhető el
+- [x] `app/(auth)/login.tsx` – design szerint pontosan
+- [x] `app/(auth)/register.tsx` – design szerint pontosan
+- [x] Supabase e-mail/jelszó bejelentkezés és regisztráció bekötése
+- [x] Regisztrációkor `breathing_children` sor létrehozása (név + életkor)
+- [x] „Elfelejtett jelszó?" – Supabase `resetPasswordForEmail`, magyar visszajelzéssel
+- [x] Regisztráció checkbox („Elfogadom, hogy a szülő felügyeli a fiókot") kötelező mező
+- [x] Hibaüzenetek magyarul, barátságosan (nem „Invalid credentials")
+- [x] Session perzisztencia: app újraindítás után bejelentkezve marad
+- [x] Auth guard: bejelentkezés nélkül a `(tabs)` nem érhető el
 
 ## 5. Kezdőképernyő (3. képernyő)
 
@@ -216,6 +216,59 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 4. Auth képernyők (1–2. képernyő)
+
+**Mit:** Elkészült a bejelentkezés és a regisztráció a canvas 1. és 2.
+képernyője alapján, bekötött Supabase auth-tal. A két képernyő csak
+megjelenítés: az űrlap-ellenőrzés, a Supabase hívások és a magyar
+hibaüzenetek a `lib/auth.ts`-ben vannak (`signIn`, `signUp`,
+`resetPassword`, `signOut`, `ensureChildProfile`), a bejelentkezett állapot
+pedig a `hooks/useAuthSession.ts`-ben. Az auth guard a gyökér layoutban ül:
+amíg a tárolt session be nem töltődött, semmi nem renderelődik, utána
+session nélkül `/login`-ra, session-nel a `(tabs)`-ra irányít (D-019).
+
+Két új komponens: `Checkbox` (18×18, a designban csak bepipálva szerepel,
+az üres állapot fehér + `toggle.off` keret) és `FormMessage` (hiba- és
+sikerkártya az elsődleges gomb fölött). Mindkettő a designból hiányzó
+állapot, rákérdezés után – lásd D-020. A töltés a gomb feliratában látszik
+(„Bejelentkezés…"), a `PrimaryButton` nem kapott új propot.
+
+A gyerek profilja nem a regisztrációkor jön létre, hanem a megerősített
+e-mail utáni első belépéskor: a projekten be van kapcsolva az e-mail
+megerősítés, tehát a `signUp` után nincs session, RLS mellett pedig nem
+lehet beszúrni. A név és az életkor addig AsyncStorage-ban vár (D-021).
+
+**Fájlok:** app/(auth)/_layout.tsx, app/(auth)/login.tsx,
+app/(auth)/register.tsx, app/_layout.tsx, components/Checkbox.tsx,
+components/FormMessage.tsx, hooks/useAuthSession.ts, lib/auth.ts,
+docs/feature-tasks.md
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Az iOS
+production export lefut (4,37 MB Hermes bytecode), és a bundle tartalmazza
+mindkét képernyő szövegeit (a Hermes a nem ASCII stringeket UTF-16-ban
+tárolja, ezért `grep -a` helyett bájtszintű kereséssel ellenőriztem).
+A Supabase auth végpontjait `curl`-lel próbáltam a projekt anon kulcsával:
+a hibakódok (`invalid_credentials`, `over_email_send_rate_limit`) pontosan
+azok, amikre a `lib/auth.ts` fordítása épül. **Éles iPhone-on Expo Go-val
+még nincs megnézve.**
+
+**Nyitva maradt:**
+- **A Supabase beépített SMTP-je kb. 2 levél/óra** — a regisztrációs próba
+  már most `over_email_send_rate_limit`-be futott. Éles használat előtt
+  saját SMTP kell (vagy a Dashboardon kikapcsolható az e-mail megerősítés,
+  akkor a `signUp` rögtön ad session-t, és a profil azonnal létrejön).
+- A jelszó-visszaállító levél linkje jelenleg a Supabase alap oldalára
+  visz, nem az appba. Deep link (`b2kira://`) és „új jelszó" képernyő még
+  nincs — ez a 10. szakasz szülői zár körébe illik majd.
+- Ha valaki bejelentkezik, de nincs gyerek profilja **és** nincs függő
+  adat a telefonon (pl. új eszközön), most nincs hova irányítani. A profil
+  létrehozó képernyő az 5. szakasz `useChildStore`-jával jön.
+- Eszközön ellenőrizendő: a 72 px-es felső padding az iPhone állapotsáv
+  alatt (D-022), a billentyűzet fölé csúszó gomb (`KeyboardAvoidingView`),
+  és hogy a regisztráció görgethető marad-e kis képernyőn.
+
+**Commit:** feat: bejelentkezés és regisztráció Supabase auth-tal
 
 ## 2026-08-25 – 3. Design rendszer komponensek
 
@@ -804,6 +857,88 @@ kerülnének), vagy egyetlen közös kiosztás mindkét képernyőre (eltérés 
 designtól).
 **Visszavonható?** Igen, a preset kivezethető propba, ha később kell egy
 harmadik lila képernyő saját kiosztással.
+
+## D-019 – Az auth guard imperatív átirányítás, nem `Stack.Protected`
+
+**Dátum:** 2026-08-25
+**Döntés:** a gyökér layout (`app/_layout.tsx`) egy `useEffect`-ben nézi meg a
+session-t és a `useSegments()` első elemét, és `router.replace`-szel irányít
+(`/login`, illetve `/`). Amíg a tárolt session be nem töltődött (`ready`),
+a layout `null`-t ad vissza, tehát nem villan fel rossz képernyő.
+**Miért:** az expo-router 6 `Stack.Protected` deklaratív, de a kizárt
+képernyőket egyszerűen kiveszi a navigátorból (`useSortedScreens`). Kijelentkezett
+állapotban így a `(tabs)/index` — vagyis a „/" útvonal — megszűnik, és nem tudtam
+eszköz nélkül biztosan megmondani, hogy a router a `(auth)/login`-ra esik-e vissza,
+vagy az Unmatched képernyőre. Márpedig ez pont a leggyakoribb eset: az első indítás.
+Az imperatív változatnál a „/" mindig létező route-ra fut, és onnan lép tovább.
+**Alternatíva:** `Stack.Protected` guardokkal (kevesebb kód, nincs egy frame-nyi
+átmenet) — eszközön kipróbálva bármikor visszaváltható. Illetve `app/index.tsx`
+átirányító route: ez ütközne a `(tabs)/index.tsx`-szel, mindkettő a „/" útvonal.
+**Visszavonható?** Igen, a két `useEffect` helyett két `Stack.Protected` blokk.
+
+## D-020 – A designból hiányzó auth állapotok (üres checkbox, üzenet, töltés)
+
+**Dátum:** 2026-08-25
+**Döntés:** három érték hiányzott a designból, mindhármat rákérdezés után
+rögzítettük. (1) Az üres checkbox fehér, 2 px `toggle.off` (#DDD3EE) kerettel,
+bepipálva `green.500` + fehér pipa. (2) A hiba- és sikerüzenet kártya az
+elsődleges gomb fölött, 14-es radiusszal: hiba `pink.150` háttér + `pink.600`
+szöveg, siker `green.100` + `green.700`, Nunito 12/600. (3) Hálózati hívás
+alatt a gomb felirata kap egy „…"-t és `disabled` lesz.
+**Miért:** a canvas csak a kész, hibátlan állapotot rajzolja, és a palettában
+nincs piros — a rózsaszín/zöld páros a meglévő tokenekből jön, tehát nem
+kellett új színt kitalálni. A töltésjelzés így nem igényel új design elemet
+és a `PrimaryButton` sem bővült.
+**Következmény:** két új komponens, ami nincs a `CLAUDE.md` listájában:
+`components/Checkbox.tsx` és `components/FormMessage.tsx`. Mindkettő önálló UI
+koncepció és mindkét auth képernyőn (illetve később a szülői záron) újra
+használható, ezért nem a képernyőkbe került.
+**Alternatíva:** natív `Alert` a hibákra (kilóg a képernyő hangulatából),
+spinner a gombban (új, designban nem szereplő elem).
+**Visszavonható?** Igen, mindhárom egy-egy komponensben van.
+
+## D-021 – A gyerek profil a megerősítés utáni első belépéskor jön létre
+
+**Dátum:** 2026-08-25
+**Döntés:** a regisztráció a gyerek nevét és életkorát AsyncStorage-ba teszi
+(`doboz-legzes.pending-child`), és a `breathing_children` sor akkor jön létre,
+amikor a szülő először sikeresen belép (`ensureChildProfile()` a `signIn`-ből).
+A művelet best-effort: hálózati hiba esetén a függő adat megmarad a következő
+próbáig, és soha nem akasztja meg a belépést.
+**Miért:** a `CLAUDE.md` „egy tranzakcióban jön létre a user és a
+breathing_children sor" előírását kliensből nem lehet szó szerint teljesíteni,
+ráadásul a projekten **be van kapcsolva az e-mail megerősítés** (a `/auth/v1/signup`
+`over_email_send_rate_limit`-tel válaszol, tehát ténylegesen levelet küld). A
+`signUp` így nem ad session-t, session nélkül pedig az RLS (`parent_id = auth.uid()`)
+helyesen tiltja a beszúrást. Az adat a telefonon vár — a gyerek neve amúgy is
+lokálisan tárolódik majd a `useChildStore`-ban.
+**Alternatíva:** (1) a nevet és az életkort `signUp` `options.data`-ba tenni és
+adatbázis triggerrel létrehozni a sort — a gyerek neve bekerülne az auth
+felhasználó metaadatai közé, ami a gyerekadat-elvek ellen megy; (2) az e-mail
+megerősítés kikapcsolása a Dashboardon — ez a szülő címének ellenőrzését adná
+fel; (3) Edge Function service role kulccsal — új mozgó alkatrész egy sorért.
+**Ismert korlát:** ha a szülő új eszközön lép be először, a függő adat nincs meg,
+így nem jön létre profil. A „nincs gyerek profil → irányíts a létrehozására"
+ágat az 5. szakasz építi meg.
+**Visszavonható?** Igen, ha az e-mail megerősítés kikapcsol: akkor a `signUp`
+után rögtön van session, és a meglévő `ensureChildProfile()` azonnal lefut.
+
+## D-022 – Az auth képernyők paddingje fix 72 / 26 / 32, csak alul enged a safe area
+
+**Dátum:** 2026-08-25
+**Döntés:** a két auth képernyő a design keretének paddingjét használja
+(`72` fent, `26` oldalt, `32` lent), `SafeAreaView` nélkül. Az alsó padding
+egyetlen kivétel: `Math.max(32, insets.bottom)`.
+**Miért:** a canvas 402×874-es kerete a teljes iPhone képernyő, az állapotsávval
+együtt — a 72 px tehát már eleve alatta van. Ha `SafeAreaView`-t tennénk alá,
+a felső inset (~59 pt) hozzáadódna, és a tartalom láthatóan lejjebb csúszna a
+designhoz képest. Alul viszont a 32 px a home indicator sávjába lóg (iPhone 16
+Pro: 34 pt), ezért ott a nagyobb érték nyer — ez 2 px eltérés, cserébe a
+„Nincs még fiókod?" sor nem kerül a csík alá.
+**Alternatíva:** teljes `SafeAreaView` (látható eltérés a designtól minden
+képernyőn), vagy szigorúan 32 px alul (a footer szöveg a home indicator alá
+kerülne, és a designban is csak azért fér el, mert az egy makett).
+**Visszavonható?** Igen, képernyőnként egy `paddingBottom` sor.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
