@@ -79,7 +79,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] Panda, Monkey, Lion ugyanígy
 - [x] `mood: 'happy' | 'breathing'` és `scale: number` prop mindegyiken
 - [x] `data/characters.ts` – id, magyar név, chip gradiens színek
-- [ ] Ellenőrzés: egy scratch képernyőn mind a 4 karakter megjelenik, `scale` csúszkával
+- [x] Ellenőrzés: egy scratch képernyőn mind a 4 karakter megjelenik, `scale` csúszkával
 
 > Ez a legkényesebb rész. Egyesével csináld, karakterenként külön prompt, külön commit.
 
@@ -216,6 +216,53 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 2. Karakterek
+
+**Mit:** Elkészült mind a négy karakter (`Bunny`, `Panda`, `Monkey`, `Lion`) tiszta
+`<View>` geometriából, a `design-reference/*.html` értékeiből 1:1-ben átszámolva.
+Mindegyik a specifikált `{ mood, scale }` propot kapja. A karakterszínek bekerültek
+a `constants/palette.json`-be (`character.bunny…lion`), így komponensben egyetlen
+hex érték sincs. Mellé a `data/characters.ts` katalógus (id, magyar név, chip
+gradiens színpár) és egy `characterComponents` id→komponens map, hogy a képernyők
+ne ágazzanak négyfelé. A `mood` prop egyelőre nem változtat a rajzon (D-011).
+Ellenőrzésre készült egy fejlesztői `app/scratch-characters.tsx` képernyő, ami
+mind a négy karaktert egyszerre mutatja állítható `scale`-lel (0.5–1.5) és
+`mood`-dal; a kezdőképernyő placeholderére került hozzá egy ideiglenes link.
+
+**Fájlok:** components/characters/Bunny.tsx, Panda.tsx, Monkey.tsx, Lion.tsx,
+components/characters/types.ts, components/characters/index.ts,
+data/characters.ts, constants/palette.json, app/scratch-characters.tsx,
+app/(tabs)/index.tsx
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. A Metro iOS
+production bundle (`dev=false&minify=true`, 2,4 MB) hiba nélkül lefordul, a
+karakterkód (`boxShadow` ×28, `skewY` ×10, a katalógus nevei) benne van.
+**Éles iPhone-on Expo Go-val még nincs megnézve — ez a következő lépés**, és
+kifejezetten a lentebb felsorolt három RN-specifikus dolgot kell megnézni rajta.
+
+**Nyitva maradt:**
+- **Eszközön ellenőrizendő (nem tudtam szimulátor nélkül):** (1) a százalékos
+  `borderRadius` (pofik, orr, panda szemfolt, majom pofa) valóban ellipszist
+  rajzol-e; (2) a `boxShadow` string megjelenik-e (új architektúra kell hozzá,
+  Expo Go SDK 54-en alapértelmezett); (3) az oroszlán sörény cikkelyei
+  (`skewY` + `overflow: hidden`) jól vágódnak-e körre. Ha bármelyik nem jó,
+  a D-009 / D-010 bejegyzés írja le, mi a visszaút.
+- A karakterek **magyar nevei** (Nyuszi, Panda, Majom, Oroszlán) nem szerepelnek
+  a designban, én választottam őket. A UI-ban jelenleg sehol nem látszanak (a
+  chip csak szín), szóval szabadon átírhatók.
+- A `mood` prop nem csinál semmit (D-011). Ha a `breathing` állapotban mást
+  szeretnél (pl. csukott szem), az egy külön design döntés.
+- Az `app/scratch-characters.tsx` és a kezdőképernyőre tett „Karakter teszt →"
+  link **fejlesztői segédlet, ship előtt törlendő** (a „Ship előtt" lista
+  „Dev utilities eltávolítása" sora fedi).
+- A bunny orra a designban elliptikus sarkú (`50% / 60% 40%`), RN-ben ez nem
+  kifejezhető, sima `50%` lett — 8×6 px-en nem látszik, de rögzítve van.
+
+**Commitok:** `feat: Bunny karakter komponens`, `feat: Panda karakter komponens`,
+`feat: Monkey karakter komponens`, `feat: Lion karakter komponens`,
+`feat: karakter katalógus és közös index`, `chore: karakter scratch képernyő`
+
 
 ## 2026-08-24 – 1. Supabase alapok
 
@@ -491,6 +538,80 @@ mindig `false`-t ad). Elvetve, mert a javítás két sor és nem jár kockázatt
 szükséges. A többi listázott figyelmeztetés a familyBudget régi függvényeire
 vonatkozik, azokhoz nem nyúltunk.
 **Visszavonható?** Igen, egy `grant execute ... to public` visszaállítja.
+
+## D-009 – A karakterek CSS→React Native konverziójának szabályai
+
+**Dátum:** 2026-08-25
+**Döntés:** a `design-reference/*.html` karaktergeometriáját négy fix szabállyal
+fordítottam át: (1) a HTML `content-box`-ot használ, ezért a keretes elemeknél a
+kerettel megnövelt méret került a RN stílusba (pl. a nyuszifül `22×44` + `3px`
+keret → `28×50`); (2) az árnyékok a RN 0.81 új architektúrás `boxShadow`
+stringjével mennek (`0 6px 14px <szín>`), nem `shadowColor`/`shadowOffset`/
+`elevation` négyessel; (3) a nem négyzetes ellipszisek (pofik, orr, panda
+szemfolt, majom pofa) százalékos `borderRadius`-t kapnak, a négyzetesek konkrét
+számot; (4) a geometria `StyleSheet`-ben van, nem NativeWind osztályokban.
+**Miért:** (1) enélkül minden keretes elem 6 px-szel kisebb lenne a designnál.
+(2) a `boxShadow` a design CSS értékeit 1:1-ben átveszi (blur, offset, alfa),
+míg a `shadowRadius` átváltása közelítés lett volna, amit a CLAUDE.md tilt.
+(3) a RN a sima `borderRadius`-t nem négyzetes dobozon lekerekített
+téglalappá vágja vissza, nem ellipszissé — a százalék az egyetlen pontos út.
+(4) a karakterek fél pixeles (`2.5`, `8.5`) értékekkel, negatív pozíciókkal,
+százalékos radiusszal és transzformokkal dolgoznak; ezek NativeWind arbitrary
+értékként olvashatatlanok és a `rounded-[50%]` fordítása nem garantált, a
+CLAUDE.md pedig pont ilyen esetre engedi a StyleSheet-et.
+**Alternatíva:** `shadowColor`/`shadowRadius` átszámolás (blur/2 hüvelykujjszabály)
+és számított radiusok — mindkettő közelítés. Illetve `react-native-svg` a teljes
+geometriára: pontos lenne, de új könyvtár, és a CLAUDE.md kifejezetten `<View>`
+elemekből kéri a karaktereket.
+**Ismert korlát:** a nyuszi orrának elliptikus sarkait (`50% 50% 50% 50% /
+60% 60% 40% 40%`) a RN nem tudja, ott sima `50%` lett. 8×6 px-en nem látszik.
+**Visszavonható?** Igen. Ha az eszközön a `boxShadow` vagy a százalékos radius
+nem működne, elemenként visszaváltható a `shadow*` négyesre, illetve a
+százalék helyett a legnagyobb oldal fele adja a legjobb közelítést.
+
+## D-010 – Az oroszlán sörénye négy elforgatott cikkely, nem `conic-gradient`
+
+**Dátum:** 2026-08-25
+**Döntés:** a `Lion.html` sörénye `conic-gradient(#E8A33D,#D98A26, …)` nyolc
+váltakozó megállóval. React Nativeben ehelyett egy `#E8A33D` alapkör van, rajta
+négy `#D98A26` cikkely (45°-os szeletek, `rotate` + `skewY(45deg)` párossal
+kirajzolva, a kör `overflow: 'hidden'`-nel vágva).
+**Miért:** a React Nativenek nincs kúpos gradiense, és az `expo-linear-gradient`
+sem tud ilyet. A nyolc váltakozó megálló pontosan nyolc 45°-os szeletet jelent,
+amiből négy az alapszín — így a minta ugyanaz, csak az átmenetek élesek a lágy
+helyett. Egy sörényen ez inkább előny.
+**Alternatíva:** `react-native-svg` (pontos kúpos gradiens, de új könyvtár egy
+dekoratív körért); vagy egyszínű sörény (a designtól látható eltérés).
+**Visszavonható?** Igen, a `MANE_WEDGES` tömb kiürítésével azonnal egyszínű
+sörény marad.
+
+## D-011 – A `mood` prop egyelőre nem változtat a karakterek rajzán
+
+**Dátum:** 2026-08-25
+**Döntés:** mind a négy karakter fogadja a `mood: 'happy' | 'breathing'` propot,
+de ugyanúgy rajzolódik mindkét értéknél.
+**Miért:** a `design-reference` karakterfájljai a `mood`-ot deklarálják, de
+sehol nem használják — a `00-teljes-canvas.html` a kezdőképernyőn `happy`,
+a gyakorlaton `breathing` értékkel hívja őket, és a két képernyőn a karakter
+azonos. Kitalálni egy „lélegző arcot" a designtól való eltérés lenne, amit a
+CLAUDE.md engedélyhez köt.
+**Alternatíva:** elhagyni a propot — elvetve, mert a `docs/design-tokens.md`
+kiírja a szerződést, és a hívó képernyők már így vannak megírva a designban.
+**Visszavonható?** Igen, a prop megvan, csak a stílusváltást kell beletenni.
+
+## D-012 – A scratch képernyőn gomb-lépegető van, nem csúszka
+
+**Dátum:** 2026-08-25
+**Döntés:** az `app/scratch-characters.tsx` a `scale`-t `−`/`+` gombokkal
+(0.05-ös lépés) és két gyorsválasztóval (0.55 és 1.00) állítja, nem csúszkával.
+**Miért:** a csúszkához `@react-native-community/slider` kellene, ami új
+dependency egy ship előtt úgyis törlendő fejlesztői képernyő kedvéért. A két
+gyorsválasztó ráadásul pont a légzésanimáció két szélső értéke, tehát a
+tényleges ellenőrzési feladatra jobb is, mint a folytonos húzás.
+**Alternatíva:** a slider könyvtár telepítése (engedélyköteles, és a max 10
+dependency célszámot fogyasztja), vagy `PanResponder`-es saját csúszka
+(felesleges kód egy eldobható képernyőn).
+**Visszavonható?** Igen, de a képernyő amúgy is törlésre van ítélve ship előtt.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
