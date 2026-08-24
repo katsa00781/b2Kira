@@ -217,6 +217,38 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-25 – fix: „private properties are not supported" (Hermes)
+
+**Mit:** A production build `Syntax error: private properties are not supported`
+hibával elhasalt. Nem a mi kódunk okozta: a `react-native/src/private/webapis/
+geometry/DOMRectReadOnly.js` `#private` osztálymezőket használ, és a projektben a
+`babel-preset-expo@57.0.8` volt telepítve (az SDK 55+ presetje), ami már nem
+fordítja le ezt a szintaxist, mert újabb Hermes-t feltételez. Az SDK 54 `hermesc`-je
+viszont nem ismeri a privát mezőket, így a bytecode fordítás hasalt el. A preset
+verziója az Expo 54-hez lett igazítva (`~54.0.12`), és ezzel a hiba megszűnt.
+Ez lezárja a 0. Setup bejegyzés két nyitott pontját (a sikertelen `expo export`-ot
+és a `babel-preset-expo` verzióeltérést). Lásd D-013.
+
+**Fájlok:** package.json, package-lock.json
+
+**Tesztelve:**
+- `npx expo export --platform ios --clear` most **lefut**: 3,73 MB Hermes bytecode
+  (`.hbc`) készül. Előtte ugyanez a parancs hibalistával állt le.
+- A javítás után a dev bundle is rendben (`dev=true`, 8,9 MB, HTTP 200), és
+  `this.#` privát mező **0 db** maradt benne.
+- **A reanimated worklet plugin a régebbi presettel is aktív** (`__workletHash`
+  466 példányban a bundle-ben) — a D-004 döntés tehát továbbra is érvényes,
+  nem kell kézzel felvenni a plugint.
+- NativeWind is fordul (`#F3EEFA`, `#5B3E8C` benne a bundle-ben), a karakterkód
+  szintén (`boxShadow`, `skewY`).
+- `npm run typecheck` és `npm run lint` hibátlan.
+
+**Nyitva maradt:** semmi ehhez a hibához. A `npm install` továbbra is jelez
+néhány audit figyelmeztetést a fejlesztői függőségekben, ezekhez nem nyúltam.
+
+**Commit:** `fix: babel-preset-expo az Expo 54-hez igazítva`
+
+
 ## 2026-08-25 – 2. Karakterek
 
 **Mit:** Elkészült mind a négy karakter (`Bunny`, `Panda`, `Monkey`, `Lion`) tiszta
@@ -612,6 +644,28 @@ tényleges ellenőrzési feladatra jobb is, mint a folytonos húzás.
 dependency célszámot fogyasztja), vagy `PanResponder`-es saját csúszka
 (felesleges kód egy eldobható képernyőn).
 **Visszavonható?** Igen, de a képernyő amúgy is törlésre van ítélve ship előtt.
+
+## D-013 – A `babel-preset-expo` az Expo SDK verziójához van kötve
+
+**Dátum:** 2026-08-25
+**Döntés:** a `babel-preset-expo` devDependency `~54.0.12`-re rögzítve, azaz
+együtt mozog az `expo@54`-gyel. Korábban `^57.0.8` volt.
+**Miért:** a preset dönti el, milyen JS szintaxist kell lefordítani, és ezt az
+adott SDK Hermes motorjához méretezi. Az 57-es preset (SDK 55+) már nem
+transzpilálja a `#private` osztálymezőket, mert az újabb Hermes tudja őket — az
+SDK 54 `hermesc`-je viszont nem, ezért a React Native saját
+`DOMRectReadOnly.js`-én elhasalt a production build. A preset és az SDK verziója
+nem opcionálisan, hanem szükségszerűen tartozik össze.
+**Alternatíva:** maradni az 57-esnél és a hiányzó transzformokat kézzel felvenni
+a `babel.config.js`-be (`@babel/plugin-transform-private-properties` stb.) —
+elvetve, mert ez csak ezt az egy tünetet kezelné, és a preset többi célzása
+(target, importok) továbbra is rossz SDK-hoz szólna.
+**Következmény:** SDK frissítéskor a presetet is emelni kell. Erre a
+`npx expo install --check` figyelmeztet.
+**Ellenőrizve:** a régebbi preset mellett is aktív a
+`react-native-worklets/plugin` (a bundle-ben `__workletHash` szerepel), tehát a
+D-004 döntés érvényben marad.
+**Visszavonható?** Igen, de csak SDK 55-re lépéssel együtt van értelme.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
