@@ -103,5 +103,16 @@
       "line": "#C98A44",
       "shadow": "rgba(200,150,60,.3)"
     }
+  },
+  "shadow": {
+    "input": "rgba(180,150,220,.15)",
+    "card": "rgba(180,150,220,.2)",
+    "chip": "rgba(180,150,220,.25)",
+    "characterChip": "rgba(150,120,180,.25)",
+    "buttonPurple": "rgba(199,140,220,.4)",
+    "buttonGreen": "rgba(120,180,160,.35)",
+    "sticker": "rgba(0,0,0,.08)",
+    "knob": "rgba(0,0,0,.2)",
+    "backButton": "rgba(150,180,170,.25)"
   }
 }
