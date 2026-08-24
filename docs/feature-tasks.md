@@ -106,12 +106,12 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 5. Kezdőképernyő (3. képernyő)
 
-- [ ] `app/(tabs)/index.tsx` – design szerint pontosan
-- [ ] `store/useChildStore.ts` – gyerek profil, karakter, szint, streak, Zustand + persist
-- [ ] Karakterválasztó működik, a választás azonnal látszik és perzisztálódik
-- [ ] Szintkártya és progress bar valós adatból (befejezett gyakorlatok száma)
-- [ ] Napi tipp: 7 tipp `data/`-ban, a hét napja szerint váltakozik
-- [ ] CTA gomb navigál a `session` képernyőre
+- [x] `app/(tabs)/index.tsx` – design szerint pontosan
+- [x] `store/useChildStore.ts` – gyerek profil, karakter, szint, streak, Zustand + persist
+- [x] Karakterválasztó működik, a választás azonnal látszik és perzisztálódik
+- [x] Szintkártya és progress bar valós adatból (befejezett gyakorlatok száma)
+- [x] Napi tipp: 7 tipp `data/`-ban, a hét napja szerint váltakozik
+- [x] CTA gomb navigál a `session` képernyőre
 
 ## 6. Légzőgyakorlat (4. képernyő) — **a projekt szíve**
 
@@ -216,6 +216,54 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 5. Kezdőképernyő (3. képernyő)
+
+**Mit:** Elkészült a kezdőképernyő a canvas 3. képernyője alapján: üdvözlés,
+streak chip, fogaskerék, nagy karakter, karakterválasztó, szintkártya +
+progress bar, napi tipp és a CTA gomb. Az adatok a `store/useChildStore.ts`-ből
+jönnek (Zustand + `persist` AsyncStorage-dzsel), a Supabase frissítés utólag,
+best-effort módon fut a `lib/child.ts`-en keresztül — a képernyő sosem vár
+hálózatra (D-024).
+
+Négy új komponens: `StreakChip`, `GearButton` (a fogaskerék CSS-ből rajzolva,
+kép asset nélkül), `CharacterPicker` (4 × 36 px chip, aktív 3 px lila kerettel,
+`hitSlop`-pal 44 pt — D-017) és `LevelCard`. Két új adatfájl: `data/levels.ts`
+(szint = minden 5. befejezett gyakorlat, 8 szintnév — D-023) és `data/tips.ts`
+(7 tipp, `Date.getDay()` szerint váltakozva).
+
+A tab bar el van rejtve: a designban egyik képernyőn sincs alsó sáv, a
+kezdőképernyő a hub (D-025). Új dependency: `zustand` (a CLAUDE.md tech
+stackjében eleve szerepel).
+
+**Fájlok:** app/(tabs)/index.tsx, app/(tabs)/_layout.tsx, app/session.tsx,
+components/StreakChip.tsx, components/GearButton.tsx,
+components/CharacterPicker.tsx, components/LevelCard.tsx, constants/colors.ts,
+data/levels.ts, data/tips.ts, lib/child.ts, store/useChildStore.ts,
+package.json, docs/feature-tasks.md
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Az iOS
+production export lefut (4,42 MB Hermes bytecode), és a bundle tartalmazza az
+új szövegeket („Felhő-ösvény", „Készen állsz egy jó nagy levegőre?", „Mai
+tipp", a napi tippeket) és a store perzisztencia kulcsát
+(`doboz-legzes.child`). **Éles iPhone-on Expo Go-val még nincs megnézve.**
+
+**Nyitva maradt:**
+- Az `app/session.tsx` egyelőre **fejlesztői placeholder** — a 6. szakasz
+  cseréli le. A két scratch képernyő linkje ide költözött, mert a valódi
+  kezdőképernyőn nincs helye. Ship előtt mindhárom törlendő.
+- A fogaskerék és a streak chip még nem navigál (a beállítások és a matricák
+  képernyő a 9–10. szakaszban készül el). A gomb `disabled`, nem ad hamis
+  visszajelzést.
+- Ha nincs gyerek profil (új eszköz, még nincs `breathing_children` sor), az
+  üdvözlés „Szia! 🌸". A profil létrehozó képernyő továbbra is hiányzik.
+- A persist rehidratálása aszinkron: elméletileg egy pillanatra a név nélküli
+  üdvözlés villanhat fel. AsyncStorage-ból ez pár ms, eszközön ellenőrizendő.
+- A `streakDays` értéket még senki nem növeli — a gyakorlat lezárása (6. és 8.
+  szakasz) fogja. Addig a chip 0-t mutat; a „kihagyott nap → 0" logika
+  (`activeStreakDays`) viszont már benne van.
+- Eszközön ellenőrizendő: a 62 px-es felső padding, a karakter és a kártyák
+  együtt kis képernyőn (iPhone SE) — a design 402×874-hez van igazítva.
 
 ## 2026-08-25 – 4. Auth képernyők (1–2. képernyő)
 
@@ -939,6 +987,59 @@ Pro: 34 pt), ezért ott a nagyobb érték nyer — ez 2 px eltérés, cserébe a
 képernyőn), vagy szigorúan 32 px alul (a footer szöveg a home indicator alá
 kerülne, és a designban is csak azért fér el, mert az egy makett).
 **Visszavonható?** Igen, képernyőnként egy `paddingBottom` sor.
+
+## D-023 – A szintnevek a `data/levels.ts`-ben, nyolc név után ismétlődnek
+
+**Dátum:** 2026-08-25
+**Döntés:** a designban csak a „2. szint — Felhő-ösvény" felirat szerepel, a
+többi szint nevét mi adtuk hozzá: nyolc, azonos hangulatú magyar név
+(`Szellő-`, `Felhő-`, `Napsugár-`, `Szivárvány-`, `Hold-`, `Csillag-`,
+`Hullám-`, `Álom-ösvény`). A 8. fölött a lista utolsó neve marad. A szint
+számítása: `szint = floor(befejezett / 5) + 1`.
+**Miért:** a design értéke (2. szint, „3/5 gyakorlat a következő matricáig",
+60%-os progress) csak akkor jön ki, ha egy szint = 5 befejezett gyakorlat,
+vagyis a szintlépés és a matrica-feloldás ugyanaz az esemény. A neveket
+rákérdezés után adtuk hozzá (a `CLAUDE.md` tiltja a hiányzó design értékek
+kitalálását), a felhasználó választotta ezt az opciót.
+**Alternatíva:** csak a szám kiírása („2. szint") — egyszerűbb, de a design
+mutatja a nevet, tehát látható eltérés lenne.
+**Visszavonható?** Igen, egyetlen tömb a `data/levels.ts`-ben.
+
+## D-024 – A kezdőképernyő a lokális store-ból rajzol, a szerver csak felülír
+
+**Dátum:** 2026-08-25
+**Döntés:** a `useChildStore` (Zustand + `persist`, AsyncStorage) tárolja a
+gyerek profilját (`childId`, név, életkor, karakter, befejezett gyakorlatok,
+streak, utolsó gyakorlat napja). A képernyő ebből renderel azonnal, és
+mountkor indít egy `syncFromServer()`-t. Az összefésülés nem felülírás:
+a befejezett gyakorlatok és a streak `Math.max(lokális, szerver)`, az utolsó
+dátumból a későbbi nyer, a karakter pedig csak akkor jön a szerverről, ha még
+nincs lokális profil (`childId === null`).
+**Miért:** offline-first (`CLAUDE.md`) — a UI nem várhat hálózatra, és a
+lokálisan lezárt, még fel nem szinkronizált gyakorlatok nem tűnhetnek el egy
+régebbi szerverállapot miatt. A karakterválasztás a gyerek friss szándéka,
+ezért az sosem íródik vissza a szerver értékére.
+**Alternatíva:** a szerver mint egyedüli igazság (offline üres képernyő,
+elveszne a helyi haladás), vagy csak lokális tárolás (eszközcserénél minden
+elveszne). A `zustand` nem új könyvtár-döntés: a `CLAUDE.md` tech stackje
+eleve előírja.
+**Visszavonható?** Igen, az összefésülés egyetlen `set()` a store-ban.
+
+## D-025 – Nincs alsó tab bar, a kezdőképernyő a hub
+
+**Dátum:** 2026-08-25
+**Döntés:** a `(tabs)` csoport megmarad (a `CLAUDE.md` mappastruktúrája így
+írja elő), de a tab bar el van rejtve (`tabBar={() => null}`). A navigáció a
+kezdőképernyőről indul: a fogaskerék a szülői beállításokra, a streak chip a
+matricagyűjteményre visz majd, onnan vissza gombbal.
+**Miért:** a canvas mind a hat képernyője teljes magasságban rajzol, egyiken
+sincs alsó sáv, és a kezdőképernyő CTA gombja pont a képernyő alján ül — egy
+tab bar eltakarná vagy feljebb tolná. A designtól való eltérést a `CLAUDE.md`
+engedélyhez köti; rákérdezés után a felhasználó ezt választotta.
+**Alternatíva:** látható 3 fülű tab bar (kényelmesebb navigáció, de az alsó
+padding és a CTA pozíciója is változna mind a három fő képernyőn).
+**Visszavonható?** Igen, egyetlen sor az `app/(tabs)/_layout.tsx`-ben — a
+kezdőképernyő gombjai és a tab bar meg is férnének egymás mellett.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 

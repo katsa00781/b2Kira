@@ -37,6 +37,10 @@ export const gradients = {
   greenButton: {
     colors: [palette.blue['300'], palette.green['500']] as const,
   },
+  /** Kezdőképernyő szintkártyájának 44×44-es ikonja */
+  levelBadge: {
+    colors: [palette.purple['400'], palette.purple['600']] as const,
+  },
   /** Kezdőképernyő szint-progress bar kitöltése */
   levelProgress: {
     colors: [palette.pink['300'], palette.purple['400']] as const,
