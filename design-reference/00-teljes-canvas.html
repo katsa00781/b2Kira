@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="cd52979f-368d-413b-8daf-fa67cd70f0db"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>/* devanagari */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("8168da02-5c0e-4653-ba6a-3e3e30387d69") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("3cf4eac9-570d-4427-ac4b-59e3f6d6e2f0") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("deeb3676-b598-4e40-a369-d3beac9e57e0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("f80fc86e-c885-47d6-a525-29e42a669ede") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("8168da02-5c0e-4653-ba6a-3e3e30387d69") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("3cf4eac9-570d-4427-ac4b-59e3f6d6e2f0") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("deeb3676-b598-4e40-a369-d3beac9e57e0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("f80fc86e-c885-47d6-a525-29e42a669ede") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("8168da02-5c0e-4653-ba6a-3e3e30387d69") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("3cf4eac9-570d-4427-ac4b-59e3f6d6e2f0") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("deeb3676-b598-4e40-a369-d3beac9e57e0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("f80fc86e-c885-47d6-a525-29e42a669ede") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* devanagari */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("8168da02-5c0e-4653-ba6a-3e3e30387d69") format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("3cf4eac9-570d-4427-ac4b-59e3f6d6e2f0") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("deeb3676-b598-4e40-a369-d3beac9e57e0") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("f80fc86e-c885-47d6-a525-29e42a669ede") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("77a2004d-eaab-4a61-89f5-f64d8bd85d8d") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("96c0a5bc-84fa-4859-961b-27d662df3817") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("091fdc4e-5a98-4b55-a68e-599296e1655a") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("0695c853-1bfa-4d5f-85a3-efc781f1701b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("1706b7ff-22b4-4e29-9caa-b3df9351c9b1") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("77a2004d-eaab-4a61-89f5-f64d8bd85d8d") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("96c0a5bc-84fa-4859-961b-27d662df3817") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("091fdc4e-5a98-4b55-a68e-599296e1655a") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("0695c853-1bfa-4d5f-85a3-efc781f1701b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("1706b7ff-22b4-4e29-9caa-b3df9351c9b1") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("77a2004d-eaab-4a61-89f5-f64d8bd85d8d") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("96c0a5bc-84fa-4859-961b-27d662df3817") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("091fdc4e-5a98-4b55-a68e-599296e1655a") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("0695c853-1bfa-4d5f-85a3-efc781f1701b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("1706b7ff-22b4-4e29-9caa-b3df9351c9b1") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("77a2004d-eaab-4a61-89f5-f64d8bd85d8d") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("96c0a5bc-84fa-4859-961b-27d662df3817") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("091fdc4e-5a98-4b55-a68e-599296e1655a") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("0695c853-1bfa-4d5f-85a3-efc781f1701b") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("1706b7ff-22b4-4e29-9caa-b3df9351c9b1") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+body{margin:0;background:#F3EEFA;font-family:'Nunito',sans-serif}
+a{color:#8B5FD9}
+a:hover{color:#6A3FC0}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes twinkle{0%,100%{opacity:.35}50%{opacity:1}}
+</style>
+<x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="0,0"></x-import>
+</helmet>
+
+<div style="min-height:100vh; padding:56px 48px; display:flex; flex-direction:column; gap:36px; align-items:flex-start">
+  <div style="display:flex; flex-direction:column; gap:6px">
+    <div style="font:800 30px 'Baloo 2',sans-serif; color:#5B3E8C">Doboz légzés gyakorló</div>
+    <div style="font:600 15px 'Nunito',sans-serif; color:#8B7AA8">Vidám légzőgyakorlat gyerekeknek — 6 fő képernyő</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:40px; align-items:flex-start">
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">1 · Bejelentkezés</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:linear-gradient(180deg,#FBF2FF 0%,#F3E9FF 45%,#EFE6FE 100%); display:flex; flex-direction:column; padding:72px 26px 32px; box-sizing:border-box; font-family:'Nunito',sans-serif; position:relative; overflow:hidden">
+          <div style="position:absolute; top:70px; right:34px; width:12px; height:12px; border-radius:50%; background:#FFD97A; animation:twinkle 2.4s ease-in-out infinite"></div>
+          <div style="position:absolute; top:140px; left:28px; width:9px; height:9px; border-radius:50%; background:#94E3C9; animation:twinkle 3s ease-in-out infinite .5s"></div>
+
+          <div style="display:flex; flex-direction:column; align-items:center; gap:10px">
+            <dc-import name="Bunny" mood="happy" scale="1" hint-size="110,110"></dc-import>
+            <div style="font:800 24px 'Baloo 2',sans-serif; color:#5B3E8C">Doboz Légzés</div>
+            <div style="font:600 13px 'Nunito',sans-serif; color:#9A8CB8; text-align:center">Lélegezz és játssz a barátaiddal!</div>
+          </div>
+
+          <div style="margin-top:32px; display:flex; flex-direction:column; gap:12px">
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Szülő e-mail címe</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">szulo@example.com</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Jelszó</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">••••••••</div>
+            </div>
+            <div style="text-align:right; font:700 12px 'Nunito',sans-serif; color:#8B5FD9">Elfelejtett jelszó?</div>
+          </div>
+
+          <div style="margin-top:auto; display:flex; flex-direction:column; gap:14px; align-items:center">
+            <button style="width:100%; border:none; border-radius:999px; padding:16px; font:800 17px 'Baloo 2',sans-serif; color:#fff; background:linear-gradient(135deg,#FF9FCB,#C9A6F5); box-shadow:0 8px 20px rgba(199,140,220,.4)">Bejelentkezés</button>
+            <div style="font:600 13px 'Nunito',sans-serif; color:#9A8CB8">Nincs még fiókod? <span style="color:#8B5FD9; font-weight:800">Regisztrálj</span></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">2 · Regisztráció</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:linear-gradient(180deg,#EAF7F2 0%,#EDF4FB 60%,#F3EEFA 100%); display:flex; flex-direction:column; padding:72px 26px 32px; box-sizing:border-box; font-family:'Nunito',sans-serif; overflow:auto">
+          <div style="font:800 24px 'Baloo 2',sans-serif; color:#5B3E8C">Hozzunk létre fiókot!</div>
+          <div style="margin-top:4px; font:600 13px 'Nunito',sans-serif; color:#9A8CB8">Csak pár adat, és kezdhettek is</div>
+
+          <div style="margin-top:24px; display:flex; flex-direction:column; gap:12px">
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Gyermek neve</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">Zoé</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Gyermek életkora</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">7 éves</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Szülő e-mail címe</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">szulo@example.com</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <div style="font:700 12px 'Nunito',sans-serif; color:#7A6C99">Jelszó</div>
+              <div style="background:#fff; border-radius:14px; padding:14px 16px; font:600 14px 'Nunito',sans-serif; color:#C3B8DC; box-shadow:0 3px 10px rgba(180,150,220,.15)">••••••••</div>
+            </div>
+          </div>
+
+          <div style="margin-top:18px; display:flex; align-items:flex-start; gap:8px">
+            <div style="width:18px; height:18px; border-radius:6px; background:#6BAF9A; flex:none; margin-top:2px"></div>
+            <div style="font:600 12px 'Nunito',sans-serif; color:#7A6C99">Elfogadom, hogy a szülő felügyeli a fiókot és a beállításokat.</div>
+          </div>
+
+          <div style="margin-top:26px; display:flex; flex-direction:column; gap:14px; align-items:center">
+            <button style="width:100%; border:none; border-radius:999px; padding:16px; font:800 17px 'Baloo 2',sans-serif; color:#fff; background:linear-gradient(135deg,#8FD3E8,#6BAF9A); box-shadow:0 8px 20px rgba(120,180,160,.35)">Fiók létrehozása</button>
+            <div style="font:600 13px 'Nunito',sans-serif; color:#9A8CB8">Van már fiókod? <span style="color:#3E7C68; font-weight:800">Bejelentkezés</span></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">3 · Kezdőképernyő</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:linear-gradient(180deg,#FBF2FF 0%,#F3E9FF 45%,#EFE6FE 100%); display:flex; flex-direction:column; padding:62px 22px 28px; box-sizing:border-box; font-family:'Nunito',sans-serif; position:relative; overflow:hidden">
+          <div style="position:absolute; top:60px; right:30px; width:14px; height:14px; border-radius:50%; background:#FFD97A; animation:twinkle 2.4s ease-in-out infinite"></div>
+          <div style="position:absolute; top:120px; left:24px; width:10px; height:10px; border-radius:50%; background:#94E3C9; animation:twinkle 3s ease-in-out infinite .5s"></div>
+          <div style="position:absolute; top:40px; left:120px; width:8px; height:8px; border-radius:50%; background:#FFAFD1; animation:twinkle 2s ease-in-out infinite 1s"></div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div style="font:700 20px 'Baloo 2',sans-serif; color:#5B3E8C">Szia, Zoé! 🌸</div>
+            <div style="display:flex; align-items:center; gap:8px">
+              <div style="display:flex; align-items:center; gap:6px; background:#FFFFFF; border-radius:999px; padding:6px 12px; box-shadow:0 2px 8px rgba(180,150,220,.25)">
+                <div style="width:16px; height:16px; border-radius:4px; background:#FFB347; transform:rotate(45deg)"></div>
+                <div style="font:800 14px 'Baloo 2',sans-serif; color:#5B3E8C">5</div>
+              </div>
+              <div style="width:34px; height:34px; border-radius:50%; background:#FFFFFF; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(180,150,220,.25); flex:none">
+                <div style="position:relative; width:16px; height:16px">
+                  <div style="position:absolute; inset:3px; border-radius:50%; border:2px solid #8B7AA8"></div>
+                  <div style="position:absolute; top:-1px; left:6.5px; width:3px; height:4px; background:#8B7AA8; border-radius:1px"></div>
+                  <div style="position:absolute; bottom:-1px; left:6.5px; width:3px; height:4px; background:#8B7AA8; border-radius:1px"></div>
+                  <div style="position:absolute; left:-1px; top:6.5px; width:4px; height:3px; background:#8B7AA8; border-radius:1px"></div>
+                  <div style="position:absolute; right:-1px; top:6.5px; width:4px; height:3px; background:#8B7AA8; border-radius:1px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:22px; display:flex; flex-direction:column; align-items:center; gap:12px">
+            <sc-if value="{{ isBunny }}" hint-placeholder-val="{{ true }}"><dc-import name="Bunny" mood="happy" scale="1" hint-size="140,140"></dc-import></sc-if>
+            <sc-if value="{{ isPanda }}"><dc-import name="Panda" mood="happy" scale="1" hint-size="140,140"></dc-import></sc-if>
+            <sc-if value="{{ isMonkey }}"><dc-import name="Monkey" mood="happy" scale="1" hint-size="140,140"></dc-import></sc-if>
+            <sc-if value="{{ isLion }}"><dc-import name="Lion" mood="happy" scale="1" hint-size="140,140"></dc-import></sc-if>
+            <div style="font:700 15px 'Baloo 2',sans-serif; color:#5B3E8C; text-align:center">Készen állsz egy jó nagy levegőre?</div>
+            <div style="display:flex; gap:10px">
+              <sc-for list="{{ characterOptions }}" as="c" hint-placeholder-count="4">
+                <div sc-camel-on-click="{{ c.onSelect }}" style="{{ c.style }}"></div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-top:22px; background:#FFFFFF; border-radius:20px; padding:16px 18px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 14px rgba(180,150,220,.2)">
+            <div style="width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,#C9A6F5,#8B5FD9); flex:none; display:flex; align-items:center; justify-content:center">
+              <div style="width:18px; height:18px; border-radius:6px; border:3px solid #fff"></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <div style="font:800 14px 'Baloo 2',sans-serif; color:#5B3E8C">2. szint — Felhő-ösvény</div>
+              <div style="font:600 12px 'Nunito',sans-serif; color:#9A8CB8">3/5 gyakorlat a következő matricáig</div>
+            </div>
+          </div>
+          <div style="margin-top:8px; height:8px; border-radius:999px; background:#EEE3FB; overflow:hidden">
+            <div style="width:60%; height:100%; border-radius:999px; background:linear-gradient(90deg,#FFAFD1,#C9A6F5)"></div>
+          </div>
+
+          <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px">
+            <div style="font:600 12.5px 'Nunito',sans-serif; color:#9A8CB8; text-align:center">Mai tipp: fújd el a lufit lassan, mint a szél 🎈</div>
+            <button style="border:none; border-radius:999px; padding:16px; font:800 17px 'Baloo 2',sans-serif; color:#fff; background:linear-gradient(135deg,#FF9FCB,#C9A6F5); box-shadow:0 8px 20px rgba(199,140,220,.4)">Kezdjük a gyakorlást →</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">4 · Légzőgyakorlat (élő)</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:linear-gradient(180deg,#EAF7F2 0%,#EDF4FB 60%,#F3EEFA 100%); display:flex; flex-direction:column; padding:62px 22px 28px; box-sizing:border-box; font-family:'Nunito',sans-serif; position:relative">
+          <div style="display:flex; justify-content:space-between; align-items:center">
+            <div style="width:34px; height:34px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(150,180,170,.25)">
+              <div style="width:10px; height:10px; border-left:3px solid #6BAF9A; border-bottom:3px solid #6BAF9A; transform:rotate(45deg)"></div>
+            </div>
+            <div style="font:700 13px 'Nunito',sans-serif; color:#6BAF9A">{{ sessionTimeLabel }} maradt</div>
+            <div style="width:34px"></div>
+          </div>
+
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px">
+            <div style="font:800 22px 'Baloo 2',sans-serif; color:#3E7C68; letter-spacing:.5px">{{ phaseLabel }}</div>
+
+            <div style="position:relative; width:220px; height:220px; display:flex; align-items:center; justify-content:center">
+              <div style="position:absolute; width:220px; height:220px; border-radius:36px; border:6px solid #DCEFE8"></div>
+              <div style="{{ boxStyle }}"></div>
+              <sc-if value="{{ isBunny }}" hint-placeholder-val="{{ true }}"><dc-import name="Bunny" mood="breathing" scale="{{ bunnyScale }}" hint-size="120,120" style="position:relative; z-index:2"></dc-import></sc-if>
+              <sc-if value="{{ isPanda }}"><dc-import name="Panda" mood="breathing" scale="{{ bunnyScale }}" hint-size="120,120" style="position:relative; z-index:2"></dc-import></sc-if>
+              <sc-if value="{{ isMonkey }}"><dc-import name="Monkey" mood="breathing" scale="{{ bunnyScale }}" hint-size="120,120" style="position:relative; z-index:2"></dc-import></sc-if>
+              <sc-if value="{{ isLion }}"><dc-import name="Lion" mood="breathing" scale="{{ bunnyScale }}" hint-size="120,120" style="position:relative; z-index:2"></dc-import></sc-if>
+            </div>
+
+            <div style="display:flex; gap:8px">
+              <sc-for list="{{ phaseDots }}" as="dot" hint-placeholder-count="4">
+                <div style="{{ dot.style }}"></div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="height:8px; border-radius:999px; background:#DCEFE8; overflow:hidden">
+              <div style="{{ sessionBarStyle }}"></div>
+            </div>
+            <button sc-camel-on-click="{{ togglePause }}" style="border:none; border-radius:999px; padding:14px; font:800 15px 'Baloo 2',sans-serif; color:#fff; background:{{ pauseBg }}; box-shadow:0 6px 16px rgba(120,180,160,.35)">{{ pauseLabel }}</button>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">5 · Matricák &amp; jelvények</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:#FBF6FF; display:flex; flex-direction:column; padding:62px 22px 28px; box-sizing:border-box; font-family:'Nunito',sans-serif; overflow:auto">
+          <div style="font:800 22px 'Baloo 2',sans-serif; color:#5B3E8C">Matricagyűjteményem</div>
+          <div style="margin-top:6px; display:flex; align-items:center; gap:8px">
+            <div style="width:22px; height:22px; border-radius:6px; background:linear-gradient(135deg,#FFB347,#FF8FA3); transform:rotate(45deg)"></div>
+            <div style="font:700 13px 'Nunito',sans-serif; color:#9A8CB8">5 napos sorozat — ne hagyd abba!</div>
+          </div>
+
+          <div style="margin-top:20px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px">
+            <sc-for list="{{ stickers }}" as="s" hint-placeholder-count="9">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:6px">
+                <div style="width:100%; aspect-ratio:1; border-radius:20px; background:{{ s.bg }}; display:flex; align-items:center; justify-content:center; box-shadow:{{ s.shadow }}">
+                  <div style="{{ s.shapeStyle }}"></div>
+                </div>
+                <div style="font:700 11px 'Nunito',sans-serif; color:{{ s.textColor }}; text-align:center">{{ s.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:24px; background:#fff; border-radius:18px; padding:16px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 14px rgba(180,150,220,.15)">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#94E3C9,#5FC7A6); flex:none"></div>
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <div style="font:800 13px 'Baloo 2',sans-serif; color:#5B3E8C">Következő jelvény: Szivárvány Mester</div>
+              <div style="font:600 12px 'Nunito',sans-serif; color:#9A8CB8">Még 2 gyakorlat kell hozzá</div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; align-items:center">
+      <div style="font:700 13px 'Nunito',sans-serif; color:#8B7AA8">6 · Szülői beállítások</div>
+      <x-import component-from-global-scope="IOSDevice" from="ac4d57c1-1638-4475-8c77-8e71728c50c4#/ios-frame.jsx" hint-size="402,874" style="width:402px">
+        <div style="height:100%; background:#F7F5FC; display:flex; flex-direction:column; padding:62px 22px 28px; box-sizing:border-box; font-family:'Nunito',sans-serif; overflow:auto; gap:18px">
+          <div style="font:800 22px 'Baloo 2',sans-serif; color:#5B3E8C">Szülői beállítások</div>
+
+          <div style="display:flex; flex-direction:column; gap:2px; background:#fff; border-radius:18px; padding:4px 16px; box-shadow:0 3px 10px rgba(180,150,220,.15)">
+            <sc-for list="{{ toggleRows }}" as="row" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:{{ row.border }}">
+                <div style="display:flex; flex-direction:column; gap:2px">
+                  <div style="font:700 14px 'Nunito',sans-serif; color:#3E3556">{{ row.label }}</div>
+                  <div style="font:600 12px 'Nunito',sans-serif; color:#9A8CB8">{{ row.sub }}</div>
+                </div>
+                <div sc-camel-on-click="{{ row.onToggle }}" style="{{ row.trackStyle }}">
+                  <div style="{{ row.knobStyle }}"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <div style="font:700 14px 'Nunito',sans-serif; color:#3E3556">Gyakorlat hossza</div>
+            <div style="display:flex; gap:8px">
+              <sc-for list="{{ lengthOptions }}" as="opt" hint-placeholder-count="3">
+                <div sc-camel-on-click="{{ opt.onSelect }}" style="{{ opt.style }}">{{ opt.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <div style="font:700 14px 'Nunito',sans-serif; color:#3E3556">Napi emlékeztető</div>
+            <div style="background:#fff; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 3px 10px rgba(180,150,220,.15)">
+              <div style="font:700 15px 'Nunito',sans-serif; color:#5B3E8C">17:30</div>
+              <div style="font:600 12px 'Nunito',sans-serif; color:#9A8CB8">Minden nap</div>
+            </div>
+          </div>
+
+          <button style="margin-top:auto; border:none; border-radius:999px; padding:14px; font:800 14px 'Baloo 2',sans-serif; color:#8B5FD9; background:#EFE6FE">Szülői zár kezelése</button>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script="">
+class Component extends DCLogic {
+  state = {
+    phaseIndex: 0,
+    progress: 0,
+    sessionElapsed: 0,
+    sessionTotal: 150,
+    paused: false,
+    soundOn: true,
+    voiceOn: true,
+    reminderOn: true,
+    lengthChoice: 1,
+    character: 'bunny'
+  };
+
+  componentDidMount() {
+    this._tick = setInterval(() => {
+      if (this.state.paused) return;
+      this.setState(s => {
+        const next = s.sessionElapsed + 0.1;
+        const elapsed = next >= s.sessionTotal ? 0 : next;
+        return { sessionElapsed: elapsed };
+      });
+    }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._tick); }
+
+  renderVals() {
+    const phases = ['Lélegezz be', 'Tartsd', 'Lélegezz ki', 'Tartsd'];
+    const phaseDur = 4;
+    const t = this.state.sessionElapsed % (phaseDur * 4);
+    const phaseIndex = Math.floor(t / phaseDur) % 4;
+    const phaseT = (t % phaseDur) / phaseDur;
+    const phaseLabel = phases[phaseIndex];
+
+    let scale;
+    if (phaseIndex === 0) scale = 0.55 + 0.45 * phaseT;
+    else if (phaseIndex === 1) scale = 1;
+    else if (phaseIndex === 2) scale = 1 - 0.45 * phaseT;
+    else scale = 0.55;
+
+    const boxSize = 100 + scale * 100;
+    const hue = phaseIndex === 0 ? '#FFB347' : phaseIndex === 1 ? '#FF8FA3' : phaseIndex === 2 ? '#94E3C9' : '#8FD3E8';
+
+    const boxStyle = `position:absolute; width:${boxSize}px; height:${boxSize}px; border-radius:${boxSize * 0.22}px; background:linear-gradient(135deg,${hue}CC,${hue}); transition:width .15s linear,height .15s linear,border-radius .15s linear; box-shadow:0 8px 24px ${hue}55; z-index:1`;
+
+    const phaseDots = [0, 1, 2, 3].map(i => ({
+      style: `width:10px; height:10px; border-radius:50%; background:${i === phaseIndex ? '#3E7C68' : '#DCEFE8'}; transition:background .3s`
+    }));
+
+    const remaining = Math.max(0, this.state.sessionTotal - this.state.sessionElapsed);
+    const mm = Math.floor(remaining / 60);
+    const ss = Math.floor(remaining % 60);
+    const sessionTimeLabel = `${mm}:${ss.toString().padStart(2, '0')}`;
+    const sessionBarStyle = `width:${(this.state.sessionElapsed / this.state.sessionTotal) * 100}%; height:100%; border-radius:999px; background:linear-gradient(90deg,#94E3C9,#6BAF9A); transition:width .1s linear`;
+
+    const stickerDefs = [
+      { bg: 'linear-gradient(135deg,#FFD9E8,#FFB6D9)', shape: 'heart', text: '#C6497D', label: 'Szívecske' },
+      { bg: 'linear-gradient(135deg,#E4D9FF,#C9A6F5)', shape: 'star', text: '#6A44B0', label: 'Csillagfény' },
+      { bg: 'linear-gradient(135deg,#D3F5E8,#94E3C9)', shape: 'leaf', text: '#3E8C6C', label: 'Levélke' },
+      { bg: 'linear-gradient(135deg,#FFE9BF,#FFD97A)', shape: 'sun', text: '#B9832A', label: 'Napsugár' },
+      { bg: '#EDE7F6', shape: 'lock', text: '#B7AACB', label: 'Zárolva', locked: true },
+      { bg: '#EDE7F6', shape: 'lock', text: '#B7AACB', label: 'Zárolva', locked: true },
+      { bg: 'linear-gradient(135deg,#CFF0FF,#8FD3E8)', shape: 'drop', text: '#2E7FA0', label: 'Vízcsepp' },
+      { bg: '#EDE7F6', shape: 'lock', text: '#B7AACB', label: 'Zárolva', locked: true },
+      { bg: '#EDE7F6', shape: 'lock', text: '#B7AACB', label: 'Zárolva', locked: true }
+    ];
+    const shapeStyleFor = (shape, locked) => {
+      if (locked) return 'width:22px; height:22px; border-radius:6px 6px 3px 3px; background:#C9BEDD; opacity:.6';
+      if (shape === 'star') return 'width:26px; height:26px; background:#6A44B0; clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)';
+      if (shape === 'heart') return 'width:24px; height:24px; background:#C6497D; transform:rotate(45deg); border-radius:0 50% 0 50%';
+      if (shape === 'leaf') return 'width:26px; height:20px; background:#3E8C6C; border-radius:0 100% 0 100%';
+      if (shape === 'sun') return 'width:22px; height:22px; border-radius:50%; background:#B9832A';
+      if (shape === 'drop') return 'width:20px; height:26px; background:#2E7FA0; border-radius:0 50% 50% 50%; transform:rotate(45deg)';
+      return 'width:20px; height:20px; background:#999';
+    };
+    const stickers = stickerDefs.map(d => ({
+      bg: d.bg, textColor: d.text, label: d.label,
+      shadow: d.locked ? 'none' : '0 4px 10px rgba(0,0,0,.08)',
+      shapeStyle: shapeStyleFor(d.shape, d.locked)
+    }));
+
+    const track = (on) => `width:44px; height:26px; border-radius:999px; background:${on ? '#8B5FD9' : '#DDD3EE'}; padding:3px; box-sizing:border-box; cursor:pointer; transition:background .2s`;
+    const knob = (on) => `width:20px; height:20px; border-radius:50%; background:#fff; transform:translateX(${on ? 18 : 0}px); transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2)`;
+
+    const toggleRows = [
+      { label: 'Hangeffektek', sub: 'Játékos hangok a gyakorlat közben', border: '1px solid #F1ECFA', trackStyle: track(this.state.soundOn), knobStyle: knob(this.state.soundOn), onToggle: () => this.setState(s => ({ soundOn: !s.soundOn })) },
+      { label: 'Hangos útmutatás', sub: 'Barátságos hang vezeti a légzést', border: '1px solid #F1ECFA', trackStyle: track(this.state.voiceOn), knobStyle: knob(this.state.voiceOn), onToggle: () => this.setState(s => ({ voiceOn: !s.voiceOn })) },
+      { label: 'Napi emlékeztető', sub: 'Értesítés a gyakorlás idejéről', border: 'none', trackStyle: track(this.state.reminderOn), knobStyle: knob(this.state.reminderOn), onToggle: () => this.setState(s => ({ reminderOn: !s.reminderOn })) }
+    ];
+
+    const lengths = ['1 perc', '2-3 perc', '5 perc'];
+    const lengthOptions = lengths.map((l, i) => ({
+      label: l,
+      onSelect: () => this.setState({ lengthChoice: i }),
+      style: `flex:1; text-align:center; padding:10px 0; border-radius:12px; font:700 13px 'Nunito',sans-serif; cursor:pointer; ${i === this.state.lengthChoice ? 'background:#8B5FD9; color:#fff;' : 'background:#fff; color:#8B7AA8; box-shadow:0 2px 6px rgba(180,150,220,.15);'}`
+    }));
+
+    const characterDefs = [
+      { id: 'bunny', bg: 'linear-gradient(135deg,#FFD3E8,#FFAFD1)' },
+      { id: 'panda', bg: 'linear-gradient(135deg,#F2F2F2,#3A3A3A)' },
+      { id: 'monkey', bg: 'linear-gradient(135deg,#F3DCB8,#B98559)' },
+      { id: 'lion', bg: 'linear-gradient(135deg,#FBD98C,#E8A33D)' }
+    ];
+    const characterOptions = characterDefs.map(d => ({
+      onSelect: () => this.setState({ character: d.id }),
+      style: `width:36px; height:36px; border-radius:50%; background:${d.bg}; cursor:pointer; box-sizing:border-box; border:3px solid ${this.state.character === d.id ? '#8B5FD9' : 'transparent'}; box-shadow:0 2px 6px rgba(150,120,180,.25)`
+    }));
+
+    return {
+      phaseLabel, boxStyle, bunnyScale: scale, phaseDots,
+      isBunny: this.state.character === 'bunny',
+      isPanda: this.state.character === 'panda',
+      isMonkey: this.state.character === 'monkey',
+      isLion: this.state.character === 'lion',
+      characterOptions,
+      sessionTimeLabel, sessionBarStyle,
+      pauseLabel: this.state.paused ? 'Folytatás' : 'Szünet',
+      pauseBg: this.state.paused ? 'linear-gradient(135deg,#94E3C9,#6BAF9A)' : 'linear-gradient(135deg,#8FD3E8,#6BAF9A)',
+      togglePause: () => this.setState(s => ({ paused: !s.paused })),
+      stickers, toggleRows, lengthOptions
+    };
+  }
+}
+</script>
+
+
+</body></html>

@@ -1,50 +1,49 @@
-# Welcome to your Expo app 👋
+# Doboz Légzés – projekt előkészítő csomag
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Ez a mappa a fejlesztés indulásához szükséges dokumentációt tartalmazza. Másold be
+egy az egyben az új Expo projekt gyökerébe.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+CLAUDE.md                          # ezt olvassa Claude Code minden prompt előtt
+docs/
+  design-tokens.md                 # színek, tipográfia, spacing, animáció specifikáció
+  feature-tasks.md                 # sprint feladatlista + munkanapló + döntésnapló
+  prompt-sablonok.md               # kész promptok a fejlesztéshez
+supabase/
+  migrations/
+    0001_breathing_schema.sql      # a 4 breathing_ tábla + RLS (MÉG NINCS lefuttatva)
+design-reference/
+  00-teljes-canvas.html            # a 6 képernyő eredeti forrása
+  Bunny.html Panda.html
+  Monkey.html Lion.html            # a 4 karakter pontos CSS geometriája
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Indulás
 
-## Learn more
+```bash
+npx create-expo-app@latest doboz-legzes -t expo-template-blank-typescript
+cd doboz-legzes
+# ide másold be ennek a mappának a tartalmát
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Utána nyisd meg Claude Code-ban, és az első prompt:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+> Olvasd el a CLAUDE.md-et és a docs/feature-tasks.md-et és kövesd szigorúan. Kezdd a 0. Setup szakasszal.
 
-## Join the community
+## Amit még el kell döntened / meg kell csinálnod
 
-Join our community of developers creating universal apps.
+- **Az SQL migráció még nincs lefuttatva.** Olvasd át, mielőtt ráengeded a familyBudget
+  adatbázisra. A meglévő táblákhoz nem nyúl, csak új `breathing_` prefixű táblákat hoz létre.
+- **Hangfájlok** – 2-3 halk, rövid hang kell fázisváltáshoz (`assets/sounds/`).
+  Ingyenes forrás: freesound.org, vagy generálhatod is.
+- **App ikon és splash** – a design canvasban nincs. A Bunny karakterből érdemes kiindulni.
+- **Apple Developer fiók** – TestFlighthez kell (99 USD/év). Enélkül Expo Go-val
+  tesztelhetsz a saját telefonodon, ami v1-hez bőven elég.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Design research (opcionális, de segít)
+
+Ha finomítani akarod a designt, mielőtt kódolsz:
+
+- Pinterest: `kids breathing app UI`, `calm app for children` → 15 referencia
+- Dribbble: ugyanez → 10 referencia
+- Mobbin: valós app flow-k (Headspace Kids, Breathe, Moshi)
