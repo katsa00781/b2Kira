@@ -217,6 +217,59 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-25 – 3. Design rendszer komponensek
+
+**Mit:** Elkészült mind a hat design rendszer komponens a
+`design-reference/00-teljes-canvas.html` értékeiből 1:1-ben: `PrimaryButton`
+(lila/zöld gradiens variáns, pill forma, variánsonkénti árnyék, `disabled`
+állapot), `TextField` (címke + fehér input kártya, 14-es radius, placeholder
+szín), `ProgressBar` (8 px pill, lila és zöld variáns, 90°-os gradiens
+kitöltés), `Twinkles` (animált díszpöttyök Reanimated `withRepeat`-tel,
+`login` és `home` preset), `ToggleRow` (44×26-os animált kapcsoló,
+címke + alcím, elválasztó vonal) és `SegmentedChoice` (egyenlő szélességű
+választó, generikus `string | number` értékkel — így a gyakorlathossz
+másodpercben tárolható).
+
+Mellé két közös dolog: a `constants/shadows.ts` a `docs/design-tokens.md`
+„Árnyékok" táblájából (`boxShadow` stringek, a színek a `palette.json` új
+`shadow` csoportjában — D-015), és a `gradients.levelProgress` bejegyzés a
+`colors.ts`-ben. Új dependency: `expo-linear-gradient` (D-014, engedéllyel).
+Ellenőrzésre `app/scratch-ui.tsx` fejlesztői képernyő készült, linkkel a
+kezdőképernyő placeholderéről.
+
+**Fájlok:** components/PrimaryButton.tsx, TextField.tsx, ProgressBar.tsx,
+Twinkles.tsx, ToggleRow.tsx, SegmentedChoice.tsx, constants/shadows.ts,
+constants/palette.json, constants/colors.ts, app/scratch-ui.tsx,
+app/(tabs)/index.tsx, package.json
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Az iOS
+production export (`npx expo export --platform ios --clear`) lefut, 3,76 MB
+Hermes bytecode; a bundle-ben benne van mind a hat komponens szövege
+(`Hangeffektek`, `Gyakorlat hossza`, `Design rendszer teszt`) és a natív
+`ExpoLinearGradient` modul. **Éles iPhone-on Expo Go-val még nincs megnézve.**
+
+**Nyitva maradt:**
+- **Eszközön ellenőrizendő:** (1) a gradiensek iránya (135° a gombokon, 90° a
+  progress baron); (2) a `boxShadow` stringek megjelenése — ugyanaz a kérdés,
+  mint a karaktereknél; (3) a `Twinkles` pöttyök pozíciója valódi képernyőn
+  (a design 402×874-es kerethez van igazítva, iPhone SE-n magasabbra
+  csúszhatnak); (4) a `ToggleRow` gombjának 18 px-es útja.
+- A `PrimaryButton` nem ismer „betöltés" állapotot, csak `disabled`-et. Ha az
+  auth képernyőkön kell spinner, az külön kör.
+- A `ProgressBar` nem animálja a kitöltést (a design `.1s linear` átmenetet
+  használ a session sávon). A gyakorlat képernyő úgyis Reanimated shared
+  value-ból fogja hajtani, ott dől el, kell-e külön animált variáns.
+- A szülői beállítások kártyája, a matrica csempe és a session szünet gombja
+  még nincs komponensben — azok a saját képernyőjük szakaszában készülnek.
+- Az `app/scratch-ui.tsx` és a kezdőképernyőre tett link **fejlesztői
+  segédlet, ship előtt törlendő**.
+
+**Commitok:** `feat: PrimaryButton komponens`, `feat: TextField komponens`,
+`feat: ProgressBar komponens`, `feat: Twinkles animált díszpöttyök`,
+`feat: ToggleRow komponens`, `feat: SegmentedChoice komponens`,
+`chore: design rendszer scratch képernyő`
+
+
 ## 2026-08-25 – fix: „private properties are not supported" (Hermes)
 
 **Mit:** A production build `Syntax error: private properties are not supported`
@@ -666,6 +719,91 @@ elvetve, mert ez csak ezt az egy tünetet kezelné, és a preset többi célzás
 `react-native-worklets/plugin` (a bundle-ben `__workletHash` szerepel), tehát a
 D-004 döntés érvényben marad.
 **Visszavonható?** Igen, de csak SDK 55-re lépéssel együtt van értelme.
+
+## D-014 – `expo-linear-gradient` a gradiensekhez
+
+**Dátum:** 2026-08-25
+**Döntés:** felvettük az `expo-linear-gradient` csomagot (`npx expo install`,
+SDK 54-kompatibilis verzió), engedélykéréssel.
+**Miért:** a designban gradiens van az elsődleges gombokon
+(`135deg,#FF9FCB,#C9A6F5` és `135deg,#8FD3E8,#6BAF9A`), mindkét progress
+bar kitöltésén (`90deg`), a karakterválasztó chipeken, a matricákon és a
+szintkártya ikonján — ez a design egyik hordozó eleme, nem díszítés. A
+React Native `View` nem tud gradienst. A `CLAUDE.md` styling szakasza maga
+nevezi meg ezt a csomagot, és a `constants/colors.ts` `gradients` objektuma
+már eleve `colors` + `locations` párokban készült hozzá.
+**Alternatíva:** tömör szín közelítés (a `CLAUDE.md` „ne approximálj"
+szabályába ütközik, és a gombok látványosan másképp néznének ki), vagy
+`react-native-svg` (nagyobb könyvtár, natív modul ugyanúgy).
+**Következmény:** natív modul, de Expo Go SDK 54 tartalmazza, tehát a
+fejlesztői tesztelést nem töri el. A dependency szám 1-gyel nőtt.
+**Visszavonható?** Igen, de csak a gradiensek feladásával együtt.
+
+## D-015 – Az árnyékok `constants/shadows.ts`-ben, `boxShadow` stringként
+
+**Dátum:** 2026-08-25
+**Döntés:** a `docs/design-tokens.md` „Árnyékok" táblája a
+`constants/shadows.ts`-be került kész `boxShadow` stringként (pl.
+`0 8px 20px rgba(199,140,220,.4)`), a rgba színek pedig a `palette.json` új
+`shadow` csoportjába.
+**Miért:** ugyanaz a logika, mint a karaktereknél (D-009): a `boxShadow`
+string a design offset/blur/alfa értékeit 1:1-ben átveszi, míg a
+`shadowRadius`-ra átszámolás közelítés lenne. Az árnyékszínek palettába
+emelése pedig azért kell, hogy a `CLAUDE.md` szabálya („komponensbe hex
+értéket soha ne írj") az rgba árnyékokra is teljesüljön, és egy helyen
+lehessen mind a hetet átnézni.
+**Alternatíva:** minden komponensben helyben megírt `boxShadow` string
+(ismétlés, és a token tábla elveszne), vagy platformonkénti
+`shadowColor`/`shadowOffset`/`shadowOpacity`/`shadowRadius` + `elevation`
+(közelítés, és négyszer annyi sor).
+**Visszavonható?** Igen, a `shadows` objektum egy helyen cserélhető a
+platform-specifikus négyesre, ha eszközön a `boxShadow` nem jönne be.
+
+## D-016 – Az input mezőbe beírt szöveg színe `text.body`
+
+**Dátum:** 2026-08-25
+**Döntés:** a `TextField` beírt szövege `#3E3556` (`text.body`), a
+placeholder marad `#C3B8DC` (`text.placeholder`).
+**Miért:** a designban minden input kitöltött értéke placeholder-színű, mert
+a canvas csak makett — ott nincs külön „beírt" állapot. Ez az egy érték
+hiányzott a design tokenekből, ezért rá lett kérdezve, és a válasz a
+`text.body` lett: ez adja a legjobb kontrasztot, és élesen elválik a
+placeholdertől.
+**Alternatíva:** `text.heading` (`#5B3E8C`, lilás, gyengébb kontraszt) vagy
+a placeholder szín megtartása (olvashatatlan lenne).
+**Visszavonható?** Igen, egyetlen osztálynév a `TextField`-ben.
+
+## D-017 – A 44 pt-os célterület a design méreteinek megváltoztatása nélkül
+
+**Dátum:** 2026-08-25
+**Döntés:** a `ToggleRow`-ban a **teljes sor** kattintható, nem csak a 44×26-os
+kapcsoló; a `SegmentedChoice` elemei a design 10 px-es paddingját tartják, és
+`hitSlop`-pal (4 px fent-lent) érik el a 44 pt-ot.
+**Miért:** a `CLAUDE.md` minimum 44×44 pt tap targetet ír elő, a design
+viszont ennél alacsonyabb elemeket rajzol (kapcsoló 26 px, szegmens ~38 px).
+A méret növelése látható eltérés lenne a designtól, amit engedélyhez köt a
+`CLAUDE.md`; a nagyobb érintési terület viszont láthatatlan.
+**Alternatíva:** a komponensek magasítása (design eltérés), vagy a 44 pt
+szabály feladása ezeken az elemeken (a gyerek nehezebben találná el — a
+beállítások ugyan szülői képernyő, de a szabály nem tesz kivételt).
+**Visszavonható?** Igen, a `hitSlop` és a sor-`Pressable` külön-külön szűkíthető.
+
+## D-018 – A `Twinkles` pöttyök pozíciója a komponensben, presetként
+
+**Dátum:** 2026-08-25
+**Döntés:** a díszpöttyök koordinátái, méretei, színei és időzítései a
+`Twinkles.tsx`-ben élnek `login` / `home` preset néven; a képernyő csak
+`variant`-ot ad át.
+**Miért:** a két lila képernyő más-más pöttykiosztást használ (2 és 3 pötty,
+eltérő pozíció és méret), ez pedig design adat, nem képernyő logika — a
+`CLAUDE.md` szerint az `app/` mappa csak route és képernyő, üzleti logika és
+tartalom nem. Egy szabadon átadható `dots` tömb ugyanezt a design adatot
+szórná szét a képernyőkbe.
+**Alternatíva:** `dots` prop (rugalmasabb, de a design értékek a képernyőkbe
+kerülnének), vagy egyetlen közös kiosztás mindkét képernyőre (eltérés a
+designtól).
+**Visszavonható?** Igen, a preset kivezethető propba, ha később kell egy
+harmadik lila képernyő saját kiosztással.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
