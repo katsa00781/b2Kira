@@ -60,7 +60,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] Betűtípusok: `@expo-google-fonts/baloo-2`, `@expo-google-fonts/nunito`, `expo-font`
 - [x] `constants/colors.ts` és `constants/typography.ts` a `docs/design-tokens.md` alapján
 - [x] `constants/images.ts` létrehozása (üresen is)
-- [ ] Lint + typecheck script bekötése (`npm run lint`, `npm run typecheck`)
+- [x] Lint + typecheck script bekötése (`npm run lint`, `npm run typecheck`)
 - [x] `CLAUDE.md`, `docs/`, `design-reference/`, `supabase/` bemásolása a projekt gyökerébe
 - [ ] Push GitHubra (privát repó)
 
