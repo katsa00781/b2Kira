@@ -86,7 +86,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 ## 3. Design rendszer komponensek
 
 - [x] `PrimaryButton` (lila + zöld variáns, gradiens, árnyék)
-- [ ] `TextField` (címke + input, placeholder szín, árnyék)
+- [x] `TextField` (címke + input, placeholder szín, árnyék)
 - [ ] `ProgressBar` (gradiens kitöltés)
 - [ ] `Twinkles` (animált díszpöttyök a lila képernyőkhöz)
 - [ ] `ToggleRow` (kapcsoló + címke + alcím)
