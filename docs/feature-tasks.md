@@ -90,7 +90,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] `ProgressBar` (gradiens kitöltés)
 - [x] `Twinkles` (animált díszpöttyök a lila képernyőkhöz)
 - [x] `ToggleRow` (kapcsoló + címke + alcím)
-- [ ] `SegmentedChoice` (gyakorlathossz választó)
+- [x] `SegmentedChoice` (gyakorlathossz választó)
 
 ## 4. Auth képernyők (1–2. képernyő)
 
