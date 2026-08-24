@@ -57,7 +57,7 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [x] NativeWind telepítése és konfigurálása (`tailwind.config.js`, `babel.config.js`, `global.css`)
 - [x] Expo Router bekötése (`app/_layout.tsx`, `expo-router/entry`)
 - [x] `react-native-reanimated` telepítése + babel plugin (**legyen a plugin lista utolsó eleme**)
-- [ ] Betűtípusok: `@expo-google-fonts/baloo-2`, `@expo-google-fonts/nunito`, `expo-font`
+- [x] Betűtípusok: `@expo-google-fonts/baloo-2`, `@expo-google-fonts/nunito`, `expo-font`
 - [ ] `constants/colors.ts` és `constants/typography.ts` a `docs/design-tokens.md` alapján
 - [ ] `constants/images.ts` létrehozása (üresen is)
 - [ ] Lint + typecheck script bekötése (`npm run lint`, `npm run typecheck`)
