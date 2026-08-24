@@ -13,6 +13,11 @@ export default function HomeScreen() {
           Karakter teszt →
         </Text>
       </Link>
+      <Link href="/scratch-ui">
+        <Text className="font-nunito-bold text-[13px] text-purple-600">
+          Design rendszer teszt →
+        </Text>
+      </Link>
     </View>
   );
 }
