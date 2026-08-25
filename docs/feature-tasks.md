@@ -157,10 +157,13 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 8. Session mentés és offline sor
 
-- [ ] Gyakorlat végén `breathing_sessions` sor beszúrása
-- [ ] Nincs net → lokális sorba kerül AsyncStorage-ba
-- [ ] `lib/sync.ts` – app indításkor és net visszatérésekor kiüríti a sort
-- [ ] Duplikáció elleni védelem (lokális id)
+- [x] Gyakorlat végén `breathing_sessions` sor beszúrása
+- [x] Nincs net → lokális sorba kerül AsyncStorage-ba
+- [x] `lib/sync.ts` – app indításkor és előtérbe kerüléskor kiüríti a sort
+- [x] Duplikáció elleni védelem (kliensen generált uuid + `ignoreDuplicates`)
+
+> A „net visszatérésekor" trigger helyett app indítás + előtérbe kerülés +
+> gyakorlat vége hármas fut, hogy ne kelljen új könyvtár — lásd D-038.
 
 ## 9. Matricák és streak (5. képernyő)
 
@@ -230,6 +233,75 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 8. Session mentés és offline sor
+
+**Mit:** A lezárt gyakorlatok felkerülnek a `breathing_sessions` táblára. Az új
+`lib/sync.ts` üríti a `useSessionStore.pending` sort: egyetlen kötegelt
+`upsert`, `ignoreDuplicates` mellett. A gyakorlat továbbra is **mindig
+lokálisan záródik**, a feltöltés utólag, best-effort — a UI sosem várja meg, és
+hiba esetén nem jelez semmit.
+
+A duplikáció elleni védelem: a `recordSession` mostantól **uuid v4-et** generál
+lokálisan, és ez az id megy fel a `breathing_sessions.id`-ba is. Egy megismételt
+feltöltés így ütközik a primary keyre, és `ignoreDuplicates` mellett egyszerűen
+kimarad (D-039). A store kapott egy `version: 1` migrációt, mert a korábbi
+`${Date.now()}-${random}` id **nem** uuid, és egy ilyen sor `invalid input
+syntax`-ra futva örökre megakasztotta volna a kötegelt feltöltést.
+
+Három ponton fut a szinkron: app indításkor, minden előtérbe kerüléskor
+(`AppState`), és minden gyakorlat végén. Hálózatot nem figyelünk, mert az új
+könyvtárat jelentett volna (D-038).
+
+**Fájlok:** lib/sync.ts (új), store/useSessionStore.ts, app/_layout.tsx,
+app/session.tsx, docs/feature-tasks.md
+
+**Tesztelve:** valódi Supabase projekten (`eguhipjgnhbajbmnrskm`), ideiglenes
+teszt fiókkal és gyerek profillal, **valódi `supabase-js` klienssel és valódi
+RLS alatt** (nem szimulált JWT-vel):
+1. Bejelentkezés a teszt szülővel → OK.
+2. A `fetchChildProfile()` gyerek-lekérdezése → megtalálta a profilt.
+3. Két várakozó gyakorlat (egy befejezett 150 mp, egy megszakított 40 mp),
+   kliensen generált uuid id-kkel.
+4. 1. feltöltés → 2 sor.
+5. **2. feltöltés ugyanazokkal az id-kkel** (mintha a sor nem ürült volna) →
+   a táblában **továbbra is 2 sor**, duplikátum nincs.
+6. A `countCompletedSessions()` 1 befejezettet ad vissza — a megszakított nem
+   számít bele, ahogy kell.
+7. **RLS:** idegen `child_id`-vel a beszúrás `42501`-gyel elutasítva.
+8. **Offline eset:** elérhetetlen hosttal az `uploadSessions()` üres listát ad,
+   tehát a sor **nem ürül** — a gyakorlat nem vész el.
+
+Előtte SQL-ből, `authenticated` szerepben is le lett futtatva ugyanez: 5
+beszúrási kísérletből 2 körben 3 különböző sor keletkezett.
+
+A teszt fiók, a gyerek profil és minden teszt sor **törölve**; az adatbázis
+ugyanabban az állapotban maradt, mint a munka előtt (0 sor mind a négy
+`breathing_` táblában).
+
+`npm run typecheck` és `npm run lint` hibátlan, a Metro bundle (1591 modul)
+hiba nélkül fordul.
+
+**Nyitva maradt:**
+- **A teljes kliensút a futó appban nincs végigkattintva.** A szinkron
+  meghívása (`app/_layout.tsx`, `app/session.tsx`) csak fordítási szinten
+  igazolt; a `lib/sync.ts` belső logikáját viszont a fenti teszt 1:1-ben
+  ugyanazzal a klienssel és lekérdezésekkel futtatta. Az appban való
+  végigjátszáshoz be kell tudni jelentkezni, ahhoz pedig vagy saját SMTP kell,
+  vagy az e-mail megerősítés ideiglenes kikapcsolása (a 0./1. szakasz óta
+  nyitott pont).
+- **A `breathing_children.streak_days` és `last_session_date` nem megy fel.**
+  A `registerCompletedSession` csak lokálisan lép, a szerveren ez a két oszlop
+  0/üres marad. A `completedSessions` ettől függetlenül helyes, mert azt a
+  `countCompletedSessions()` a session sorokból számolja. A streak szerver
+  oldali vezetése a 9. szakaszé.
+- **Egy „mérgezett" sor megakasztaná a köteget:** ha egy sor tartósan
+  visszautasításra kerül (pl. a gyerek profilt szerver oldalon törölték), a
+  köteg minden alkalommal elhasal, és a sor nem ürül. Soronkénti feltöltésre
+  vagy a sor méretének korlátozására nincs védelem — v1-ben tudatosan nem
+  bonyolítottuk (D-039).
+
+**Commit:** feat: session feltöltés és offline sor
 
 ## 2026-08-25 – 7.5. iPad támogatás és fekvő tájolás
 
@@ -1500,3 +1572,47 @@ D-035-ben leírt „ne ugorjon a layout" előny elveszne.
 iPad tájolást; `requireFullScreen: true` esetén ezt már **nekünk kell**
 megadnunk az `ios.infoPlist`-ben — ezért van ott kézzel (lásd D-036).
 **Visszavonható?** Igen, de akkor a szorzót hookra kell cserélni.
+
+## D-038 – A szinkron nem figyeli a hálózatot, három ponton fut
+
+**Dátum:** 2026-08-25
+**Döntés:** a feltöltési sort app indításkor, minden előtérbe kerüléskor
+(`AppState` → `active`) és minden gyakorlat végén próbáljuk üríteni. A hálózat
+állapotát **nem** figyeljük.
+**Miért:** a feladatlista eredetileg „net visszatérésekor" triggert kért, ahhoz
+viszont a `@react-native-community/netinfo` kellett volna. A CLAUDE.md célszáma
+max 10 fő dependency, jelenleg 20-nál tartunk — egy újat csak akkor éri meg
+felvenni, ha valódi különbséget hoz. Itt nem hoz: a tipikus eset az, hogy a
+gyerek offline gyakorol, bezárja az appot, és később wifin nyitja ki újra — ezt
+az indítás és az előtérbe kerülés lefedi.
+**Alternatíva:** NetInfo felvétele. Pontosabb triggert adna arra az egy esetre,
+amikor az app végig nyitva van, és közben jön vissza a kapcsolat.
+**Ismert korlát:** ha az app nyitva marad, és eközben tér vissza a net, a
+szinkron csak a következő előtérbe kerüléskor fut le. A gyakorlat addig is
+biztonságban van a lokális sorban.
+**Visszavonható?** Igen, a NetInfo utólag bármikor hozzáadható egy negyedik
+triggerként, a `syncPendingSessions()` változtatása nélkül.
+
+## D-039 – Kliensen generált uuid a session id-je, kötegelt `upsert`
+
+**Dátum:** 2026-08-25
+**Döntés:** a `recordSession` uuid v4-et generál `Math.random`-ból, és ez az id
+megy fel a `breathing_sessions.id`-ba. A feltöltés egyetlen kötegelt `upsert`,
+`onConflict: 'id'` és `ignoreDuplicates: true` mellett.
+**Miért:** így a feltöltés **idempotens**: ha a válasz elveszik, és a sor nem
+ürül, a következő próbálkozás ugyanazokkal az id-kkel megy fel, és a már meglévő
+sorok kimaradnak. Nem kellett hozzá sémamódosítás (külön `client_id` oszlop),
+mert a tábla `id`-je amúgy is uuid.
+**Miért `Math.random` és nem `expo-crypto`:** az id csak azonosít, nem véd
+semmit — kriptográfiai erősség nem szükséges, és így nem kellett új könyvtár.
+**Alternatíva 1:** `client_id text unique` oszlop migrációval. Ugyanezt tudná,
+de fölösleges sémamódosítás.
+**Alternatíva 2:** soronkénti feltöltés. Robusztusabb lenne (egy hibás sor nem
+akasztja meg a többit), de több kérés, és tipikusan 1–3 sor vár a sorban.
+**Ismert korlát:** egy tartósan visszautasított sor megakasztja az egész
+köteget. V1-ben ezt elfogadjuk.
+**Következmény:** a store `version: 1` migrációt kapott, mert a korábbi
+id-formátum nem uuid, és egyetlen ilyen sor örökre megakasztotta volna a
+feltöltést.
+**Visszavonható?** Igen, de a már feltöltött sorok id-jét nem lehet utólag
+megváltoztatni.

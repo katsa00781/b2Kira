@@ -17,6 +17,7 @@ import { defaultSessionSeconds } from '@/data/sessionLengths';
 import { useBreathingCycle } from '@/hooks/useBreathingCycle';
 import { usePressed } from '@/hooks/usePressed';
 import { notifySessionFinished, useSessionFeedback } from '@/hooks/useSessionFeedback';
+import { syncPendingSessions } from '@/lib/sync';
 import { formatDuration, useSessionTimer } from '@/hooks/useSessionTimer';
 import { useChildStore } from '@/store/useChildStore';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -71,6 +72,9 @@ export default function SessionScreen() {
         completed,
         characterId,
       });
+
+      // Best-effort feltöltés. Nincs net → marad a sorban, a UI nem várja meg.
+      void syncPendingSessions();
     },
     [recordSession, characterId]
   );
