@@ -167,12 +167,13 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 9. Matricák és streak (5. képernyő)
 
-- [ ] `data/stickers.ts` – 9 matrica katalógus a design szerint
-- [ ] `app/(tabs)/stickers.tsx` – 3×3 rács, feloldott és zárolt állapot
-- [ ] Feloldási logika: minden 5. befejezett gyakorlat
-- [ ] Streak számítás naptári napokban, helyi idő szerint
-- [ ] „Következő jelvény" kártya valós adatból
-- [ ] Ünneplő visszajelzés feloldáskor (rövid, nem modal)
+- [x] `data/stickers.ts` – 9 matrica katalógus (5 a designból, 4 a mienk – D-040)
+- [x] `app/(tabs)/stickers.tsx` – 3×3 rács, feloldott és zárolt állapot
+- [x] Feloldási logika: minden 5. befejezett gyakorlat
+- [x] Streak számítás naptári napokban, helyi idő szerint (az 5. szakaszból)
+- [x] „Következő jelvény" kártya valós adatból
+- [x] Ünneplő visszajelzés feloldáskor (rövid, nem modal)
+- [x] A feloldott kulcsok és a streak felmegy a szerverre
 
 ## 10. Szülői beállítások (6. képernyő)
 
@@ -233,6 +234,88 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 9. Matricák és streak
+
+**Mit:** Elkészült a matricagyűjtemény (5. képernyő) és a hozzá tartozó
+feloldási logika. A katalógus hardcoded (`data/stickers.ts`), 9 matricával: az
+első öt a designból való, a másik négyet mi tettük hozzá, mert a design a
+6–9. slotot csak névtelen „Zárolva" placeholderként rajzolja (D-040). A
+feloldottság **kizárólag a befejezett gyakorlatok számából** származik —
+minden 5. gyakorlat old fel egyet, a katalógus sorrendjében —, így nem tud
+elcsúszni egy külön tárolt listától.
+
+Az alakok `@expo/vector-icons` ikonok, nem CSS-ből épített `View`-k: a design a
+csillagot `clip-path`-tal rajzolja, amit a React Native nem támogat (D-041).
+Új dependency nem kellett, az `@expo/vector-icons` már a projekt része.
+
+A designban nincs link a matricákhoz és nincs vissza gomb sem — mivel a tab
+sáv rejtve van (D-025), mindkettőt pótolni kellett: a kezdőképernyő
+szintkártyája nyitja a gyűjteményt, a gyűjtemény tetején pedig van vissza
+gomb (D-042).
+
+Az ünneplés a kezdőképernyőn jelenik meg, nem a gyakorlat képernyőn: a
+gyakorlat vége azonnal visszalép, ezért a feloldott kulcs a store-ban utazik
+(`justUnlocked`), és a kezdőképernyő mutatja meg. Nem modal, nem kér
+érintést — megjelenik, 2,6 mp-et kivár, majd magától eltűnik.
+
+A `lib/sync.ts` mostantól a feloldott kulcsokat és a sorozatot is felviszi
+(`breathing_stickers`, `breathing_children`) — ezzel a 8. szakasz nyitott
+pontja („a streak nem megy fel") is lezárult.
+
+Egy design érték hiányzott a palettából: a csillag matrica gradiensének
+kezdőszíne (`#E4D9FF`), ez bekerült `purple.200` néven.
+
+**Fájlok:** data/stickers.ts (új), components/StickerTile.tsx (új),
+components/StickerCelebration.tsx (új), lib/stickers.ts (új),
+app/(tabs)/stickers.tsx (új), app/(tabs)/_layout.tsx, app/(tabs)/index.tsx,
+components/LevelCard.tsx, store/useChildStore.ts, lib/child.ts, lib/sync.ts,
+constants/palette.json, docs/feature-tasks.md
+
+**Tesztelve:**
+
+*Feloldási logika* — 18 határeset, mind rendben: 0/4 gyakorlat → 0 matrica;
+5 → 1; 9 → még mindig 1; 10 → 2; 23 → 4; 45 → mind a 9; 60 → nem megy 9 fölé;
+negatív input → 0. A „következő matrica" 0-nál Szívecske, 23-nál Vízcsepp,
+44-nél Lufi, 45-nél `null`. A „még N gyakorlat" 23-nál 2, 20-nál 5, 24-nél 1.
+Az ünneplés pontosan az 5., 10., 15., … 45. gyakorlatnál sül el.
+
+*Képernyő, iPad mini szimulátoron, Expo Go* — 23 befejezett gyakorlatra
+állított demó állapottal: a rács 4 feloldott (Szívecske, Csillagfény, Levélke,
+Napsugár) és 5 zárolt csempét mutat, három egyenlő oszlopban, 14-es közökkel.
+A sorozat sor „5 napos sorozat — ne hagyd abba!", a kártya „Következő jelvény:
+Vízcsepp / Még 2 gyakorlat kell hozzá" — mind valós adatból. Fekvő és álló
+módban is helyes. Az ünneplő kártya („Új matrica: Napsugár! / Bekerült a
+gyűjteményedbe 🎉") a szintkártya alatt jelenik meg, a matrica saját
+gradiensével. Menet közben az is igazolódott, hogy a `clearJustUnlocked()`
+tényleg lefut és perzisztálódik: egy második betöltésnél már nem jött elő.
+
+*Szerver szinkron, valódi `supabase-js` klienssel, valódi RLS alatt* (teszt
+fiókkal, ami utána törölve lett): 4 matrica feltöltve → 4 sor; ugyanaz a 4 +
+egy új újraküldve → **5 sor, duplikátum nélkül**; a már meglévő sor
+`earned_at`-je **nem íródott felül**; a streak és a `last_session_date`
+felment a `breathing_children`-re; idegen `child_id`-vel a beszúrás
+`42501`-gyel elutasítva. A teszt fiók és minden teszt sor törölve, az
+adatbázis üresen maradt.
+
+`npm run typecheck` és `npm run lint` hibátlan.
+
+**Nyitva maradt:**
+- **A teljes kör a futó appban nincs végigjátszva** (gyakorlat → 5. befejezés →
+  ünneplés → gyűjtemény → szerver), mert ahhoz be kell tudni jelentkezni; a
+  részeket külön-külön viszont igazoltuk. Ugyanaz a nyitott pont, mint a
+  8. szakasznál: e-mail megerősítés vagy saját SMTP kell hozzá.
+- **A 9. matrica „Lufi" lett „Hullámocska" helyett.** A tervezett névhez nincs
+  hullám ikon az Ionicons készletben; a lufi viszont illik az app saját
+  képnyelvéhez („fújd el a lufit lassan" – napi tipp). A színek a tervezettek
+  maradtak.
+- A `breathing_stickers` tábla csak írásra van használva, olvasásra nem — a
+  gyűjtemény a lokális `completedSessions`-ből rajzolódik. Eszközváltáskor a
+  matricák a session sorokból állnak helyre (a `countCompletedSessions()`
+  révén), a `breathing_stickers` ehhez ma nem járul hozzá.
+- A gyűjtemény képernyő nincs a szülői zár mögött — a 10. szakasz témája.
+
+**Commit:** feat: matricagyűjtemény, feloldás és ünneplés
 
 ## 2026-08-25 – 8. Session mentés és offline sor
 
@@ -1616,3 +1699,59 @@ id-formátum nem uuid, és egyetlen ilyen sor örökre megakasztotta volna a
 feltöltést.
 **Visszavonható?** Igen, de a már feltöltött sorok id-jét nem lehet utólag
 megváltoztatni.
+
+## D-040 – 9 matrica: 5 a designból, 4 a mienk
+
+**Dátum:** 2026-08-25
+**Döntés:** a katalógus 9 matricát tartalmaz. Az első öt a designból van
+(Szívecske, Csillagfény, Levélke, Napsugár, Vízcsepp), a másik négyet
+(Felhőcske, Holdacska, Csillagpor, Lufi) mi tettük hozzá, kizárólag a meglévő
+palettából — egyetlen új hex érték kellett, a csillag gradiensének kezdőszíne
+(`#E4D9FF`), ami a `docs/design-tokens.md` matrica-táblájában szerepel, csak a
+`palette.json`-ból hiányzott.
+**Miért:** a design 9 slotot rajzol, de csak ötöt nevez meg — a maradék négy
+névtelen „Zárolva" placeholder. Ha ennél maradunk, 25 befejezett gyakorlat
+után a gyerek örökre négy lakattal néz szembe, és a gyűjtés elveszti az
+értelmét. Kilenc matricával 45 gyakorlatig van mit gyűjteni.
+**Precedens:** a szintneveket ugyanígy mi adtuk hozzá (D-023).
+**Alternatíva:** maradni öt matricánál, a többi slot végleg zárolt. Design-hű,
+de a feature lényegét rontja el.
+**Visszavonható?** Igen, de ha egy matrica már fel volt oldva valakinél, a
+kulcsa benne marad a `breathing_stickers`-ben.
+
+## D-041 – A matrica-alakok ikonok, nem CSS-ből épített View-k
+
+**Dátum:** 2026-08-25
+**Döntés:** mind a 9 matrica alakja `@expo/vector-icons` (Ionicons) ikon.
+**Miért:** a design a csillagot `clip-path: polygon(...)`-nal rajzolja, amit a
+React Native **nem támogat**. A szív, levél, kör és csepp ugyan felépíthető
+lenne `borderRadius` + `transform`-ból 1:1-ben, de akkor a csillag kilógna a
+sorból (két egymásra forgatott háromszögből csak hatszög-szerű csillag jön ki),
+és a négy új matricához (felhő, hold, szikra, lufi) is közelítés kellene. Az
+ikonkészlettel minden alak éles és egységes, bármilyen méretben — ami iPaden
+(D-035) külön számít.
+**Miért nem új könyvtár:** az `@expo/vector-icons` már dependency, a `Checkbox`
+pipája is ezt használja.
+**Alternatíva:** `react-native-svg` — pontos, tetszőleges alak, de új
+könyvtár, és a CLAUDE.md célszáma max 10 fő dependency.
+**Ismert eltérés:** a szív és a levél formája az Ionicons változata, nem
+bitre a design CSS-e. A méretek, színek és a csempe geometriája viszont
+pontosan a designból jönnek.
+**Visszavonható?** Igen, a `StickerTile` egyetlen komponens.
+
+## D-042 – Navigáció a gyűjteményhez: a szintkártya, és van vissza gomb
+
+**Dátum:** 2026-08-25
+**Döntés:** a kezdőképernyő szintkártyája megnyitja a matricagyűjteményt, a
+gyűjtemény tetején pedig van egy vissza gomb.
+**Miért:** a design egyik képernyőjén sincs link a matricákhoz, és a
+gyűjteményen nincs vissza gomb sem — a mockup képernyőnként külön létezik. Mivel
+a tab sáv rejtve van (D-025), enélkül a gyűjtemény elérhetetlen lenne, oda
+kerülve pedig a gyerek beragadna. A szintkártya azért jó belépő, mert a saját
+szövege szól a matricákról („3/5 gyakorlat a következő matricáig”).
+**Alternatíva:** a streak chip vagy egy új gomb a kezdőképernyőn — utóbbi új,
+designban nem szereplő elem lenne.
+**Eltérés a designtól:** a gyűjtemény címe mellé bekerült egy 34×34-es vissza
+gomb, ugyanolyan, mint a gyakorlat képernyőn. A kártya megjelenése nem
+változott, csak érinthető lett.
+**Visszavonható?** Igen.

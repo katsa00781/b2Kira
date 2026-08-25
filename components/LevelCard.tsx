@@ -1,9 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, gradients } from '@/constants/colors';
 import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
+import { usePressed } from '@/hooks/usePressed';
 
 type LevelCardProps = {
   level: number;
@@ -11,15 +12,31 @@ type LevelCardProps = {
   /** Hány gyakorlat van meg a következő matricáig szükséges `goal`-ból. */
   done: number;
   goal: number;
+  /** Megadva a kártya a matricagyűjteményre visz (D-042). */
+  onPress?: () => void;
 };
 
 /**
  * Szintkártya a kezdőképernyőn (`00-teljes-canvas.html`, 3. képernyő):
  * fehér kártya, 44×44-es lila gradiens ikon, szint és a matricáig hátralévő út.
+ *
+ * `onPress` esetén a matricagyűjteményt nyitja — a designban nincs külön link
+ * oda, és ez a kártya szól a matricákról (D-042).
  */
-export function LevelCard({ level, levelName, done, goal }: LevelCardProps) {
+export function LevelCard({ level, levelName, done, goal, onPress }: LevelCardProps) {
+  const { pressed, pressHandlers } = usePressed();
+
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityRole={onPress ? 'button' : 'summary'}
+      accessibilityLabel={`${level}. szint, ${levelName}. ${done} a ${goal} gyakorlatból a következő matricáig.`}
+      accessibilityHint={onPress ? 'Megnyitja a matricagyűjteményt' : undefined}
+      disabled={!onPress}
+      onPress={onPress}
+      {...pressHandlers}
+      // A `style` itt nem lehet függvény — lásd D-026.
+      style={[styles.card, pressed && styles.pressed]}
+    >
       <LinearGradient
         colors={gradients.levelBadge.colors}
         start={GRADIENT_START}
@@ -37,7 +54,7 @@ export function LevelCard({ level, levelName, done, goal }: LevelCardProps) {
           {done}/{goal} gyakorlat a következő matricáig
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -73,4 +90,5 @@ const styles = StyleSheet.create({
     borderColor: colors.white,
   },
   texts: { flex: 1, gap: s(2) },
+  pressed: { opacity: 0.85 },
 });

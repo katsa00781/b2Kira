@@ -8,16 +8,21 @@
  * **A UI soha nem várja meg ezt a modult**, és hiba esetén sem jelez semmit —
  * a gyereknek nem dolga tudni, hogy volt-e net.
  */
+import { SESSIONS_PER_LEVEL } from '@/data/levels';
+import { stickers, unlockedCount } from '@/data/stickers';
 import { useChildStore } from '@/store/useChildStore';
 import { useSessionStore, type PendingSession } from '@/store/useSessionStore';
 
+import { saveProgress } from './child';
+import { saveUnlockedStickers } from './stickers';
 import { supabase } from './supabase';
 
 /** Egyszerre csak egy futás — az indítás és az előtérbe kerülés egybeeshet. */
 let running = false;
 
 /**
- * Kiüríti a feltöltési sort, amennyire tudja. Mindig csendben tér vissza.
+ * Kiüríti a feltöltési sort, és felviszi a sorozatot meg a feloldott
+ * matricákat. Mindig csendben tér vissza.
  *
  * Hívási pontok (D-038): app indítás, előtérbe kerülés, gyakorlat vége.
  */
@@ -27,7 +32,10 @@ export async function syncPendingSessions(): Promise<void> {
   }
 
   const { pending } = useSessionStore.getState();
-  if (pending.length === 0) {
+  const child = useChildStore.getState();
+
+  // Ha nincs se feltöltendő gyakorlat, se haladás, nincs mit tenni.
+  if (pending.length === 0 && child.completedSessions === 0) {
     return;
   }
 
@@ -39,10 +47,25 @@ export async function syncPendingSessions(): Promise<void> {
       return;
     }
 
-    const uploaded = await uploadSessions(childId, pending);
-    if (uploaded.length > 0) {
-      useSessionStore.getState().clearPending(uploaded);
+    if (pending.length > 0) {
+      const uploaded = await uploadSessions(childId, pending);
+      if (uploaded.length > 0) {
+        useSessionStore.getState().clearPending(uploaded);
+      }
     }
+
+    // A sorozat és a matricák a session sorokból nem jönnek ki maguktól.
+    const progress = useChildStore.getState();
+    await saveProgress(childId, {
+      streakDays: progress.streakDays,
+      lastSessionDate: progress.lastSessionDate,
+    });
+
+    const earned = unlockedCount(progress.completedSessions, SESSIONS_PER_LEVEL);
+    await saveUnlockedStickers(
+      childId,
+      stickers.slice(0, earned).map((sticker) => sticker.key)
+    );
   } catch {
     // Nincs net, lejárt token, bármi: a sor marad, legközelebb újra megy.
   } finally {

@@ -84,3 +84,27 @@ async function countCompletedSessions(childId: string): Promise<number> {
 
   return error ? 0 : (count ?? 0);
 }
+
+/**
+ * A sorozat felvitele a `breathing_children`-re. A `completed_sessions` nincs
+ * külön oszlopban — azt a `countCompletedSessions()` számolja a session
+ * sorokból —, de a streak csak lokálisan létezne, ha nem küldenénk fel.
+ *
+ * Best-effort, mint minden más ebben a fájlban.
+ */
+export async function saveProgress(
+  childId: string,
+  progress: { streakDays: number; lastSessionDate: string | null }
+): Promise<void> {
+  try {
+    await supabase
+      .from('breathing_children')
+      .update({
+        streak_days: progress.streakDays,
+        last_session_date: progress.lastSessionDate,
+      })
+      .eq('id', childId);
+  } catch {
+    // A lokális állapot marad az igazság, legközelebb újra próbáljuk.
+  }
+}

@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,11 +10,13 @@ import { GearButton } from '@/components/GearButton';
 import { LevelCard } from '@/components/LevelCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ProgressBar } from '@/components/ProgressBar';
+import { StickerCelebration } from '@/components/StickerCelebration';
 import { StreakChip } from '@/components/StreakChip';
 import { Twinkles } from '@/components/Twinkles';
 import { gradients } from '@/constants/colors';
 import { contentMaxWidth, s, uiScale } from '@/constants/layout';
 import { SESSIONS_PER_LEVEL, levelProgress } from '@/data/levels';
+import { stickers } from '@/data/stickers';
 import { tipOfTheDay } from '@/data/tips';
 import { activeStreakDays, useChildStore } from '@/store/useChildStore';
 
@@ -29,6 +31,8 @@ export default function HomeScreen() {
   const lastSessionDate = useChildStore((state) => state.lastSessionDate);
   const setCharacter = useChildStore((state) => state.setCharacter);
   const syncFromServer = useChildStore((state) => state.syncFromServer);
+  const justUnlocked = useChildStore((state) => state.justUnlocked);
+  const clearJustUnlocked = useChildStore((state) => state.clearJustUnlocked);
 
   // A képernyő a lokális állapotból már kirajzolódott, ez csak utólag frissít.
   useEffect(() => {
@@ -38,6 +42,9 @@ export default function HomeScreen() {
   const Character = characterComponents[characterId];
   const level = levelProgress(completedSessions);
   const streak = activeStreakDays({ streakDays, lastSessionDate });
+  const unlocked = stickers.find((sticker) => sticker.key === justUnlocked) ?? null;
+
+  const dismissCelebration = useCallback(() => clearJustUnlocked(), [clearJustUnlocked]);
 
   return (
     <LinearGradient
@@ -77,11 +84,16 @@ export default function HomeScreen() {
             levelName={level.name}
             done={level.done}
             goal={SESSIONS_PER_LEVEL}
+            onPress={() => router.push('/stickers')}
           />
         </View>
         <View style={styles.levelProgress}>
           <ProgressBar progress={level.ratio} variant="purple" />
         </View>
+
+        {unlocked ? (
+          <StickerCelebration sticker={unlocked} onDone={dismissCelebration} />
+        ) : null}
 
         <View style={styles.footer} className="mt-auto">
           <Text style={styles.tip} className="text-center font-nunito-semibold text-text-subtle">

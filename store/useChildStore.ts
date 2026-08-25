@@ -12,6 +12,9 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { CharacterId } from '@/data/characters';
 import { defaultCharacterId } from '@/data/characters';
+import { SESSIONS_PER_LEVEL } from '@/data/levels';
+import type { StickerKey } from '@/data/stickers';
+import { stickers, unlockedCount } from '@/data/stickers';
 import { fetchChildProfile, saveCharacter } from '@/lib/child';
 
 type ChildState = {
@@ -25,6 +28,12 @@ type ChildState = {
   streakDays: number;
   /** `YYYY-MM-DD`, a gyerek helyi ideje szerint. */
   lastSessionDate: string | null;
+  /**
+   * A most feloldott matrica kulcsa, amíg a kezdőképernyő meg nem ünnepelte.
+   * Azért store-ban van és nem navigációs paraméterben, mert a gyakorlat
+   * képernyő azonnal visszalép — az ünneplés a kezdőképernyőn jelenik meg.
+   */
+  justUnlocked: StickerKey | null;
 
   setCharacter: (characterId: CharacterId) => void;
   /**
@@ -32,6 +41,8 @@ type ChildState = {
    * gyakorlat nem számít bele — a gyereknek attól még nincs rossz napja.
    */
   registerCompletedSession: () => void;
+  /** Az ünneplés lefutott, ne jelenjen meg újra. */
+  clearJustUnlocked: () => void;
   /** Frissítés a szerverről. Hiba esetén nem nyúl a lokális állapothoz. */
   syncFromServer: () => Promise<void>;
   /** Kijelentkezéskor (10. szakasz) ürítjük — a gyerek adata ne maradjon ott. */
@@ -46,9 +57,14 @@ const initialState = {
   completedSessions: 0,
   streakDays: 0,
   lastSessionDate: null,
+  justUnlocked: null,
 } satisfies Omit<
   ChildState,
-  'setCharacter' | 'registerCompletedSession' | 'syncFromServer' | 'clear'
+  | 'setCharacter'
+  | 'registerCompletedSession'
+  | 'clearJustUnlocked'
+  | 'syncFromServer'
+  | 'clear'
 >;
 
 export const useChildStore = create<ChildState>()(
@@ -67,10 +83,17 @@ export const useChildStore = create<ChildState>()(
 
       registerCompletedSession: () => {
         set((state) => {
+          const completedSessions = state.completedSessions + 1;
+
+          // Minden 5. gyakorlat old fel egy matricát, a katalógus sorrendjében.
+          const before = unlockedCount(state.completedSessions, SESSIONS_PER_LEVEL);
+          const after = unlockedCount(completedSessions, SESSIONS_PER_LEVEL);
+          const justUnlocked = after > before ? (stickers[after - 1]?.key ?? null) : state.justUnlocked;
+
           const today = dateKey();
 
           if (state.lastSessionDate === today) {
-            return { completedSessions: state.completedSessions + 1 };
+            return { completedSessions, justUnlocked };
           }
 
           const yesterday = new Date();
@@ -78,12 +101,15 @@ export const useChildStore = create<ChildState>()(
           const continued = state.lastSessionDate === dateKey(yesterday);
 
           return {
-            completedSessions: state.completedSessions + 1,
+            completedSessions,
+            justUnlocked,
             streakDays: continued ? state.streakDays + 1 : 1,
             lastSessionDate: today,
           };
         });
       },
+
+      clearJustUnlocked: () => set({ justUnlocked: null }),
 
       syncFromServer: async () => {
         const profile = await fetchChildProfile();
