@@ -5,20 +5,37 @@
  * - **Néma módban ne szóljon** (`playsInSilentMode: false`) — a haptika viszont
  *   akkor is megy, arról a `lib/haptics.ts` gondoskodik.
  * - **Hiányzó vagy hibás hangfájl ne dobjon hibát** — ilyenkor a gyakorlat
- *   némán fut tovább.
+ *   némán fut tovább (D-034), de `__DEV__`-ben legalább naplózzuk (D-048).
  *
- * A lejátszók lustán jönnek létre és megmaradnak: egy 4 mp-enkénti hangnál
- * az újra-létrehozás fölösleges késleltetés lenne.
+ * A lejátszók a gyakorlat indulásakor, **előre** jönnek létre és megmaradnak:
+ * Expo Go-ban a WAV a Metro dev szerverről töltődik le hálózaton át, ezért a
+ * fázisváltás pillanatában létrehozott lejátszó könnyen lemarad a saját
+ * négymásodperces ablakáról (D-048).
  */
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 
 import { phaseSounds, sounds, type SoundName } from '@/constants/sounds';
 
+import { devWarn } from './devWarn';
+
 /** A hangok halkak maguktól is, ez csak a biztonsági plafon. */
 const VOLUME = 0.7;
 
 const players = new Map<SoundName, AudioPlayer>();
-let audioModeReady = false;
+let audioModePromise: Promise<void> | null = null;
+
+/**
+ * A gyakorlat indulásakor: audio session beállítása és a lejátszók előre
+ * betöltése. Akkor is lefut, ha a hangeffekt ki van kapcsolva — az audio
+ * session a beszédre is érvényes, azt pedig külön kapcsoló szabályozza.
+ */
+export async function prepareSounds(): Promise<void> {
+  await ensureAudioMode();
+
+  for (const name of Object.keys(sounds) as SoundName[]) {
+    getPlayer(name);
+  }
+}
 
 /** Egy fázisváltás hangja. Ismeretlen fázisnál nem csinál semmit. */
 export function playPhaseSound(phase: number): void {
@@ -34,10 +51,10 @@ export function playPhaseSound(phase: number): void {
 
   try {
     // Az előző lejátszás közben is jöhet új fázis — mindig az elejéről.
-    void player.seekTo(0);
+    player.seekTo(0).catch((error: unknown) => devWarn('hang', error));
     player.play();
-  } catch {
-    // Némán tovább.
+  } catch (error) {
+    devWarn('hang', error);
   }
 }
 
@@ -46,11 +63,16 @@ export function releaseSounds(): void {
   for (const player of players.values()) {
     try {
       player.remove();
-    } catch {
-      // Némán tovább.
+    } catch (error) {
+      devWarn('hang', error);
     }
   }
   players.clear();
+}
+
+/** Csak a diagnosztikának: a már létrehozott lejátszók. */
+export function loadedPlayers(): ReadonlyMap<SoundName, AudioPlayer> {
+  return players;
 }
 
 function getPlayer(name: SoundName): AudioPlayer | null {
@@ -60,30 +82,29 @@ function getPlayer(name: SoundName): AudioPlayer | null {
   }
 
   try {
-    ensureAudioMode();
+    void ensureAudioMode();
     const player = createAudioPlayer(sounds[name]);
     player.volume = VOLUME;
     players.set(name, player);
     return player;
-  } catch {
+  } catch (error) {
     // Hiányzó vagy nem dekódolható fájl: nincs hang, de nincs hiba sem.
+    devWarn('hang', error);
     return null;
   }
 }
 
-function ensureAudioMode(): void {
-  if (audioModeReady) {
-    return;
-  }
-  audioModeReady = true;
-
-  void setAudioModeAsync({
+/** Az audio session egyszer áll be, és a hívók megvárhatják. */
+export function ensureAudioMode(): Promise<void> {
+  audioModePromise ??= setAudioModeAsync({
     // iOS néma kapcsoló: a hang elnémul, a rezgés megy tovább.
     playsInSilentMode: false,
     // Rövid effektek — ne szakítsák meg, amit a szülő épp hallgat.
     interruptionMode: 'mixWithOthers',
     shouldPlayInBackground: false,
-  }).catch(() => {
-    // Némán tovább.
+  }).catch((error: unknown) => {
+    devWarn('hang', error);
   });
+
+  return audioModePromise;
 }

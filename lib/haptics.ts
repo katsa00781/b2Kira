@@ -8,6 +8,8 @@
  */
 import * as Haptics from 'expo-haptics';
 
+import { devWarn } from './devWarn';
+
 /** A belégzés kezdete erősebb — ez az egyetlen fázis, amit „elindítunk”. */
 export function impactMedium(): void {
   void run(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
@@ -26,7 +28,8 @@ export function notifySuccess(): void {
 async function run(action: () => Promise<void>): Promise<void> {
   try {
     await action();
-  } catch {
-    // Némán tovább — lásd a fájl fejlécét.
+  } catch (error) {
+    // Némán tovább — lásd a fájl fejlécét. Fejlesztés közben viszont látszik.
+    devWarn('rezgés', error);
   }
 }

@@ -8,6 +8,8 @@
  */
 import * as Speech from 'expo-speech';
 
+import { devWarn } from './devWarn';
+
 const OPTIONS: Speech.SpeechOptions = {
   language: 'hu-HU',
   rate: 0.85,
@@ -18,8 +20,9 @@ export function speak(text: string): void {
   try {
     Speech.stop();
     Speech.speak(text, OPTIONS);
-  } catch {
+  } catch (error) {
     // Ha az eszközön nincs magyar hang, a gyakorlat menjen tovább némán.
+    devWarn('beszéd', error);
   }
 }
 
@@ -27,7 +30,8 @@ export function speak(text: string): void {
 export function stopSpeaking(): void {
   try {
     Speech.stop();
-  } catch {
+  } catch (error) {
     // Ugyanaz: a leállítás hibája se akassza meg a gyakorlatot.
+    devWarn('beszéd', error);
   }
 }

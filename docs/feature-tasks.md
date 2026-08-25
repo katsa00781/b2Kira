@@ -235,6 +235,67 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-25 – fix: iOS Expo Go — fizikai iPhone-on se hang, se rezgés
+
+**Mit:** Bejelentés: a gyakorlat alatt **fizikai iPhone-on, Expo Go-ban se hang,
+se rezgés** nincs (csengő módban, tehát nem a néma kapcsoló), miközben a
+macOS szimulátorban a hang szólt.
+
+Ami az átvizsgálásból **kizárható**: a `breathing_settings` tábla üres, tehát a
+szerver nem kapcsolhatta ki a csatornákat; a store alapértéke mind a háromra
+`true`; a `ToggleRow`, a beállítás képernyő és a `fetchSettings` mezőnév-
+párosítása helyes; a három WAV szabályos 16 bites, 22 050 Hz-es PCM;
+az `expo-audio`, `expo-speech` és `expo-haptics` verziója pontosan az, amit az
+SDK 54-es Expo Go tartalmaz.
+
+Ami **megmaradt gyanúnak**, és amiért eddig semmi nyoma nem volt: mind a három
+csatorna némán bukik (D-034), így eszközön semmi nem különbözteti meg a
+„nincs natív modul", a „nincs magyar hang" és a „nem is futott le" esetet.
+Ezért ez a commit **először láthatóvá teszi a hibát**, és közben kijavítja a
+lejátszási lánc két valódi törékenységét (D-048):
+
+1. `lib/devWarn.ts` (új): `__DEV__`-ben a Metro konzolra írja, ami élesben
+   némán elbukna. Élesben a viselkedés változatlan, D-034 érvényben marad.
+2. `lib/feedbackDiagnostics.ts` (új): a gyakorlat indulásakor egyszer lefutó
+   önteszt — kiírja a kapcsolók állását, hogy az audio session beállt-e, hogy
+   a lejátszó betöltődött-e (hossz, hangerő), hogy van-e **magyar hang** az
+   eszközön, és hogy a haptika hívása lefut-e. Csak `__DEV__`-ben, a gyerek
+   ebből semmit nem lát.
+3. `prepareSounds()`: az audio session most **megvárható** és a gyakorlat
+   indulásakor áll be (eddig a legelső lejátszás pillanatában, fire-and-forget
+   módon), és a három lejátszó **előre betöltődik**. Eszközön ez valódi
+   különbség: Expo Go-ban a WAV a Metro dev szerverről jön hálózaton át, így a
+   fázisváltás pillanatában létrehozott lejátszó lemaradhat a saját
+   négymásodperces ablakáról. A szimulátoron (localhost) ez sosem látszik.
+4. Az audio session akkor is beáll, ha a hangeffekt ki van kapcsolva — az
+   `expo-speech` ugyanazt a megosztott iOS audio session-t használja, tehát a
+   beszédre is hatással van.
+
+**Fájlok:** lib/devWarn.ts (új), lib/feedbackDiagnostics.ts (új), lib/sounds.ts,
+lib/haptics.ts, lib/speech.ts, hooks/useSessionFeedback.ts, docs/feature-tasks.md
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. **A javítás
+eszközön még nincs igazolva** — a diagnosztika kimenete kell hozzá.
+
+**Nyitva maradt:**
+- **A gyökérok nincs megerősítve.** A következő lépés: elindítani a gyakorlatot
+  a fizikai iPhone-on, és a Metro terminálban elolvasni a
+  `[visszajelzés-teszt]` blokkot. Ez négy irányt választ szét: (a) a kapcsolók
+  ki vannak kapcsolva; (b) a natív modul hiányzik vagy hibát dob; (c) nincs
+  magyar hang telepítve; (d) minden lefut, tehát eszközoldali beállítás a ludas.
+- **Eszközoldali gyanú, amit a kód nem tud javítani:** a média hangerő nullán
+  (a `.ambient` kategória a média csúszkát használja, és nem a csengőét), és
+  az iOS `Beállítások → Hangok és rezgés → Rendszerrezgés` kikapcsolt állapota
+  — ez utóbbi némán letiltja az összes `expo-haptics` hívást.
+- A `playsInSilentMode: false` marad (a szülő döntése, 2026-08-25): néma
+  kapcsolónál iOS `.ambient` kategóriát kapunk, ami a **beszédet is** elnémítja,
+  nem csak a hangeffektet. Rezgés ilyenkor is van.
+- A diagnosztika ideiglenes: ha a hiba megvan és nem tér vissza, a
+  `lib/feedbackDiagnostics.ts` és a `useSessionFeedback`-beli hívása törölhető.
+  A `devWarn` maradhat, az önmagában hasznos.
+
+**Commit:** fix: az iOS-en néma visszajelzés diagnosztikája és a lejátszási lánc előtöltése
+
 ## 2026-08-25 – 10. Szülői beállítások
 
 **Mit:** Elkészült a beállítás képernyő, a szülői zárral együtt. A képernyőre
@@ -1649,8 +1710,6 @@ hibás visszajelzés, és ne dobjon rá piros hibaképernyőt.
 ennek nincs címzettje, a szülő úgyse látná.
 **Visszavonható?** Igen, de csak akkor, ha van hova jelenteni a hibát.
 
-<!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
-
 ## D-035 – iPad: arányos nagyítás modul szintű szorzóval, nem hookkal
 
 **Dátum:** 2026-08-25
@@ -1897,3 +1956,26 @@ képernyőjén jönne fel.
 alapból be van kapcsolva a store-ban, de értesítés nem megy ki, mert nincs
 engedély. Ez tudatos: inkább néma, mint tolakodó.
 **Visszavonható?** Igen, egy paraméter.
+
+## D-048 – A visszajelzési csatornák `__DEV__`-ben naplóznak, és a hangok előre töltődnek
+
+**Dátum:** 2026-08-25
+**Döntés:** a hang, a beszéd és a rezgés élesben továbbra is **némán bukik**
+(D-034), de `__DEV__`-ben a `lib/devWarn.ts`-en keresztül a konzolra ír, és a
+gyakorlat indulásakor lefut egy önteszt (`lib/feedbackDiagnostics.ts`). Ezen
+kívül az audio session megvárható lett, és a három lejátszó a gyakorlat
+indulásakor, előre jön létre — nem a fázisváltás pillanatában.
+**Miért:** egy fizikai iPhone-on Expo Go alatt se hang, se rezgés nem volt,
+miközben a szimulátorban szólt — és a D-034-es néma bukás miatt **semmilyen
+nyom nem maradt** arról, melyik csatorna hol állt meg. A néma bukás a gyerek
+szempontjából továbbra is helyes, a fejlesztés szempontjából viszont vakká tesz.
+Az előtöltés önmagában is valódi javítás: Expo Go-ban a WAV a dev szerverről
+tölt hálózaton át, és a fázisváltás pillanatában létrehozott lejátszó
+lemaradhat a saját négymásodperces ablakáról — pont az a különbség, ami
+localhoston (szimulátor) sosem jelentkezik.
+**Alternatíva:** a hibákat élesben is felszínre hozni — ezt a D-034 elveti, és
+jó okkal: a gyakorlat képernyőn a hibaüzenetnek nincs címzettje.
+**Visszavonható?** Igen. A diagnosztika ideiglenes, a gyökérok megerősítése
+után törölhető; a `devWarn` és az előtöltés viszont maradjon.
+
+<!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

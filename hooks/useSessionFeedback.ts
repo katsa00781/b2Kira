@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 
 import { phaseLabels } from '@/data/phases';
+import { logFeedbackDiagnostics } from '@/lib/feedbackDiagnostics';
 import { impactLight, impactMedium, notifySuccess } from '@/lib/haptics';
-import { playPhaseSound, releaseSounds } from '@/lib/sounds';
+import { playPhaseSound, prepareSounds, releaseSounds } from '@/lib/sounds';
 import { speak, stopSpeaking } from '@/lib/speech';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
@@ -51,14 +52,19 @@ export function useSessionFeedback(phase: number, active: boolean): void {
     }
   }, [phase, active]);
 
+  // Indulás: az audio session beáll, a három lejátszó pedig előre betöltődik.
+  // Enélkül a fázisváltás pillanatában létrehozott lejátszó lemaradhat a saját
+  // négymásodperces ablakáról, mert a WAV még a dev szerverről tölt (D-048).
   // A képernyő elhagyásakor ne beszéljen tovább, és a lejátszók is dőljenek le.
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    void prepareSounds();
+    void logFeedbackDiagnostics();
+
+    return () => {
       stopSpeaking();
       releaseSounds();
-    },
-    []
-  );
+    };
+  }, []);
 }
 
 /** A gyakorlat végi visszajelzés. Külön, mert nem fázisváltáshoz kötődik. */
