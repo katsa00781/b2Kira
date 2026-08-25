@@ -4,27 +4,35 @@
  * **adott eszközön** — Expo Go-ban a szimulátor és a fizikai iPhone nem
  * ugyanaz (D-048).
  *
- * Azért kell, mert mind a három csatorna némán bukik (D-034): eszközön
- * enélkül semmi nem különbözteti meg a „ki van kapcsolva” esetet a
- * „nincs meg a natív modul” és a „nincs magyar hang” esettől.
+ * Két menetben mér: induláskor egy pillanatkép, majd `DELAY_MS` múlva még
+ * egy. A második a lényeg — a hangfájl Expo Go-ban a Metro dev szerverről
+ * tölt, tehát induláskor a „még nincs betöltve" állapot **normális**, és csak
+ * a késleltetett mérés mondja meg, hogy betöltődött-e valaha.
  *
  * A gyerek ebből semmit nem lát és nem hall.
  */
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
-import { Platform } from 'react-native';
+import { Dimensions, Platform } from 'react-native';
 
 import { phaseSounds } from '@/constants/sounds';
+import { isTablet } from '@/constants/layout';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
 import { ensureAudioMode, loadedPlayers } from './sounds';
+
+/** Ennyi idő alatt egy pár kilobájtos WAV-nak le kell jönnie a dev szerverről. */
+const DELAY_MS = 3000;
 
 export async function logFeedbackDiagnostics(): Promise<void> {
   if (!__DEV__) {
     return;
   }
 
-  const lines: string[] = [`platform: ${Platform.OS} ${Platform.Version}`];
+  const { width, height } = Dimensions.get('screen');
+  const lines: string[] = [
+    `platform: ${Platform.OS} ${Platform.Version} · ${isTablet ? 'IPAD (tablet méret)' : 'telefon méret'} · ${width}×${height}`,
+  ];
 
   const { soundOn, voiceOn, hapticsOn } = useSettingsStore.getState();
   lines.push(`kapcsolók: hang=${soundOn} beszéd=${voiceOn} rezgés=${hapticsOn}`);
@@ -34,6 +42,36 @@ export async function logFeedbackDiagnostics(): Promise<void> {
   lines.push(await checkHaptics());
 
   console.log(`[visszajelzés-teszt]\n  ${lines.join('\n  ')}`);
+
+  setTimeout(() => {
+    void logSecondPass();
+  }, DELAY_MS);
+}
+
+/** A késleltetett mérés: betöltődött-e a hang, és beszél-e tényleg. */
+async function logSecondPass(): Promise<void> {
+  const lines: string[] = [];
+
+  const player = loadedPlayers().get(phaseSounds[0]);
+  if (!player) {
+    lines.push('hang: a lejátszó eltűnt (a képernyőt közben elhagyták?)');
+  } else {
+    const status = player.currentStatus;
+    lines.push(
+      `hang: betöltve=${player.isLoaded} hossz=${player.duration}s szól=${player.playing}`
+    );
+    lines.push(
+      `hang részletek: állapot=${status.playbackState} időzár=${status.timeControlStatus} várakozás oka=${status.reasonForWaitingToPlay} némítva=${status.mute} pufferel=${status.isBuffering}`
+    );
+  }
+
+  try {
+    lines.push(`beszéd: éppen beszél=${await Speech.isSpeakingAsync()}`);
+  } catch (error) {
+    lines.push(`beszéd: nem kérdezhető le — ${message(error)}`);
+  }
+
+  console.log(`[visszajelzés-teszt · ${DELAY_MS / 1000} mp múlva]\n  ${lines.join('\n  ')}`);
 }
 
 async function checkAudio(): Promise<string> {
@@ -67,7 +105,8 @@ async function checkSpeech(): Promise<string> {
 async function checkHaptics() {
   try {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    return 'rezgés: a hívás lefutott (szimulátoron ettől még nem érezni)';
+    // Figyelem: a hívás iPaden és kikapcsolt rendszerrezgésnél is „lefut".
+    return 'rezgés: a hívás lefutott (ez még nem jelenti, hogy érezni is)';
   } catch (error) {
     return `rezgés: a hívás elszállt — ${message(error)}`;
   }

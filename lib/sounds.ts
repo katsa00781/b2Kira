@@ -16,7 +16,7 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
 
 import { phaseSounds, sounds, type SoundName } from '@/constants/sounds';
 
-import { devWarn } from './devWarn';
+import { devLog, devWarn } from './devWarn';
 
 /** A hangok halkak maguktól is, ez csak a biztonsági plafon. */
 const VOLUME = 0.7;
@@ -53,9 +53,25 @@ export function playPhaseSound(phase: number): void {
     // Az előző lejátszás közben is jöhet új fázis — mindig az elejéről.
     player.seekTo(0).catch((error: unknown) => devWarn('hang', error));
     player.play();
+    reportPlayback(name, player);
   } catch (error) {
     devWarn('hang', error);
   }
+}
+
+/** Fejlesztői mérés: a `play()` után negyed másodperccel szól-e valóban. */
+function reportPlayback(name: SoundName, player: AudioPlayer): void {
+  if (!__DEV__) {
+    return;
+  }
+
+  setTimeout(() => {
+    const status = player.currentStatus;
+    devLog(
+      'hang',
+      `${name} · szól=${player.playing} betöltve=${player.isLoaded} időzár=${status.timeControlStatus} várakozás=${status.reasonForWaitingToPlay}`
+    );
+  }, 250);
 }
 
 /** A képernyő elhagyásakor: a lejátszók natív oldala is felszabadul. */

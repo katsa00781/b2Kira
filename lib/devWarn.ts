@@ -11,3 +11,10 @@ export function devWarn(area: string, error: unknown): void {
     console.warn(`[${area}] ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+/** Ugyanaz, csak nem hibához: mérési pont a visszajelzési láncban. */
+export function devLog(area: string, text: string): void {
+  if (__DEV__) {
+    console.log(`[${area}] ${text}`);
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { phaseLabels } from '@/data/phases';
+import { devLog } from '@/lib/devWarn';
 import { logFeedbackDiagnostics } from '@/lib/feedbackDiagnostics';
 import { impactLight, impactMedium, notifySuccess } from '@/lib/haptics';
 import { playPhaseSound, prepareSounds, releaseSounds } from '@/lib/sounds';
@@ -33,6 +34,10 @@ export function useSessionFeedback(phase: number, active: boolean): void {
     lastPhase.current = phase;
 
     const { soundOn, voiceOn, hapticsOn } = useSettingsStore.getState();
+
+    // Fejlesztői mérés: enélkül nem látszik, hogy a fázisváltás egyáltalán
+    // elsül-e az eszközön, vagy csak a megszólalás marad el.
+    devLog('fázis', `${phase} · hang=${soundOn} beszéd=${voiceOn} rezgés=${hapticsOn}`);
 
     if (hapticsOn) {
       // A belégzés indítja a ciklust, ezért az erősebb.

@@ -8,7 +8,7 @@
  */
 import * as Speech from 'expo-speech';
 
-import { devWarn } from './devWarn';
+import { devLog, devWarn } from './devWarn';
 
 const OPTIONS: Speech.SpeechOptions = {
   language: 'hu-HU',
@@ -19,7 +19,7 @@ const OPTIONS: Speech.SpeechOptions = {
 export function speak(text: string): void {
   try {
     Speech.stop();
-    Speech.speak(text, OPTIONS);
+    Speech.speak(text, __DEV__ ? { ...OPTIONS, ...devCallbacks(text) } : OPTIONS);
   } catch (error) {
     // Ha az eszközön nincs magyar hang, a gyakorlat menjen tovább némán.
     devWarn('beszéd', error);
@@ -34,4 +34,13 @@ export function stopSpeaking(): void {
     // Ugyanaz: a leállítás hibája se akassza meg a gyakorlatot.
     devWarn('beszéd', error);
   }
+}
+
+/** Fejlesztői mérés: az `expo-speech` maga jelzi, elindult-e a mondat. */
+function devCallbacks(text: string): Speech.SpeechOptions {
+  return {
+    onStart: () => devLog('beszéd', `elindult: „${text}”`),
+    onDone: () => devLog('beszéd', `kimondva: „${text}”`),
+    onError: (error) => devWarn('beszéd', error),
+  };
 }

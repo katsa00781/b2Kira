@@ -296,6 +296,29 @@ eszközön még nincs igazolva** — a diagnosztika kimenete kell hozzá.
 
 **Commit:** fix: az iOS-en néma visszajelzés diagnosztikája és a lejátszási lánc előtöltése
 
+### Frissítés – a diagnosztika eredménye és a hang oka
+
+Az eszközön (iPhone, 414×896, iOS 26.4.2) lefuttatott önteszt szerint **minden
+ép**: a kapcsolók bekapcsolva, a WAV betöltődik (0,34 mp, nincs némítva,
+`readyToPlay`), és van magyar hang az eszközön (Tünde). Vagyis se hiányzó
+natív modul, se hiányzó TTS hang, se le nem töltődő asset.
+
+**A hang oka megvan: a telefon néma módban volt.** A hangerő-csúszka mellett
+az áthúzott piros csengő ikon jelezte. Néma kapcsolónál iOS `.ambient`
+kategóriát kapunk (`playsInSilentMode: false`), ami a hangeffektet **és a
+beszédet is** elnémítja — az `expo-speech` ugyanazt a megosztott audio
+session-t használja. Ez tehát **szabályos működés**, nem hiba: a CLAUDE.md
+kifejezetten ezt kéri, és a szülő 2026-08-25-én meg is erősítette, hogy a
+szabály maradjon.
+
+**Ami emiatt nyitva maradt:** a rezgés. A telefon hangerő-állításkor rezeg,
+tehát a Taptic Engine működik, és az `impactAsync` sem dob hibát — de a
+gyakorlat alatt nem érezhető. Ennek a mérésére került be a fázisszintű
+nyomkövetés (`devLog`): a fázisváltás minden lépése, a `play()` utáni tényleges
+lejátszási állapot, és az `expo-speech` `onStart`/`onDone`/`onError`
+visszahívásai. Ez választja szét, hogy a fázisváltás **egyáltalán elsül-e** az
+eszközön, vagy csak a megszólalás marad el.
+
 ## 2026-08-25 – 10. Szülői beállítások
 
 **Mit:** Elkészült a beállítás képernyő, a szülői zárral együtt. A képernyőre
