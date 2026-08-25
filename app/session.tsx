@@ -15,6 +15,7 @@ import { phaseLabels } from '@/data/phases';
 import { defaultSessionSeconds } from '@/data/sessionLengths';
 import { useBreathingCycle } from '@/hooks/useBreathingCycle';
 import { usePressed } from '@/hooks/usePressed';
+import { notifySessionFinished, useSessionFeedback } from '@/hooks/useSessionFeedback';
 import { formatDuration, useSessionTimer } from '@/hooks/useSessionTimer';
 import { useChildStore } from '@/store/useChildStore';
 import { useSessionStore } from '@/store/useSessionStore';
@@ -42,6 +43,9 @@ export default function SessionScreen() {
 
   const { scale, phase } = useBreathingCycle(running);
   const { elapsed, remaining, ratio } = useSessionTimer(totalSeconds, running);
+
+  // Hang, beszéd és rezgés a fázisváltásokhoz.
+  useSessionFeedback(phase, running);
 
   // A gyakorlat alatt ne aludjon el a képernyő.
   useKeepAwake();
@@ -95,6 +99,7 @@ export default function SessionScreen() {
       return;
     }
     setFinished(true);
+    notifySessionFinished();
     endSession(true);
     router.back();
   }, [elapsed, totalSeconds, finished, endSession, router]);

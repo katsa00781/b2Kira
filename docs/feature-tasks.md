@@ -131,12 +131,12 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 7. Hang, beszéd, haptika
 
-- [ ] `lib/haptics.ts` – fázisváltás visszajelzés
-- [ ] `lib/speech.ts` – `expo-speech`, `hu-HU`, `rate: 0.85`, előző mondat leállítása
-- [ ] `assets/sounds/` – 2-3 halk hang, `expo-audio` lejátszás
-- [ ] Hiányzó hangfájl ne dobjon hibát
-- [ ] iOS néma kapcsoló: hang néma, haptika megy
-- [ ] Mindhárom külön kapcsolható, azonnali hatállyal
+- [x] `lib/haptics.ts` – fázisváltás visszajelzés
+- [x] `lib/speech.ts` – `expo-speech`, `hu-HU`, `rate: 0.85`, előző mondat leállítása
+- [x] `assets/sounds/` – 2-3 halk hang, `expo-audio` lejátszás
+- [x] Hiányzó hangfájl ne dobjon hibát
+- [x] iOS néma kapcsoló: hang néma, haptika megy
+- [x] Mindhárom külön kapcsolható, azonnali hatállyal
 
 > **Teszt a gyerekkel:** ha csukott szemmel is tudja követni, jó. Ha nézni kell hozzá a
 > képernyőt, a hang túl halk vagy túl késői.
@@ -216,6 +216,62 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 7. Hang, beszéd, haptika
+
+**Mit:** A gyakorlat megszólalt. A három visszajelzési csatorna a
+**fázisváltás** pillanatához kötve fut (nem a folyamatos animációhoz), egyetlen
+helyről: `hooks/useSessionFeedback.ts`. Rezgés — belégzés kezdetén `Medium`, a
+másik három váltásnál `Light`, a gyakorlat végén `Success` —, halk hangeffekt
+és magyar beszéd (`hu-HU`, `rate: 0.85`, minden mondat előtt `Speech.stop()`).
+
+A három kapcsoló az új `store/useSettingsStore.ts`-ben él (persist
+AsyncStorage-dzsel, alapból mindhárom bekapcsolva). A hook a fázisváltáskor
+`getState()`-tel olvassa ki őket, nem feliratkozással: így a kapcsoló azonnal
+érvényes, de a kapcsolgatás önmagában nem indít el hangot vagy mondatot
+(D-032). A beállítás képernyő a 10. szakaszé, addig a `scratch-ui` képernyő
+három kapcsolója már a valódi store-ra megy.
+
+A hangok `assets/sounds/`-ban: emelkedő `inhale.wav`, rövid `hold.wav`,
+ereszkedő `exhale.wav` — generált, halk szinusz hangok, ideiglenesnek szánva
+(D-033). A lejátszás `expo-audio`-val, `playsInSilentMode: false` és
+`mixWithOthers` mellett: iOS néma kapcsolónál a hang elnémul, a rezgés megy
+tovább. Hiányzó vagy hibás hangfájl, hiányzó haptika és hiányzó magyar TTS hang
+esetén mind a három csatorna némán továbbenged — a gyakorlat sose álljon meg
+azért, mert nem tudott megszólalni (D-034).
+
+Új dependency: `expo-audio`, `expo-speech` (mindkettő a CLAUDE.md tech stackjében
+nevesítve van).
+
+**Fájlok:** hooks/useSessionFeedback.ts, lib/haptics.ts, lib/speech.ts,
+lib/sounds.ts, constants/sounds.ts, store/useSettingsStore.ts,
+assets/sounds/inhale.wav, assets/sounds/hold.wav, assets/sounds/exhale.wav,
+app/session.tsx, app/scratch-ui.tsx, app.json, package.json, docs/feature-tasks.md
+
+**Tesztelve:** iOS szimulátor (iPhone 17, iOS 26), Expo Go, ideiglenes
+naplózással mérve. A visszajelzés **pontosan 4,00 mp-enként** sül el, sorban
+`Lélegezz be` → `Tartsd` → `Lélegezz ki` → `Tartsd` (mért időbélyegek:
+…19.362 / …23.401 / …27.399 / …31.401 / …35.412), és a beszéd tényleg szól
+(`Speech.isSpeakingAsync() === true` minden fázisváltás után 400 ms-mal).
+Háttérbe küldés: a visszajelzés azonnal elhallgat, visszatéréskor szünetel és
+nem ismétli meg a fázist. A három kapcsolót futó gyakorlat közben átállítva
+mindegyik **a következő fázisváltásnál** azonnal érvényesült, újraindítás
+nélkül, és visszakapcsolva újra megszólalt. `expo-audio` hibát egyszer sem
+dobott. `npm run typecheck` és `npm run lint` hibátlan.
+
+**Nyitva maradt:**
+- **A hangok generált placeholderek** (D-033) — éles eszközön, gyerekkel még
+  nincsenek kipróbálva. A feladatlista tesztje („ha csukott szemmel is tudja
+  követni, jó") még nem futott le. A hangerő (`VOLUME = 0.7` a `lib/sounds.ts`-ben)
+  és maguk a hangok cserélhetők a többi kód érintése nélkül.
+- **Haptika szimulátoron nem mérhető** — az `expo-haptics` hívások lefutnak,
+  de rezgés nincs; éles iPhone-on még ellenőrizendő.
+- A magyar TTS hang minősége csak szimulátoron hallgatva; éles eszközön
+  (ahol más hangkészlet lehet telepítve) még nem.
+- A beállítás képernyő (10. szakasz) még nincs meg, addig a kapcsolók csak a
+  `scratch-ui` képernyőn érhetők el, ami ship előtt törlendő.
+- Szünet után nem ismételjük meg az aktuális fázis mondatát — szándékos, de
+  gyerekkel érdemes megnézni, nem hiányzik-e.
 
 ## 2026-08-25 – 6. Légzőgyakorlat (4. képernyő)
 
@@ -1235,6 +1291,51 @@ eleve ezt a csomagot nevezi meg.
 **Alternatíva:** globális `activateKeepAwakeAsync` az app indulásakor —
 felesleges akkumulátorhasználat az összes többi képernyőn.
 **Visszavonható?** Igen, a hook egyetlen sor.
+
+## D-032 – A kapcsolókat a fázisváltás olvassa ki, nem feliratkozás
+
+**Dátum:** 2026-08-25
+**Döntés:** a `hooks/useSessionFeedback.ts` a `soundOn` / `voiceOn` /
+`hapticsOn` értékeket a fázisváltás pillanatában, `useSettingsStore.getState()`-tel
+olvassa ki, nem Zustand selectorral iratkozik fel rájuk.
+**Miért:** így a beállítás azonnal érvényes (a legközelebbi fázisváltás már az új
+értéket látja, legfeljebb 4 mp múlva), de a kapcsolgatás önmagában nem indít el
+hangot vagy mondatot.
+**Alternatíva:** selector — ez viszont a kapcsolókat is beteszi a visszajelzés
+effektjének függőségi listájába, így egyetlen kapcsolóállítás a fázis közepén
+újra lejátszaná a hangot és újramondatná a feliratot.
+**Ismert korlátozás:** a futó fázis visszajelzését egy kikapcsolás nem szakítja
+félbe, csak a következőt hagyja el.
+**Visszavonható?** Igen, egyetlen hookon belüli olvasás.
+
+## D-033 – A fázishangok generált szinusz hangok, ideiglenesen
+
+**Dátum:** 2026-08-25
+**Döntés:** az `assets/sounds/` három WAV fájlja (emelkedő `inhale`, rövid
+`hold`, ereszkedő `exhale`) generált, halk szinusz hang halk oktávval és lágy
+be-/kicsengéssel — nem hangkönyvtárból származó felvétel.
+**Miért:** a designban nincs megadva hang, letöltött asset pedig licenc- és
+minőségkérdés is lenne, amit nem akartunk megkérdezés nélkül eldönteni. Így a
+teljes lánc (lejátszás, néma mód, kapcsoló, időzítés) kipróbálható, a fájlok
+pedig bármikor kicserélhetők ugyanezen a néven, kódmódosítás nélkül.
+**Alternatíva:** hang nélkül hagyni a szakaszt — akkor a lejátszási lánc maradt
+volna teszteletlen.
+**Nyitva:** a végleges hangokat a gyerekkel való próba után érdemes kiválasztani.
+
+## D-034 – Minden visszajelzési csatorna némán bukik
+
+**Dátum:** 2026-08-25
+**Döntés:** a hang, a beszéd és a haptika minden hívása elnyeli a hibát
+(`try/catch`, illetve `.catch()`), és a létre nem hozható lejátszó `null`-t ad
+vissza kivétel helyett.
+**Miért:** CLAUDE.md ezt kifejezetten kéri a hangfájlra, de ugyanez a helyzet a
+másik kettővel: a szimulátoron nincs rezgés, egy eszközön hiányozhat a magyar
+TTS hang, egy hívás beleeshet egy hangmegszakításba. Az, hogy a doboz lélegzik,
+fontosabb, mint hogy megszólal-e hozzá bármi — a gyereket sose állítsa meg egy
+hibás visszajelzés, és ne dobjon rá piros hibaképernyőt.
+**Alternatíva:** a hibák felszínre hozása naplózással — de a gyakorlat képernyőn
+ennek nincs címzettje, a szülő úgyse látná.
+**Visszavonható?** Igen, de csak akkor, ha van hova jelenteni a hibát.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 

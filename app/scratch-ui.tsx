@@ -17,6 +17,7 @@ import { ToggleRow } from '@/components/ToggleRow';
 import { Twinkles } from '@/components/Twinkles';
 import { colors } from '@/constants/colors';
 import { shadows } from '@/constants/shadows';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 const LENGTH_OPTIONS = [
   { value: 60, label: '1 perc' },
@@ -27,8 +28,9 @@ const LENGTH_OPTIONS = [
 export default function ScratchUiScreen() {
   const [name, setName] = useState('');
   const [progress, setProgress] = useState(0.6);
-  const [soundOn, setSoundOn] = useState(true);
-  const [voiceOn, setVoiceOn] = useState(false);
+  // A három visszajelzés-kapcsoló már a valódi store-ból jön: a 10. szakasz
+  // beállítás képernyőjéig ez az egyetlen hely, ahol ki-be lehet kapcsolni őket.
+  const settings = useSettingsStore();
   const [length, setLength] = useState<number>(150);
 
   return (
@@ -68,14 +70,20 @@ export default function ScratchUiScreen() {
           <ToggleRow
             label="Hangeffektek"
             sub="Játékos hangok a gyakorlat közben"
-            value={soundOn}
-            onValueChange={setSoundOn}
+            value={settings.soundOn}
+            onValueChange={settings.setSoundOn}
           />
           <ToggleRow
             label="Hangos útmutatás"
             sub="Barátságos hang vezeti a légzést"
-            value={voiceOn}
-            onValueChange={setVoiceOn}
+            value={settings.voiceOn}
+            onValueChange={settings.setVoiceOn}
+          />
+          <ToggleRow
+            label="Rezgés"
+            sub="Finom rezgés minden fázisváltásnál"
+            value={settings.hapticsOn}
+            onValueChange={settings.setHapticsOn}
             showDivider={false}
           />
         </View>
