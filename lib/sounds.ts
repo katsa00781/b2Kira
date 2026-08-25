@@ -21,6 +21,21 @@ import { devLog, devWarn } from './devWarn';
 /** A hangok halkak maguktól is, ez csak a biztonsági plafon. */
 const VOLUME = 0.7;
 
+/**
+ * **Ideiglenes kísérlet, csak `__DEV__`-ben.**
+ *
+ * `true` esetén az audio session `.playback` kategóriát kap `.ambient` helyett,
+ * amit a néma kapcsoló **nem** némít el. Ez választja szét egyértelműen a két
+ * lehetséges okot, a hangerő-HUD értelmezése nélkül:
+ *
+ * - ha ettől megjön a hang → a telefon néma módban volt, a kód rendben van;
+ * - ha így is néma marad → az ok mélyebben van, és megyünk tovább.
+ *
+ * Élesben (`__DEV__ === false`) semmit nem változtat: ott marad a CLAUDE.md
+ * szerinti néma működés. A kísérlet után ez a kapcsoló törlendő.
+ */
+const SILENT_MODE_TEST = true;
+
 const players = new Map<SoundName, AudioPlayer>();
 let audioModePromise: Promise<void> | null = null;
 
@@ -112,9 +127,14 @@ function getPlayer(name: SoundName): AudioPlayer | null {
 
 /** Az audio session egyszer áll be, és a hívók megvárhatják. */
 export function ensureAudioMode(): Promise<void> {
+  const playsInSilentMode = __DEV__ && SILENT_MODE_TEST;
+  if (playsInSilentMode) {
+    devLog('hang', 'KÍSÉRLET: playsInSilentMode = true (.playback kategória)');
+  }
+
   audioModePromise ??= setAudioModeAsync({
     // iOS néma kapcsoló: a hang elnémul, a rezgés megy tovább.
-    playsInSilentMode: false,
+    playsInSilentMode,
     // Rövid effektek — ne szakítsák meg, amit a szülő épp hallgat.
     interruptionMode: 'mixWithOthers',
     shouldPlayInBackground: false,
