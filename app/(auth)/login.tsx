@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { TextField } from '@/components/TextField';
 import { Twinkles } from '@/components/Twinkles';
 import { gradients } from '@/constants/colors';
+import { contentMaxWidth, s, uiScale } from '@/constants/layout';
 import { usePressed } from '@/hooks/usePressed';
 import { resetPassword, signIn } from '@/lib/auth';
 
@@ -65,15 +66,17 @@ export default function LoginScreen() {
         style={styles.screen}
       >
         <View style={[styles.content, { paddingBottom: Math.max(BOTTOM_PADDING, insets.bottom) }]}>
-          <View className="items-center gap-[10px]">
-            <Bunny mood="happy" scale={1} />
-            <Text className="font-baloo-extrabold text-[24px] text-text-heading">Doboz Légzés</Text>
-            <Text className="text-center font-nunito-semibold text-[13px] text-text-subtle">
+          <View style={styles.header}>
+            <Bunny mood="happy" scale={uiScale} />
+            <Text style={styles.title} className="font-baloo-extrabold text-text-heading">
+              Doboz Légzés
+            </Text>
+            <Text style={styles.subtitle} className="text-center font-nunito-semibold text-text-subtle">
               Lélegezz és játssz a barátaiddal!
             </Text>
           </View>
 
-          <View className="mt-[32px] gap-[12px]">
+          <View style={styles.form}>
             <TextField
               label="Szülő e-mail címe"
               placeholder="szulo@example.com"
@@ -102,13 +105,13 @@ export default function LoginScreen() {
               {...forgotten.pressHandlers}
               style={[styles.forgotten, forgotten.pressed && styles.pressed]}
             >
-              <Text className="font-nunito-bold text-[12px] text-purple-600">
+              <Text style={styles.forgottenLabel} className="font-nunito-bold text-purple-600">
                 Elfelejtett jelszó?
               </Text>
             </Pressable>
           </View>
 
-          <View className="mt-auto items-center gap-[14px]">
+          <View style={styles.footer} className="mt-auto">
             {feedback ? <FormMessage tone={feedback.tone} message={feedback.message} /> : null}
 
             <PrimaryButton
@@ -125,8 +128,9 @@ export default function LoginScreen() {
               {...registerLink.pressHandlers}
               style={registerLink.pressed && styles.pressed}
             >
-              <Text className="font-nunito-semibold text-[13px] text-text-subtle">
-                Nincs még fiókod? <Text className="font-nunito-bold text-purple-600">Regisztrálj</Text>
+              <Text style={styles.subtitle} className="font-nunito-semibold text-text-subtle">
+                Nincs még fiókod?{' '}
+                <Text className="font-nunito-bold text-purple-600">Regisztrálj</Text>
               </Text>
             </Pressable>
           </View>
@@ -137,15 +141,25 @@ export default function LoginScreen() {
 }
 
 /** A design keretében a tartalom 72 / 26 / 32 px-re van a képernyő szélétől. */
-const BOTTOM_PADDING = 32;
+const BOTTOM_PADDING = s(32);
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: {
     flex: 1,
-    paddingTop: 72,
-    paddingHorizontal: 26,
+    // iPaden középre igazított, korlátozott szélességű oszlop (D-035).
+    width: '100%',
+    maxWidth: contentMaxWidth,
+    alignSelf: 'center',
+    paddingTop: s(72),
+    paddingHorizontal: s(26),
   },
+  header: { alignItems: 'center', gap: s(10) },
+  title: { fontSize: s(24) },
+  subtitle: { fontSize: s(13) },
+  form: { marginTop: s(32), gap: s(12) },
+  forgottenLabel: { fontSize: s(12) },
+  footer: { alignItems: 'center', gap: s(14) },
   forgotten: { alignSelf: 'flex-end' },
   pressed: { opacity: 0.6 },
 });

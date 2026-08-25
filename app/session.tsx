@@ -10,6 +10,7 @@ import { PauseButton } from '@/components/PauseButton';
 import { PhaseDots } from '@/components/PhaseDots';
 import { ProgressBar } from '@/components/ProgressBar';
 import { colors, gradients } from '@/constants/colors';
+import { contentMaxWidth, s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { phaseLabels } from '@/data/phases';
 import { defaultSessionSeconds } from '@/data/sessionLengths';
@@ -124,7 +125,7 @@ export default function SessionScreen() {
             <View style={styles.backArrow} />
           </Pressable>
 
-          <Text className="font-nunito-bold text-[13px] text-green-500">
+          <Text style={styles.timer} className="font-nunito-bold text-green-500">
             {formatDuration(remaining)} maradt
           </Text>
 
@@ -132,8 +133,8 @@ export default function SessionScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
-        <View className="flex-1 items-center justify-center gap-[24px]">
-          <Text style={styles.phaseLabel} className="font-baloo-extrabold text-[22px] text-green-700">
+        <View style={styles.stage} className="flex-1 items-center justify-center">
+          <Text style={styles.phaseLabel} className="font-baloo-extrabold text-green-700">
             {phaseLabels[phase]}
           </Text>
 
@@ -142,7 +143,7 @@ export default function SessionScreen() {
           <PhaseDots phase={phase} />
         </View>
 
-        <View className="gap-[10px]">
+        <View style={styles.footer}>
           <ProgressBar progress={ratio} variant="green" />
           <PauseButton paused={paused} onPress={() => setPaused((value) => !value)} />
         </View>
@@ -152,34 +153,41 @@ export default function SessionScreen() {
 }
 
 /** A design keretében a tartalom 62 / 22 / 28 px-re van a képernyő szélétől. */
-const BOTTOM_PADDING = 28;
+const BOTTOM_PADDING = s(28);
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: {
     flex: 1,
-    paddingTop: 62,
-    paddingHorizontal: 22,
+    // iPaden középre igazított, korlátozott szélességű oszlop (D-035).
+    width: '100%',
+    maxWidth: contentMaxWidth,
+    alignSelf: 'center',
+    paddingTop: s(62),
+    paddingHorizontal: s(22),
   },
+  stage: { gap: s(24) },
+  footer: { gap: s(10) },
+  timer: { fontSize: s(13) },
   backButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: s(34),
+    height: s(34),
+    borderRadius: s(34) / 2,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: shadows.backButton,
   },
   backArrow: {
-    width: 10,
-    height: 10,
-    borderLeftWidth: 3,
-    borderBottomWidth: 3,
+    width: s(10),
+    height: s(10),
+    borderLeftWidth: s(3),
+    borderBottomWidth: s(3),
     borderColor: colors.green['500'],
     transform: [{ rotate: '45deg' }],
-    marginLeft: 3,
+    marginLeft: s(3),
   },
-  headerSpacer: { width: 34 },
-  phaseLabel: { letterSpacing: 0.5 },
+  headerSpacer: { width: s(34) },
+  phaseLabel: { fontSize: s(22), letterSpacing: 0.5 },
   pressed: { opacity: 0.6 },
 });

@@ -17,6 +17,7 @@ import { FormMessage } from '@/components/FormMessage';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { TextField } from '@/components/TextField';
 import { gradients } from '@/constants/colors';
+import { contentMaxWidth, s } from '@/constants/layout';
 import { usePressed } from '@/hooks/usePressed';
 import { signUp } from '@/lib/auth';
 
@@ -71,14 +72,14 @@ export default function RegisterScreen() {
           ]}
           keyboardShouldPersistTaps="handled"
         >
-          <Text className="font-baloo-extrabold text-[24px] text-text-heading">
+          <Text style={styles.title} className="font-baloo-extrabold text-text-heading">
             Hozzunk létre fiókot!
           </Text>
-          <Text className="mt-[4px] font-nunito-semibold text-[13px] text-text-subtle">
+          <Text style={styles.lead} className="font-nunito-semibold text-text-subtle">
             Csak pár adat, és kezdhettek is
           </Text>
 
-          <View className="mt-[24px] gap-[12px]">
+          <View style={styles.form}>
             <TextField
               label="Gyermek neve"
               placeholder="Zoé"
@@ -116,7 +117,7 @@ export default function RegisterScreen() {
             />
           </View>
 
-          <View className="mt-[18px]">
+          <View style={styles.consent}>
             <Checkbox
               checked={consent}
               onChange={setConsent}
@@ -124,7 +125,7 @@ export default function RegisterScreen() {
             />
           </View>
 
-          <View className="mt-[26px] items-center gap-[14px]">
+          <View style={styles.footer}>
             {feedback ? <FormMessage tone={feedback.tone} message={feedback.message} /> : null}
 
             <PrimaryButton
@@ -141,8 +142,9 @@ export default function RegisterScreen() {
               {...loginLink.pressHandlers}
               style={loginLink.pressed && styles.pressed}
             >
-              <Text className="font-nunito-semibold text-[13px] text-text-subtle">
-                Van már fiókod? <Text className="font-nunito-bold text-green-700">Bejelentkezés</Text>
+              <Text style={styles.subtitle} className="font-nunito-semibold text-text-subtle">
+                Van már fiókod?{' '}
+                <Text className="font-nunito-bold text-green-700">Bejelentkezés</Text>
               </Text>
             </Pressable>
           </View>
@@ -153,14 +155,24 @@ export default function RegisterScreen() {
 }
 
 /** A design keretében a tartalom 72 / 26 / 32 px-re van a képernyő szélétől. */
-const BOTTOM_PADDING = 32;
+const BOTTOM_PADDING = s(32);
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: {
     flexGrow: 1,
-    paddingTop: 72,
-    paddingHorizontal: 26,
+    // iPaden középre igazított, korlátozott szélességű oszlop (D-035).
+    width: '100%',
+    maxWidth: contentMaxWidth,
+    alignSelf: 'center',
+    paddingTop: s(72),
+    paddingHorizontal: s(26),
   },
+  title: { fontSize: s(24) },
+  lead: { marginTop: s(4), fontSize: s(13) },
+  subtitle: { fontSize: s(13) },
+  form: { marginTop: s(24), gap: s(12) },
+  consent: { marginTop: s(18) },
+  footer: { marginTop: s(26), alignItems: 'center', gap: s(14) },
   pressed: { opacity: 0.6 },
 });

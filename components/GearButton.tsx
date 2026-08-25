@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { usePressed } from '@/hooks/usePressed';
 
@@ -36,35 +37,35 @@ export function GearButton({ onPress }: { onPress?: () => void }) {
 
 const styles = StyleSheet.create({
   button: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: s(34),
+    height: s(34),
+    borderRadius: s(34) / 2,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: shadows.chip,
   },
   pressed: { opacity: 0.6 },
-  gear: { width: 16, height: 16 },
+  gear: { width: s(16), height: s(16) },
   ring: {
     position: 'absolute',
-    top: 3,
-    right: 3,
-    bottom: 3,
-    left: 3,
-    borderRadius: 5,
-    borderWidth: 2,
+    top: s(3),
+    right: s(3),
+    bottom: s(3),
+    left: s(3),
+    borderRadius: s(5),
+    borderWidth: s(2),
     borderColor: colors.text.muted,
   },
   tooth: {
     position: 'absolute',
-    borderRadius: 1,
+    borderRadius: s(1),
     backgroundColor: colors.text.muted,
   },
-  toothVertical: { width: 3, height: 4, left: 6.5 },
-  toothHorizontal: { width: 4, height: 3, top: 6.5 },
-  toothTop: { top: -1 },
-  toothBottom: { bottom: -1 },
-  toothLeft: { left: -1 },
-  toothRight: { right: -1 },
+  toothVertical: { width: s(3), height: s(4), left: s(6.5) },
+  toothHorizontal: { width: s(4), height: s(3), top: s(6.5) },
+  toothTop: { top: -s(1) },
+  toothBottom: { bottom: -s(1) },
+  toothLeft: { left: -s(1) },
+  toothRight: { right: -s(1) },
 });

@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { gradients } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { usePressed } from '@/hooks/usePressed';
 
@@ -49,7 +50,9 @@ export function PrimaryButton({
         end={GRADIENT_END}
         style={styles.fill}
       >
-        <Text className="text-center font-baloo-extrabold text-[17px] text-white">{label}</Text>
+        <Text style={styles.label} className="text-center font-baloo-extrabold text-white">
+          {label}
+        </Text>
       </LinearGradient>
     </Pressable>
   );
@@ -66,11 +69,12 @@ const styles = StyleSheet.create({
   },
   fill: {
     borderRadius: 999,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: s(16),
+    paddingHorizontal: s(16),
     alignItems: 'center',
     justifyContent: 'center',
   },
+  label: { fontSize: s(17) },
   shadowPurple: { boxShadow: shadows.buttonPurple },
   shadowGreen: { boxShadow: shadows.buttonGreen },
   pressed: { opacity: 0.85 },

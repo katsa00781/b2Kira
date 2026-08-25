@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 
 type Twinkle = {
   top: number;
@@ -23,7 +24,8 @@ type Twinkle = {
 };
 
 /**
- * A pöttyök pozíciója képernyőnként más, ezért itt van preset-be szedve
+ * A pöttyök pozíciója képernyőnként más, ezért itt van preset-be szedve.
+ * Az értékek a design telefonméretében vannak; a nagyítás renderkor történik
  * (`00-teljes-canvas.html`, 1. és 3. képernyő). A `twinkle` keyframe
  * 0.35 → 1 → 0.35 opacitás, ezért a félidő animálódik oda-vissza.
  */
@@ -116,12 +118,12 @@ function TwinkleDot({ twinkle }: { twinkle: Twinkle }) {
       style={[
         styles.dot,
         {
-          top: twinkle.top,
-          left: twinkle.left,
-          right: twinkle.right,
-          width: twinkle.size,
-          height: twinkle.size,
-          borderRadius: twinkle.size / 2,
+          top: s(twinkle.top),
+          left: twinkle.left === undefined ? undefined : s(twinkle.left),
+          right: twinkle.right === undefined ? undefined : s(twinkle.right),
+          width: s(twinkle.size),
+          height: s(twinkle.size),
+          borderRadius: s(twinkle.size) / 2,
           backgroundColor: twinkle.color,
         },
         animatedStyle,

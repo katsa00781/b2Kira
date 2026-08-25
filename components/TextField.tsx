@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 
 type TextFieldProps = Omit<TextInputProps, 'placeholderTextColor'> & {
@@ -17,10 +18,12 @@ type TextFieldProps = Omit<TextInputProps, 'placeholderTextColor'> & {
  */
 export function TextField({ label, ...inputProps }: TextFieldProps) {
   return (
-    <View className="gap-[6px]">
-      <Text className="font-nunito-bold text-[12px] text-text-label">{label}</Text>
+    <View style={styles.field}>
+      <Text style={styles.label} className="font-nunito-bold text-text-label">
+        {label}
+      </Text>
       <TextInput
-        className="rounded-[14px] bg-white px-4 py-[14px] font-nunito-semibold text-[14px] text-text-body"
+        className="bg-white font-nunito-semibold text-text-body"
         placeholderTextColor={colors.text.placeholder}
         style={styles.input}
         {...inputProps}
@@ -30,5 +33,13 @@ export function TextField({ label, ...inputProps }: TextFieldProps) {
 }
 
 const styles = StyleSheet.create({
-  input: { boxShadow: shadows.input },
+  field: { gap: s(6) },
+  label: { fontSize: s(12) },
+  input: {
+    borderRadius: s(14),
+    paddingHorizontal: s(16),
+    paddingVertical: s(14),
+    fontSize: s(14),
+    boxShadow: shadows.input,
+  },
 });

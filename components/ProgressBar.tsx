@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
 import { colors, gradients } from '@/constants/colors';
+import { s } from '@/constants/layout';
 
 export type ProgressBarVariant = 'purple' | 'green';
 
@@ -39,7 +40,7 @@ const GRADIENT_END = { x: 1, y: 0 } as const;
 
 const styles = StyleSheet.create({
   track: {
-    height: 8,
+    height: s(8),
     borderRadius: 999,
     overflow: 'hidden',
   },

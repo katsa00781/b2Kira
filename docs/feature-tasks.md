@@ -141,6 +141,20 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 > **Teszt a gyerekkel:** ha csukott szemmel is tudja követni, jó. Ha nézni kell hozzá a
 > képernyőt, a hang túl halk vagy túl késői.
 
+## 7.5. iPad támogatás és fekvő tájolás
+
+- [x] `constants/layout.ts` – eszközfüggő nagyítás: `uiScale`, `s()`, `contentMaxWidth`
+- [x] Tipográfia és árnyékok a szorzóra kötve (`constants/typography.ts`, `constants/shadows.ts`)
+- [x] Komponensméretek és képernyő-paddingek átvezetve a szorzóra
+- [x] `app.json`: iPaden mind a négy tájolás, iPhone-on marad az álló zár
+- [x] `requireFullScreen` – nincs Split View, az ablak mindig a teljes képernyő
+- [x] A tartalomoszlop iPaden a design szélességére korlátozva, középre igazítva
+- [ ] Teszt éles iPad 6. generáción, fekvő és álló módban (TestFlight buildből)
+
+> **Teszt:** a gyakorlat képernyő fekvőben is elférjen vágás nélkül, és a doboz
+> érezhetően nagyobb legyen, mint telefonon. A telefonos megjelenés **ne**
+> változzon egy pixelt se.
+
 ## 8. Session mentés és offline sor
 
 - [ ] Gyakorlat végén `breathing_sessions` sor beszúrása
@@ -216,6 +230,83 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 7.5. iPad támogatás és fekvő tájolás
+
+**Mit:** Az app iPaden is használható, és iPaden **fekvő módban is** — ezt a
+gyerek kérte, mert fekve akarja használni. A telepítés TestFlighten keresztül
+lesz, a cél eszköz egy **6. generációs iPad** (1024×768 pt, iPadOS 17.7).
+
+A design egyetlen méretben készült (390 pt széles telefon, álló), ezért kellett
+egy skálázási réteg: az új `constants/layout.ts` a képernyő **rövidebb**
+oldalából számol egy `uiScale` szorzót, és minden méret az `s()` függvényen megy
+át — padding, betűméret, gap, légződoboz, karakter, árnyék-offset. Fekvő módban
+a rövidebb oldal a magasság, ezért abból számolunk (D-035). A szorzó modul
+szintű konstans, nem hook: forgatáskor **nem változik**, tehát a layout nem
+ugrik át más méretre, amikor a gyerek megfordítja a táblagépet. Telefonon a
+szorzó pontosan 1.0.
+
+A tartalom iPaden egy `contentMaxWidth` széles, középre igazított oszlopba
+került — enélkül fekvőben egy közel 1000 pt széles beviteli mező lenne.
+
+A tájolás iPhone-on marad álló (`orientation: "portrait"`), iPaden mind a négy
+irány engedélyezett az `ios.infoPlist` `UISupportedInterfaceOrientations~ipad`
+kulcsával (D-036). Emellett `requireFullScreen: true`, tehát iPaden nincs Split
+View — részben mert gyerekappnál nem szerencsés, részben mert így az ablak
+mérete garantáltan megegyezik a képernyőével, amire a szorzó épül (D-037).
+
+Az `app.json` megkapta a `bundleIdentifier`-t (`com.kacsorzsolt.dobozlegzes`),
+mert EAS buildhez és TestFlighthez kötelező. **Ha más bundle id kell, ez az
+egyetlen hely, ahol át kell írni** — még nem futott EAS build.
+
+**Fájlok:** constants/layout.ts (új), constants/typography.ts,
+constants/shadows.ts, components/BreathingBox.tsx, PhaseDots.tsx,
+ProgressBar.tsx, PauseButton.tsx, PrimaryButton.tsx, TextField.tsx,
+FormMessage.tsx, StreakChip.tsx, GearButton.tsx, LevelCard.tsx,
+CharacterPicker.tsx, Checkbox.tsx, ToggleRow.tsx, SegmentedChoice.tsx,
+Twinkles.tsx, app/session.tsx, app/(tabs)/index.tsx, app/(auth)/login.tsx,
+app/(auth)/register.tsx, app.json, docs/feature-tasks.md
+
+**Tesztelve:** iPad mini (A17 Pro) szimulátor, Expo Go, SDK 54.
+Az iPad mini rövidebb oldala 744 pt — **szigorúbb eset, mint a cél iPad 6**
+(768 pt), tehát ami itt elfér, ott is elfér.
+- **Álló mód:** a bejelentkező képernyő arányosan felnagyítva jelenik meg, a
+  tartalom középre igazított oszlopban (518 pt a 744-ből), a Bunny, a
+  tipográfia és a gombok együtt nőttek. Semmi nem lóg ki.
+- **Fekvő mód:** a készüléket elforgatva az app **együtt fordul** (a Simulator
+  ablaka 707×545-re vált, az app tartalma vele), tehát a `~ipad` tájolás
+  Expo Go-ban is érvényesül. A gyakorlat képernyő fekvőben **hiánytalanul
+  elfér**: vissza gomb, „2:09 maradt", „Lélegezz be" felirat, a narancs
+  légződoboz kerettel és a karakterrel, a négy fázispötty, a session sáv és a
+  „Szünet" gomb — a tartalom kb. 646 pt-ot foglal a 744-ből, semmi nem vágódik
+  le. A doboz kerete mérve ~302 pt (telefonon 220), tehát a nagyítás a
+  számított 1,329-es szorzót adja. Az iPad 6 szorzója 1,371 lesz, a gyakorlat
+  képernyő tartalma ott kb. 683 pt a 768-ból.
+- **iPhone 17 szimulátor:** a bejelentkező képernyő a régi, telefonos
+  méretében jelenik meg — teljes szélességű mezők, nincs oszlopkorlát. A
+  szorzó minden iPhone-on (SE 375, 17 402, Pro Max 440) pontosan 1.000, tehát
+  az `s()` az azonosság és egyetlen design érték sem változik.
+- `npm run typecheck` és `npm run lint` hibátlan. A Metro bundle (1585 modul)
+  hiba nélkül fordul.
+
+**Nyitva maradt:**
+- **Éles iPad 6-on még nincs kipróbálva** — a szimulátorlistában nincs ilyen
+  régi modell, ezért iPad minivel helyettesítettük. A 6. generációs iPad A10-es
+  processzora lassabb; a reanimated légzésanimáció UI szálon fut, tehát
+  elvben nem érintett, de **méréssel még nem igazoltuk**.
+- **TestFlighthez még hiányzik:** Apple Developer Program tagság, EAS build
+  konfiguráció (`eas.json`), és a `bundleIdentifier` jóváhagyása. EAS build
+  eddig egyáltalán nem futott ezen a projekten (lásd a 0. szakasz nyitott
+  pontját a Hermes export hibáról — az EAS saját toolchainnel fordít, ezért
+  ott várhatóan nem jelentkezik, de ez sincs igazolva).
+- Az `app.json` neve továbbra is `b2kira`, nem „Doboz Légzés". TestFlight
+  előtt érdemes átírni (ez a 0. szakasz óta nyitott pont).
+- A két `scratch-*` képernyő nem kapott skálázást — dev eszközök, a „Ship
+  előtt" listán amúgy is törlésre vannak jelölve.
+- A matrica- és beállítás képernyő (9. és 10. szakasz) még nem létezik; azokat
+  eleve `s()`-sel kell megírni.
+
+**Commit:** feat: iPad támogatás arányos nagyítással és fekvő tájolással
 
 ## 2026-08-25 – 7. Hang, beszéd, haptika
 
@@ -1339,3 +1430,73 @@ ennek nincs címzettje, a szülő úgyse látná.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 
+## D-035 – iPad: arányos nagyítás modul szintű szorzóval, nem hookkal
+
+**Dátum:** 2026-08-25
+**Döntés:** a design egyetlen méretben készült (390 pt széles telefon, álló).
+iPaden ezt **arányosan felnagyítjuk** egy `constants/layout.ts`-ben számolt
+`uiScale` szorzóval, és minden méret az `s()` függvényen megy át (padding,
+betűméret, doboz, karakter, árnyék-offset). A szorzó a képernyő **rövidebb**
+oldalából jön (`shortSide / 560`, 1.0 és 1.6 közé vágva), mert fekvő módban a
+rövidebb oldal a magasság — ott a legszűkebb a hely, nem a szélességnél.
+A tartalom ezen felül egy `contentMaxWidth` széles, középre igazított oszlopba
+kerül, hogy fekvőben ne legyen egy közel 1000 pt széles beviteli mező.
+**Miért modul szintű konstans és nem `useWindowDimensions` hook:** (1) így
+használható `StyleSheet.create`-ben, ami a fájlok betöltésekor fut egyszer;
+(2) a `Dimensions.get('screen')` rövidebb oldala forgatáskor nem változik, tehát
+a layout **nem ugrik át más méretre**, amikor a gyerek megfordítja a táblagépet;
+(3) nincs újrarenderelés forgatáskor. Telefonon a szorzó pontosan 1.0, tehát a
+telefonos megjelenés bitre változatlan.
+**Alternatíva 1:** a gyökér `View`-ra tett `transform: [{ scale }]` — sokkal
+kisebb diff lett volna, de a felskálázott réteg szövege elmosódik.
+**Alternatíva 2:** telefonszélességű oszlop középen, nagyítás nélkül — nulla
+design-eltérés, de iPaden minden apró marad, márpedig a gyerek pont azt nézi
+messziről. Elvetve.
+**Következmény:** a design px értékei sok helyen átkerültek NativeWind
+`className`-ből `StyleSheet`-be, mert egy `text-[22px]` osztály nem tud
+futásidőben skálázódni. Ez a CLAUDE.md styling szabályainak „runtime-ban
+számított dinamikus stílusok" kivétele alá esik.
+**Az `s()` szándékosan nem kerekít:** az első változat `Math.round`-ot használt,
+de a designban vannak törtértékek (a napi tipp `12.5`, a fogaskerék `6.5`), és
+azokat telefonon is átírta volna 13-ra, illetve 7-re. Kerekítés nélkül a
+szorzó 1.0 mellett az `s()` az azonosság, tehát a telefonos megjelenés
+igazolhatóan bitre változatlan. iPaden a törtpontos méret nem gond, a React
+Native subpixel elrendezést használ.
+**Visszavonható?** Igen: `MAX_SCALE = 1` mellett minden visszaáll a telefonos
+méretre, kódváltoztatás nélkül.
+
+## D-036 – Fekvő tájolás csak iPaden, iPhone-on marad az álló zár
+
+**Dátum:** 2026-08-25
+**Döntés:** iPaden mind a négy tájolás engedélyezett, iPhone-on marad a
+`portrait` zár. Megvalósítás: az `app.json` `orientation: "portrait"` mezője az
+iPhone-t zárja, az `ios.infoPlist` `UISupportedInterfaceOrientations~ipad`
+kulcsa pedig iPaden mind a négy irányt felsorolja. iOS a `~ipad` változatot
+részesíti előnyben táblagépen, tehát a kettő nem ütközik.
+**Miért:** a gyerek fekve, fekvő módban akarja használni az iPadet — ezt kérte
+a szülő. Telefon fekvő módra viszont a design nem készült: a 62–72 px-es felső
+padding és a függőleges stackek 390×844-ből 844×390-be nem férnek bele, az
+auth képernyők pedig előhívott billentyűzettel használhatatlanok lennének.
+**Alternatíva:** `orientation: "default"`, azaz mindenhol szabad forgatás —
+ehhez mind a hat képernyőnek kellene egy telefon-fekvő változat is. Ez a
+munkát megduplázná olyan esetre, amit senki nem használ.
+**Visszavonható?** Igen, egy sor az `app.json`-ban.
+
+## D-037 – iPaden nincs Split View (`requireFullScreen: true`)
+
+**Dátum:** 2026-08-25
+**Döntés:** az app iPaden mindig teljes képernyős, a többfeladatos Split View és
+Slide Over ki van kapcsolva.
+**Miért:** két oka van. Egy: gyerekappnál nem szerencsés, ha a gyakorlat közben
+félrehúzható és fél képernyőn fut — a légzőgyakorlat a teljes figyelmet kéri.
+Kettő: technikai — Split View-ban az **ablak** mérete eltér a **képernyő**
+méretétől, a D-035 szerinti szorzó viszont a képernyőből számol egyszer,
+betöltéskor. Teljes képernyős módban a kettő garantáltan megegyezik, tehát a
+nagyítás mindig helyes.
+**Alternatíva:** multitasking engedése és a szorzó `useWindowDimensions`-ből
+számolása. Működne, de forgatáskor és ablakméretezéskor újrarenderelne, és a
+D-035-ben leírt „ne ugorjon a layout" előny elveszne.
+**Mellékhatás:** az Expo alapból (multitasking mellett) magától beírja a négy
+iPad tájolást; `requireFullScreen: true` esetén ezt már **nekünk kell**
+megadnunk az `ios.infoPlist`-ben — ezért van ott kézzel (lásd D-036).
+**Visszavonható?** Igen, de akkor a szorzót hookra kell cserélni.

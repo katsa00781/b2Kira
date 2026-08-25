@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reani
 
 import { characterComponents } from '@/components/characters';
 import { colors, phaseBoxColors } from '@/constants/colors';
+import { s, uiScale } from '@/constants/layout';
 import { phaseBoxShadows } from '@/constants/shadows';
 import type { CharacterId } from '@/data/characters';
 
@@ -30,14 +31,19 @@ export const BreathingBox = memo(function BreathingBox({
 }: BreathingBoxProps) {
   const Character = characterComponents[characterId];
 
-  // méret = 100 + scale * 100 → 155 … 200, a radius a méret 22%-a
+  // A worklet a lokális konstanst zárja be, nem a modul importját.
+  const device = uiScale;
+
+  // méret = 100 + scale * 100 → 155 … 200 (iPaden arányosan nagyobb),
+  // a radius a méret 22%-a
   const boxStyle = useAnimatedStyle(() => {
-    const size = 100 + scale.value * 100;
+    const size = (100 + scale.value * 100) * device;
     return { width: size, height: size, borderRadius: size * 0.22 };
   });
 
+  // A légzés nagyítása és az eszköz nagyítása egymásra épül.
   const characterStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.value * device }],
   }));
 
   return (
@@ -65,7 +71,7 @@ export const BreathingBox = memo(function BreathingBox({
 const GRADIENT_START = { x: 0, y: 0 } as const;
 const GRADIENT_END = { x: 1, y: 1 } as const;
 
-const FRAME_SIZE = 220;
+const FRAME_SIZE = s(220);
 
 const styles = StyleSheet.create({
   root: {
@@ -78,8 +84,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: FRAME_SIZE,
     height: FRAME_SIZE,
-    borderRadius: 36,
-    borderWidth: 6,
+    borderRadius: s(36),
+    borderWidth: s(6),
     borderColor: colors.green['50'],
   },
   box: {

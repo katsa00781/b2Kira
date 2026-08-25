@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { usePressed } from '@/hooks/usePressed';
 
@@ -22,7 +23,7 @@ type ToggleRowProps = {
 };
 
 /** A kapcsoló gombjának útja: 44 − 2×3 padding − 20 gomb = 18 px. */
-const KNOB_TRAVEL = 18;
+const KNOB_TRAVEL = s(18);
 const DURATION = 200;
 
 /**
@@ -71,9 +72,13 @@ export function ToggleRow({
         pressed && styles.pressed,
       ]}
     >
-      <View className="gap-[2px]">
-        <Text className="font-nunito-bold text-[14px] text-text-body">{label}</Text>
-        <Text className="font-nunito-semibold text-[12px] text-text-subtle">{sub}</Text>
+      <View style={styles.texts}>
+        <Text style={styles.label} className="font-nunito-bold text-text-body">
+          {label}
+        </Text>
+        <Text style={styles.sub} className="font-nunito-semibold text-text-subtle">
+          {sub}
+        </Text>
       </View>
 
       <Animated.View style={[styles.track, trackStyle]}>
@@ -88,24 +93,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: s(14),
   },
+  texts: { gap: s(2) },
+  label: { fontSize: s(14) },
+  sub: { fontSize: s(12) },
   divider: {
     borderBottomWidth: 1,
     borderBottomColor: colors.purple['75'],
   },
   pressed: { opacity: 0.7 },
   track: {
-    width: 44,
-    height: 26,
+    width: s(44),
+    height: s(26),
     borderRadius: 999,
-    padding: 3,
+    padding: s(3),
     justifyContent: 'center',
   },
   knob: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: s(20),
+    height: s(20),
+    borderRadius: s(20) / 2,
     backgroundColor: colors.white,
     boxShadow: shadows.knob,
   },

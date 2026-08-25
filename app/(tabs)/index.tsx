@@ -13,6 +13,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { StreakChip } from '@/components/StreakChip';
 import { Twinkles } from '@/components/Twinkles';
 import { gradients } from '@/constants/colors';
+import { contentMaxWidth, s, uiScale } from '@/constants/layout';
 import { SESSIONS_PER_LEVEL, levelProgress } from '@/data/levels';
 import { tipOfTheDay } from '@/data/tips';
 import { activeStreakDays, useChildStore } from '@/store/useChildStore';
@@ -51,26 +52,26 @@ export default function HomeScreen() {
           <Text
             numberOfLines={1}
             style={styles.greeting}
-            className="font-baloo-bold text-[20px] text-text-heading"
+            className="font-baloo-bold text-text-heading"
           >
             Szia{name ? `, ${name}` : ''}! 🌸
           </Text>
-          <View className="flex-row items-center gap-[8px]">
+          <View style={styles.headerActions}>
             <StreakChip days={streak} />
             {/* A beállítások képernyő a 10. szakaszban készül el, addig nem visz sehova. */}
             <GearButton />
           </View>
         </View>
 
-        <View className="mt-[22px] items-center gap-[12px]">
-          <Character mood="happy" scale={1} />
-          <Text className="text-center font-baloo-bold text-[15px] text-text-heading">
+        <View style={styles.hero}>
+          <Character mood="happy" scale={uiScale} />
+          <Text style={styles.prompt} className="text-center font-baloo-bold text-text-heading">
             Készen állsz egy jó nagy levegőre?
           </Text>
           <CharacterPicker value={characterId} onChange={setCharacter} />
         </View>
 
-        <View className="mt-[22px]">
+        <View style={styles.levelCard}>
           <LevelCard
             level={level.level}
             levelName={level.name}
@@ -78,12 +79,12 @@ export default function HomeScreen() {
             goal={SESSIONS_PER_LEVEL}
           />
         </View>
-        <View className="mt-[8px]">
+        <View style={styles.levelProgress}>
           <ProgressBar progress={level.ratio} variant="purple" />
         </View>
 
-        <View className="mt-auto gap-[10px]">
-          <Text className="text-center font-nunito-semibold text-[12.5px] text-text-subtle">
+        <View style={styles.footer} className="mt-auto">
+          <Text style={styles.tip} className="text-center font-nunito-semibold text-text-subtle">
             Mai tipp: {tipOfTheDay()}
           </Text>
           <PrimaryButton
@@ -98,15 +99,26 @@ export default function HomeScreen() {
 }
 
 /** A design keretében a tartalom 62 / 22 / 28 px-re van a képernyő szélétől. */
-const BOTTOM_PADDING = 28;
+const BOTTOM_PADDING = s(28);
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   content: {
     flex: 1,
-    paddingTop: 62,
-    paddingHorizontal: 22,
+    // iPaden középre igazított, korlátozott szélességű oszlop (D-035).
+    width: '100%',
+    maxWidth: contentMaxWidth,
+    alignSelf: 'center',
+    paddingTop: s(62),
+    paddingHorizontal: s(22),
   },
   /** Hosszú név se tolja ki a streak chipet és a fogaskereket. */
-  greeting: { flexShrink: 1 },
+  greeting: { flexShrink: 1, fontSize: s(20) },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: s(8) },
+  hero: { marginTop: s(22), alignItems: 'center', gap: s(12) },
+  prompt: { fontSize: s(15) },
+  levelCard: { marginTop: s(22) },
+  levelProgress: { marginTop: s(8) },
+  footer: { gap: s(10) },
+  tip: { fontSize: s(12.5) },
 });

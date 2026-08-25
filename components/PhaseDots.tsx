@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { PHASE_COUNT, phaseLabels } from '@/data/phases';
 
 type PhaseDotsProps = {
@@ -32,12 +33,12 @@ export function PhaseDots({ phase }: PhaseDotsProps) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    gap: 8,
+    gap: s(8),
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: s(10),
+    height: s(10),
+    borderRadius: s(10) / 2,
   },
   dotActive: { backgroundColor: colors.green['700'] },
   dotInactive: { backgroundColor: colors.green['50'] },

@@ -1,4 +1,6 @@
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
+import { s } from '@/constants/layout';
 
 type FormMessageProps = {
   /** `error` – rózsaszín kártya; `success` – zöld kártya. */
@@ -16,10 +18,12 @@ export function FormMessage({ tone, message }: FormMessageProps) {
   return (
     <View
       accessibilityRole="alert"
-      className={`w-full rounded-[14px] px-4 py-[12px] ${isError ? 'bg-pink-150' : 'bg-green-100'}`}
+      style={styles.card}
+      className={isError ? 'bg-pink-150' : 'bg-green-100'}
     >
       <Text
-        className={`text-center font-nunito-semibold text-[12px] ${
+        style={styles.message}
+        className={`text-center font-nunito-semibold ${
           isError ? 'text-pink-600' : 'text-green-700'
         }`}
       >
@@ -28,3 +32,13 @@ export function FormMessage({ tone, message }: FormMessageProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: '100%',
+    borderRadius: s(14),
+    paddingHorizontal: s(16),
+    paddingVertical: s(12),
+  },
+  message: { fontSize: s(12) },
+});

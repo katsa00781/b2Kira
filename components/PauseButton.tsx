@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { gradients } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { usePressed } from '@/hooks/usePressed';
 
@@ -34,7 +35,9 @@ export function PauseButton({ paused, onPress }: PauseButtonProps) {
         end={GRADIENT_END}
         style={styles.fill}
       >
-        <Text className="text-center font-baloo-extrabold text-[15px] text-white">{label}</Text>
+        <Text style={styles.label} className="text-center font-baloo-extrabold text-white">
+          {label}
+        </Text>
       </LinearGradient>
     </Pressable>
   );
@@ -52,10 +55,11 @@ const styles = StyleSheet.create({
   },
   fill: {
     borderRadius: 999,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: s(14),
+    paddingHorizontal: s(14),
     alignItems: 'center',
     justifyContent: 'center',
   },
+  label: { fontSize: s(15) },
   pressed: { opacity: 0.85 },
 });

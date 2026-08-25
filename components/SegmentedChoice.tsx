@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { usePressed } from '@/hooks/usePressed';
 
@@ -28,7 +29,7 @@ export function SegmentedChoice<T extends string | number>({
   onChange,
 }: SegmentedChoiceProps<T>) {
   return (
-    <View className="flex-row gap-[8px]">
+    <View style={styles.row}>
       {options.map((option) => (
         <Segment
           key={option.value}
@@ -61,8 +62,8 @@ function Segment({ label, selected, onSelect }: SegmentProps) {
       style={[styles.item, selected ? styles.itemSelected : styles.itemIdle, pressed && styles.pressed]}
     >
       <Text
-        className="text-center font-nunito-bold text-[13px]"
-        style={{ color: selected ? colors.white : colors.text.muted }}
+        className="text-center font-nunito-bold"
+        style={[styles.label, { color: selected ? colors.white : colors.text.muted }]}
       >
         {label}
       </Text>
@@ -73,10 +74,12 @@ function Segment({ label, selected, onSelect }: SegmentProps) {
 const HIT_SLOP = { top: 4, bottom: 4 } as const;
 
 const styles = StyleSheet.create({
+  row: { flexDirection: 'row', gap: s(8) },
+  label: { fontSize: s(13) },
   item: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
+    paddingVertical: s(10),
+    borderRadius: s(12),
   },
   itemSelected: {
     backgroundColor: colors.purple['600'],

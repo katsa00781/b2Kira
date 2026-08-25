@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import type { Character, CharacterId } from '@/data/characters';
 import { characters } from '@/data/characters';
@@ -70,11 +71,11 @@ function CharacterChip({ character, selected, onSelect }: CharacterChipProps) {
 const GRADIENT_START = { x: 0, y: 0 } as const;
 const GRADIENT_END = { x: 1, y: 1 } as const;
 
-const CHIP_SIZE = 36;
-const BORDER_WIDTH = 3;
+const CHIP_SIZE = s(36);
+const BORDER_WIDTH = s(3);
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 10 },
+  row: { flexDirection: 'row', gap: s(10) },
   chip: {
     width: CHIP_SIZE,
     height: CHIP_SIZE,

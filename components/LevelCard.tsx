@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, gradients } from '@/constants/colors';
+import { s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 
 type LevelCardProps = {
@@ -29,10 +30,10 @@ export function LevelCard({ level, levelName, done, goal }: LevelCardProps) {
       </LinearGradient>
 
       <View style={styles.texts}>
-        <Text className="font-baloo-extrabold text-[14px] text-text-heading">
+        <Text style={styles.title} className="font-baloo-extrabold text-text-heading">
           {level}. szint — {levelName}
         </Text>
-        <Text className="font-nunito-semibold text-[12px] text-text-subtle">
+        <Text style={styles.subtitle} className="font-nunito-semibold text-text-subtle">
           {done}/{goal} gyakorlat a következő matricáig
         </Text>
       </View>
@@ -48,26 +49,28 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: s(12),
     backgroundColor: colors.white,
-    borderRadius: 20,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
+    borderRadius: s(20),
+    paddingVertical: s(16),
+    paddingHorizontal: s(18),
     boxShadow: shadows.card,
   },
+  title: { fontSize: s(14) },
+  subtitle: { fontSize: s(12) },
   badge: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: s(44),
+    height: s(44),
+    borderRadius: s(14),
     alignItems: 'center',
     justifyContent: 'center',
   },
   badgeBox: {
-    width: 18,
-    height: 18,
-    borderRadius: 6,
-    borderWidth: 3,
+    width: s(18),
+    height: s(18),
+    borderRadius: s(6),
+    borderWidth: s(3),
     borderColor: colors.white,
   },
-  texts: { flex: 1, gap: 2 },
+  texts: { flex: 1, gap: s(2) },
 });
