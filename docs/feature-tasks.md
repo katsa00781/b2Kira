@@ -271,11 +271,14 @@ lejátszási lánc két valódi törékenységét (D-048):
    `expo-speech` ugyanazt a megosztott iOS audio session-t használja, tehát a
    beszédre is hatással van.
 
-**Fájlok:** lib/devWarn.ts (új), lib/feedbackDiagnostics.ts (új), lib/sounds.ts,
-lib/haptics.ts, lib/speech.ts, hooks/useSessionFeedback.ts, docs/feature-tasks.md
+**Fájlok:** lib/devWarn.ts (új), lib/sounds.ts, lib/haptics.ts, lib/speech.ts,
+hooks/useSessionFeedback.ts, CLAUDE.md, docs/feature-tasks.md
 
-**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. **A javítás
-eszközön még nincs igazolva** — a diagnosztika kimenete kell hozzá.
+**Tesztelve:** fizikai iPhone-on, Expo Go alatt, több cikluson át. A trace
+szerint a fázisváltás 4 másodpercenként pontosan elsül, a lejátszó valóban szól
+(`szól=true`, `időzár=playing`), és a beszéd le is fut (`onStart` → `onDone`).
+A `.playback` kategóriára váltás után **a szülő meg is hallotta a hangot és a
+magyar beszédet**. `npm run typecheck` és `npm run lint` hibátlan.
 
 **Nyitva maradt:**
 - **A gyökérok nincs megerősítve.** A következő lépés: elindítani a gyakorlatot
@@ -336,7 +339,34 @@ a `lib/feedbackDiagnostics.ts`-ben): a fázishangok 0,34 mp-esek, annyi idő
 alatt az iOS hangerő-HUD-ja fel se jön, tehát gyakorlat közben a média csúszka
 állását nem lehet ellenőrizni. A hangpróba 6 mp-ig, teljes hangerőn szól.
 
-**Ami nyitva maradt:** a rezgés. A telefon hangerő-állításkor rezeg,
+### Lezárás: a telefon néma módban volt
+
+A `__DEV__`-ben futtatott kísérlet (`playsInSilentMode: true`, tehát `.playback`
+kategória `.ambient` helyett) egy körben eldöntötte: **azonnal megjött a hang**.
+A telefon néma módban volt, és az `.ambient` kategóriát az iOS néma kapcsolója
+elnémítja — a hangeffektet és a beszédet is, mert az `expo-speech` ugyanazt a
+megosztott session-t használja. A lejátszó ettől még `playing`-et jelent, a
+média hangerő-csúszka is feljön, és a hangerő-HUD áthúzott csengője is
+megtévesztő volt: mindez néma módban is pontosan így néz ki. **Kódhiba nem
+volt.**
+
+A szülő döntése nyomán (2026-08-26) a szabály megváltozott: az app mostantól
+**néma módban is szól** (D-049). A `CLAUDE.md` „Hang, beszéd, haptika"
+szakasza ennek megfelelően át lett írva.
+
+A rezgés ugyanennek a következménye: iOS-en néma módban a rendszerszintű
+„Rezgés" beállítás dönt, és ha az tiltja, az `expo-haptics` hívás hibátlanul
+lefut, mégsem érezni semmit. Ezt az app nem tudja felülírni, és nem is
+próbálja — a `lib/haptics.ts` fejléce ezt most már pontosan írja le.
+
+**A diagnosztika visszavéve.** A `lib/feedbackDiagnostics.ts`, a hurkolt
+hangpróba, a fázisszintű nyomkövetés és a `devLog` törölve — a hiba megvan, és
+a CLAUDE.md az egyszerűséget kéri. Ha újra kell, a git history-ból előhozható
+(`a723309`, `cce941a`). **Ami maradt, mert önmagában is jobb:** a `devWarn`
+(`__DEV__`-ben látszik, ami élesben némán bukik) és a `prepareSounds()`
+előtöltés.
+
+**Ami nyitva maradt:** semmi lényeges. A telefon hangerő-állításkor rezeg,
 tehát a Taptic Engine működik, és az `impactAsync` sem dob hibát — de a
 gyakorlat alatt nem érezhető. Ennek a mérésére került be a fázisszintű
 nyomkövetés (`devLog`): a fázisváltás minden lépése, a `play()` utáni tényleges
@@ -2025,5 +2055,29 @@ localhoston (szimulátor) sosem jelentkezik.
 jó okkal: a gyakorlat képernyőn a hibaüzenetnek nincs címzettje.
 **Visszavonható?** Igen. A diagnosztika ideiglenes, a gyökérok megerősítése
 után törölhető; a `devWarn` és az előtöltés viszont maradjon.
+
+## D-049 – Az app néma módban is szól
+
+**Dátum:** 2026-08-26
+**Döntés:** az audio session `playsInSilentMode: true` (iOS `.playback`
+kategória), tehát a hangeffekt **és** a magyar beszéd a néma kapcsoló ellenére
+is hallható. Ez tudatos eltérés a CLAUDE.md eredeti szabályától („néma módban a
+hang ne szóljon"), a `CLAUDE.md` szövege át is lett írva.
+**Miért:** a szabályt eredetileg úgy fogalmaztuk meg, mintha játékhangokról
+lenne szó. A gyakorlatban viszont az derült ki, hogy néma módban a gyerek a
+**vezető magyar hangot** is elveszíti, magyarázat nélkül — az `expo-speech`
+ugyanazt a megosztott iOS audio session-t használja, mint a hangeffektek. Egy
+logopédus által kiadott, hanggal vezetett légzőgyakorlatnál ez nem apró
+kényelmetlenség: a szülő nem tudja, miért néma az app, a gyerek meg csak annyit
+tapasztal, hogy nem szól hozzá senki.
+**Alternatíva 1:** maradni a néma működésnél, és a szülőre bízni, hogy csengő
+módba tegye a telefont — elvetve, mert semmi nem jelzi neki, hogy ez a baj.
+**Alternatíva 2:** csak a beszéd szóljon néma módban, a hangeffekt ne — **nem
+megvalósítható** tisztán: a két csatorna ugyanazon az audio session-ön osztozik,
+a néma kapcsoló állását pedig Expo Go-ban JS-ből nem lehet lekérdezni.
+**Következmény:** ha a szülő azért némította le a telefont, mert csendet akar,
+az app ettől még megszólal. Ezt a beállításokban tudja kezelni: a „Hangeffektek"
+és a „Hangos útmutatás" kapcsoló külön-külön kikapcsolható.
+**Visszavonható?** Igen, egyetlen mező a `lib/sounds.ts`-ben.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

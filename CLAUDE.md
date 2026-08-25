@@ -256,7 +256,12 @@ Szabályok:
   Új fázis előtt mindig `Speech.stop()`, hogy ne torlódjanak.
 - Mindhárom külön kapcsolható a beállításokban, és a kapcsoló azonnal érvényes —
   ne kelljen újraindítani a gyakorlatot.
-- Néma módban (iOS silent switch) a hang ne szóljon, de a haptika igen.
+- **Néma módban is szól** (iOS silent switch): az audio session `.playback`
+  kategóriát kap (`playsInSilentMode: true`). A vezető hang a gyakorlat része, nem
+  játékhang — a gyerek ne veszítse el csak azért, mert a szülő telefonja néma volt.
+  Ha a szülő csendet akar, a beállításokban külön kikapcsolhatja. Lásd D-049.
+- A rezgés iOS-en néma módban a rendszer „Rezgés” beállításán múlik; ezt az app
+  nem tudja felülírni, és nem is próbálja.
 
 ---
 

@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 
 import { phaseLabels } from '@/data/phases';
-import { devLog } from '@/lib/devWarn';
-import { logFeedbackDiagnostics } from '@/lib/feedbackDiagnostics';
 import { impactLight, impactMedium, notifySuccess } from '@/lib/haptics';
 import { playPhaseSound, prepareSounds, releaseSounds } from '@/lib/sounds';
 import { speak, stopSpeaking } from '@/lib/speech';
@@ -35,10 +33,6 @@ export function useSessionFeedback(phase: number, active: boolean): void {
 
     const { soundOn, voiceOn, hapticsOn } = useSettingsStore.getState();
 
-    // Fejlesztői mérés: enélkül nem látszik, hogy a fázisváltás egyáltalán
-    // elsül-e az eszközön, vagy csak a megszólalás marad el.
-    devLog('fázis', `${phase} · hang=${soundOn} beszéd=${voiceOn} rezgés=${hapticsOn}`);
-
     if (hapticsOn) {
       // A belégzés indítja a ciklust, ezért az erősebb.
       if (phase === 0) {
@@ -63,7 +57,6 @@ export function useSessionFeedback(phase: number, active: boolean): void {
   // A képernyő elhagyásakor ne beszéljen tovább, és a lejátszók is dőljenek le.
   useEffect(() => {
     void prepareSounds();
-    void logFeedbackDiagnostics();
 
     return () => {
       stopSpeaking();

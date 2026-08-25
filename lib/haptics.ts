@@ -1,6 +1,8 @@
 /**
  * Haptikus visszajelzés (CLAUDE.md „Hang, beszéd, haptika”).
- * Minden hívás néma módban is megy — a rezgés nem függ a néma kapcsolótól.
+ * A rezgés nem a mi audio session-ünkön múlik, hanem az iOS rendszerszintű
+ * „Rezgés” beállításán: ha az néma módban tiltva van, a hívás hibátlanul
+ * lefut, és mégsem érezni semmit. Ezt az app nem tudja felülírni.
  *
  * A `expo-haptics` nem minden eszközön (szimulátor, web, olcsóbb Android)
  * érhető el, ezért minden hívás elnyeli a hibát: a gyakorlat sose álljon meg
