@@ -19,10 +19,18 @@ import { phaseSounds } from '@/constants/sounds';
 import { isTablet } from '@/constants/layout';
 import { useSettingsStore } from '@/store/useSettingsStore';
 
-import { ensureAudioMode, loadedPlayers } from './sounds';
+import { devLog } from './devWarn';
+import { ensureAudioMode, loadedPlayers, playTestTone } from './sounds';
 
 /** Ennyi idő alatt egy pár kilobájtos WAV-nak le kell jönnie a dev szerverről. */
 const DELAY_MS = 3000;
+
+/**
+ * Hurkolt hangpróba a késleltetett mérés után. Ha a hang megvan és nem tér
+ * vissza, ez az első, ami törölhető.
+ */
+const TEST_TONE = true;
+const TEST_TONE_MS = 6000;
 
 export async function logFeedbackDiagnostics(): Promise<void> {
   if (!__DEV__) {
@@ -72,6 +80,14 @@ async function logSecondPass(): Promise<void> {
   }
 
   console.log(`[visszajelzés-teszt · ${DELAY_MS / 1000} mp múlva]\n  ${lines.join('\n  ')}`);
+
+  if (TEST_TONE) {
+    devLog(
+      'hangpróba',
+      `MOST ${TEST_TONE_MS / 1000} mp-ig szól egy hurkolt hang teljes hangerőn — nyomd meg közben a hangerő gombot, és nézd meg, a MÉDIA csúszka jön-e fel, és hol áll`
+    );
+    playTestTone(TEST_TONE_MS);
+  }
 }
 
 async function checkAudio(): Promise<string> {

@@ -311,7 +311,32 @@ session-t használja. Ez tehát **szabályos működés**, nem hiba: a CLAUDE.md
 kifejezetten ezt kéri, és a szülő 2026-08-25-én meg is erősítette, hogy a
 szabály maradjon.
 
-**Ami emiatt nyitva maradt:** a rezgés. A telefon hangerő-állításkor rezeg,
+**Ez a magyarázat viszont megdőlt:** a szülő szerint a telefon nem volt néma
+módban. A hangerő-HUD áthúzott csengője a **csengőhangerőt** mutatja nullán,
+az pedig a médiacsatornát nem érinti — az `.ambient` lejátszás a média
+csúszkán szól.
+
+### A fázisszintű nyomkövetés eredménye: az app oldala hibátlan
+
+A trace az eszközön, több cikluson át, hiánytalan: 4 másodpercenként pontosan
+elsül a fázisváltás (`[fázis] 0 → 1 → 2 → 3`, mind a három kapcsoló `true`),
+a lejátszó **valóban szól** (`szól=true`, `időzár=playing`, `várakozás=unknown`),
+és a beszéd nemcsak elindul, hanem le is fut (`onStart` → `onDone` minden
+mondatra). Tehát nincs kódhiba a visszajelzési láncban: a hang elhagyja az
+appot, és az iOS némítja el a kimenet előtt.
+
+Amit a trace **nem tud** megkülönböztetni: néma kapcsoló, nullán álló
+médiahangerő és máshova (Bluetooth) irányított kimenet — mindhárom esetben a
+lejátszó ugyanígy `playing`-et jelent, és a beszéd ugyanígy `onDone`-nal zárul.
+Kimeneti útvonalat és rendszerhangerőt az `expo-audio` nem ad vissza, Expo
+Go-ban pedig natív modult nem lehet alátenni.
+
+Ezért került be a **hurkolt hangpróba** (`playTestTone`, `TEST_TONE` kapcsoló
+a `lib/feedbackDiagnostics.ts`-ben): a fázishangok 0,34 mp-esek, annyi idő
+alatt az iOS hangerő-HUD-ja fel se jön, tehát gyakorlat közben a média csúszka
+állását nem lehet ellenőrizni. A hangpróba 6 mp-ig, teljes hangerőn szól.
+
+**Ami nyitva maradt:** a rezgés. A telefon hangerő-állításkor rezeg,
 tehát a Taptic Engine működik, és az `impactAsync` sem dob hibát — de a
 gyakorlat alatt nem érezhető. Ennek a mérésére került be a fázisszintű
 nyomkövetés (`devLog`): a fázisváltás minden lépése, a `play()` utáni tényleges

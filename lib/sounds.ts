@@ -124,3 +124,40 @@ export function ensureAudioMode(): Promise<void> {
 
   return audioModePromise;
 }
+
+/**
+ * Fejlesztői hangpróba: hurkolt, teljes hangerejű lejátszás `durationMs`-ig.
+ *
+ * A fázishangok 0,34 mp-esek — annyi idő alatt az iOS hangerő-HUD-ja fel se
+ * jön, tehát a **média** csúszka állását nem lehet ellenőrizni gyakorlat
+ * közben. Ez a hurok elég hosszú hozzá. Csak `__DEV__`-ben szól.
+ */
+export function playTestTone(durationMs: number): void {
+  if (!__DEV__) {
+    return;
+  }
+
+  const player = getPlayer('exhale');
+  if (!player) {
+    return;
+  }
+
+  try {
+    player.loop = true;
+    player.volume = 1;
+    player.seekTo(0).catch((error: unknown) => devWarn('hang', error));
+    player.play();
+
+    setTimeout(() => {
+      try {
+        player.pause();
+        player.loop = false;
+        player.volume = VOLUME;
+      } catch (error) {
+        devWarn('hang', error);
+      }
+    }, durationMs);
+  } catch (error) {
+    devWarn('hang', error);
+  }
+}
