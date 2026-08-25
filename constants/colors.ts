@@ -17,6 +17,14 @@ export const phaseColors = [
   palette.blue['300'], // 3 – Tartsd
 ] as const;
 
+/**
+ * A légződoboz gradiense fázisonként: `linear-gradient(135deg, {szín}CC, {szín})`
+ * (`docs/design-tokens.md`). A `CC` = 80% átlátszatlanság, 8 jegyű hex.
+ */
+export const phaseBoxColors = phaseColors.map(
+  (color) => [`${color}CC`, color] as readonly [string, string]
+);
+
 /** Gradiensek `expo-linear-gradient`-hez: colors + locations párban. */
 export const gradients = {
   /** Bejelentkezés, Kezdőképernyő háttere */
@@ -47,6 +55,14 @@ export const gradients = {
   },
   /** Session progress bar kitöltése */
   sessionProgress: {
+    colors: [palette.green['300'], palette.green['500']] as const,
+  },
+  /** „Szünet" gomb a gyakorlat képernyőn */
+  pauseButton: {
+    colors: [palette.blue['300'], palette.green['500']] as const,
+  },
+  /** „Folytatás" gomb a gyakorlat képernyőn */
+  resumeButton: {
     colors: [palette.green['300'], palette.green['500']] as const,
   },
 } as const;

@@ -115,16 +115,16 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 6. Légzőgyakorlat (4. képernyő) — **a projekt szíve**
 
-- [ ] `hooks/useBreathingCycle.ts` – Reanimated shared value, 4×4 mp, `withRepeat`
-- [ ] `components/BreathingBox.tsx` – animált méret, radius és szín
-- [ ] `components/PhaseDots.tsx`
-- [ ] Karakter a doboz fölött, **ugyanabból** a shared value-ból skálázva
-- [ ] Fázisfelirat váltása
-- [ ] Session timer, hátralévő idő `m:ss`, alsó progress bar
-- [ ] Szünet / Folytatás – ott áll meg, ahol van
-- [ ] `expo-keep-awake` a gyakorlat alatt
-- [ ] `AppState` háttérbe kerüléskor automatikus szünet
-- [ ] Vissza gomb: megerősítés nélkül kilép, a részleges session elmentődik
+- [x] `hooks/useBreathingCycle.ts` – Reanimated shared value, 4×4 mp, `withRepeat`
+- [x] `components/BreathingBox.tsx` – animált méret, radius és szín
+- [x] `components/PhaseDots.tsx`
+- [x] Karakter a doboz fölött, **ugyanabból** a shared value-ból skálázva
+- [x] Fázisfelirat váltása
+- [x] Session timer, hátralévő idő `m:ss`, alsó progress bar
+- [x] Szünet / Folytatás – ott áll meg, ahol van
+- [x] `expo-keep-awake` a gyakorlat alatt
+- [x] `AppState` háttérbe kerüléskor automatikus szünet
+- [x] Vissza gomb: megerősítés nélkül kilép, a részleges session elmentődik
 
 > **Teszt:** 5 percen át fusson, és a 4-4-4-4 ritmus a végén is pontos legyen.
 > Ha csúszik, az animáció valahol React state-en megy át — javítsd.
@@ -216,6 +216,59 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 6. Légzőgyakorlat (4. képernyő)
+
+**Mit:** Elkészült a projekt szíve: az élő 4-4-4-4 gyakorlat a canvas 4.
+képernyője alapján. A ritmust egyetlen lineáris „ciklus-óra" hajtja a UI
+szálon (`useBreathingCycle`, shared value 0 → 16 mp), és **ebből az egyetlen
+értékből** jön a doboz mérete, a radiusa és a karakter nagyítása is, így nem
+tudnak elcsúszni (D-027). React state-be csak a fázisindex kerül, 16 mp-enként
+négyszer — ez váltja a feliratot, a doboz színét és a pöttyöket.
+
+A visszaszámláló külön hook (`useSessionTimer`), és időbélyegből számol, nem a
+tickeket adja össze, így egy akadó tick nem csúsztatja el a végét. A `Szünet`
+`cancelAnimation`-nel ott állítja meg az animációt, ahol van, a `Folytatás`
+pedig a megkezdett ciklust futtatja végig, és csak utána tér vissza a ciklus
+elejére — nem ugrik vissza a fázis elejére.
+
+A lezárt gyakorlatok lokálisan mentődnek (`store/useSessionStore.ts`, persist
+AsyncStorage-dzsel) — a részleges is, megerősítő kérdés nélkül, a képernyő
+elhagyásakor. A befejezett gyakorlat lépteti a `useChildStore`
+`completedSessions` és `streakDays` értékét is, így a kezdőképernyő
+szintkártyája és a streak chip végre él (D-030). A feltöltés a 8. szakaszé,
+addig a sor csak gyűlik. Új dependency: `expo-keep-awake` (a feladatlista
+6. szakasza nevezi meg — D-031).
+
+**Fájlok:** app/session.tsx, hooks/useBreathingCycle.ts, hooks/useSessionTimer.ts,
+components/BreathingBox.tsx, components/PhaseDots.tsx, components/PauseButton.tsx,
+data/phases.ts, data/sessionLengths.ts, store/useSessionStore.ts,
+store/useChildStore.ts, constants/colors.ts, constants/shadows.ts,
+package.json, docs/feature-tasks.md
+
+**Tesztelve:** iOS szimulátor (iPhone 17, iOS 26), Expo Go, képernyőképekkel
+ellenőrizve: mind a négy fázis a helyes színnel és felirattal, a doboz 155 →
+200 px között lélegzik a 220-as kereten belül, a karakter vele skálázódik, a
+pöttyök követik a fázist. **A ritmus pontos:** 48 mp (3 teljes ciklus) múlva
+ugyanaz a fázis és ugyanaz a dobozméret, csúszás nélkül. A szünet a pink
+„Tartsd" fázisban megállt (doboz és sáv befagyott, a gomb „Folytatás" lett),
+folytatáskor onnan ment tovább. Háttérbe küldés (Beállítások app) →
+visszatéréskor szünetel. A lezárás naplózva: befejezett gyakorlat
+`completed:true` + gyerek profil léptetve, kilépéskor 8 mp-es `completed:false`
+sor a lokális sorban. `npm run typecheck` és `npm run lint` hibátlan.
+
+**Nyitva maradt:**
+- **Hang, beszéd, haptika még nincs** (7. szakasz) — a fázisváltás pillanata
+  ott van a kódban (`phase` state), csak rá kell akasztani.
+- A gyakorlat hossza fixen 150 mp; a választó a 10. szakaszban jön
+  (`data/sessionLengths.ts` már megvan, a három opcióval).
+- A gyakorlat végén nincs ünneplés, csak visszalép a kezdőképernyőre (D-029) —
+  a matrica-ünneplés a 9. szakasz feladata.
+- Éles iPhone-on (nem szimulátoron) még nincs megnézve, és a feladatlista
+  5 perces futásteszt-e sem futott végig — a 48 mp-es mérés viszont pontos volt.
+- A két scratch képernyő (`scratch-characters`, `scratch-ui`) mostantól nem
+  érhető el sehonnan, mert a placeholder linkjei eltűntek a `session.tsx`-ből.
+  Ship előtt törlendők.
 
 ## 2026-08-25 – fix: a `Pressable` `style` függvényét elnyeli a NativeWind
 
@@ -1107,6 +1160,81 @@ működő projektben.
 **Visszavonható?** Igen, de csak akkor érdemes, ha a NativeWind javítja az
 interopot — addig a függvény alakú `style` visszatérése azonnal láthatatlan
 UI-t okoz.
+
+## D-027 – Egyetlen lineáris ciklus-óra hajtja a légzést
+
+**Dátum:** 2026-08-25
+**Döntés:** a `useBreathingCycle` egy darab shared value-t futtat 0-tól 16-ig
+egyenletesen (`withTiming` + `Easing.linear`, majd `withRepeat`), és ebből
+`interpolate`-tel jön a `scale`, egy osztással pedig a fázisindex. A doboz
+mérete, a radiusa és a karakter nagyítása mind ennek az egy értéknek a
+származéka.
+**Miért:** így fizikailag lehetetlen, hogy a doboz és a karakter elcsússzon
+egymástól vagy a fázisfelirattól, és a 4-4-4-4 ütem egyetlen helyen van
+leírva. A szünet is triviális: `cancelAnimation` megállítja az órát ott,
+ahol épp van, a folytatás pedig a hátralévő időre indít újra.
+**Alternatíva:** négy külön `withTiming` egy `withSequence`-ben, fázisonként
+külön callbackkel. Fázisonként olvashatóbb lenne, de a szünet és a folytatás
+kezelése („melyik fázis közepén álltunk meg?") jóval bonyolultabb, és a
+fázisváltás idejét külön kellene nyilvántartani.
+**Visszavonható?** Igen, a hook cseréje elég — a képernyő csak `scale`-t és
+`phase`-t lát belőle.
+
+## D-028 – A karaktert `Animated.View` skálázza, nem a `scale` propja
+
+**Dátum:** 2026-08-25
+**Döntés:** a gyakorlat képernyőn a karakter `scale={1}` propot kap, és egy
+köré tett `Animated.View` végzi a nagyítást a közös shared value-ból.
+**Miért:** a `CharacterProps.scale` sima `number`, azaz React state-en
+keresztül frissülne — másodpercenként 60 újrarenderelés, pont az, amit a
+`CLAUDE.md` tilt. Az `Animated.View` transzformja a UI szálon fut, és
+ugyanazt a látványt adja (a karakter a saját középpontja körül nagyítódik).
+**Alternatíva:** a `scale` prop `SharedValue`-vá alakítása mind a négy
+karakterben. Az egész karakterkészletet át kellene írni, a kezdőképernyőn
+viszont sima számra van szükség — két alak, két hibalehetőség.
+**Visszavonható?** Igen, de nincs rá ok.
+
+## D-029 – A gyakorlat vége egyelőre csak visszalépés
+
+**Dátum:** 2026-08-25
+**Döntés:** amikor letelik az idő, a gyakorlat lezárul, elmentődik, és a
+képernyő visszalép a kezdőképernyőre. Nincs záró képernyő, nincs modal.
+**Miért:** a designban nincs záró állapot, a `CLAUDE.md` szerint pedig nem
+approximálunk engedély nélkül. Az ünneplő visszajelzés amúgy is a 9. szakasz
+feladata (matrica feloldás), ott lesz mihez kötni.
+**Alternatíva:** saját ünneplő képernyő már most. Kockázat, hogy a 9.
+szakaszban kétféle záró élmény lenne, és hogy olyan szöveget találnánk ki,
+ami teljesítményérzetet kelt a gyerekben.
+**Visszavonható?** Igen, egyetlen `useEffect` az `app/session.tsx`-ben.
+
+## D-030 – A lezárt gyakorlatok lokális sora és a gyerek profil léptetése
+
+**Dátum:** 2026-08-25
+**Döntés:** a `store/useSessionStore.ts` egy `pending` tömbben tárolja a
+lezárt gyakorlatokat (`id`, `startedAt`, `durationSeconds`, `cyclesCompleted`,
+`completed`, `characterId`), lokális id-val. A befejezett gyakorlat ugyanitt
+lépteti a `useChildStore` `completedSessions` / `streakDays` értékét is.
+**Miért:** a mezők a `breathing_sessions` tábla alakját követik, így a 8.
+szakasz szinkronja már csak egy `insert` lesz, a lokális id pedig eleve a
+duplikáció elleni védelem. A store-ból hívott store-hívás azért van, mert a
+„befejeztem egy gyakorlatot" egyetlen esemény — a képernyőnek nem kell két
+külön lépést helyes sorrendben meghívnia.
+**Alternatíva:** (1) a képernyő hívja mindkét store-t — a második hívás
+könnyen elmaradna a 8–10. szakaszban; (2) minden a child store-ban — akkor a
+szinkronizálandó sor és a gyerek profilja keveredne össze.
+**Visszavonható?** Igen, a `pending` sorai még nem mentek fel sehova.
+
+## D-031 – `expo-keep-awake` a gyakorlat idejére
+
+**Dátum:** 2026-08-25
+**Döntés:** hozzáadtuk az `expo-keep-awake` csomagot, és a gyakorlat képernyő
+a `useKeepAwake()` hookkal tartja ébren a kijelzőt.
+**Miért:** a gyerek 2,5 percig nem nyúl a képernyőhöz, az iOS pedig alapból
+elsötétítené — pont a vizuális vezetés veszne el. A feladatlista 6. szakasza
+eleve ezt a csomagot nevezi meg.
+**Alternatíva:** globális `activateKeepAwakeAsync` az app indulásakor —
+felesleges akkumulátorhasználat az összes többi képernyőn.
+**Visszavonható?** Igen, a hook egyetlen sor.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
 

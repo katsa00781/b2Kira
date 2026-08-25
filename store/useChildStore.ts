@@ -27,6 +27,11 @@ type ChildState = {
   lastSessionDate: string | null;
 
   setCharacter: (characterId: CharacterId) => void;
+  /**
+   * Egy befejezett gyakorlat: szintet és sorozatot lép. A megszakított
+   * gyakorlat nem számít bele — a gyereknek attól még nincs rossz napja.
+   */
+  registerCompletedSession: () => void;
   /** Frissítés a szerverről. Hiba esetén nem nyúl a lokális állapothoz. */
   syncFromServer: () => Promise<void>;
   /** Kijelentkezéskor (10. szakasz) ürítjük — a gyerek adata ne maradjon ott. */
@@ -41,7 +46,10 @@ const initialState = {
   completedSessions: 0,
   streakDays: 0,
   lastSessionDate: null,
-} satisfies Omit<ChildState, 'setCharacter' | 'syncFromServer' | 'clear'>;
+} satisfies Omit<
+  ChildState,
+  'setCharacter' | 'registerCompletedSession' | 'syncFromServer' | 'clear'
+>;
 
 export const useChildStore = create<ChildState>()(
   persist(
@@ -55,6 +63,26 @@ export const useChildStore = create<ChildState>()(
         if (childId) {
           void saveCharacter(childId, characterId);
         }
+      },
+
+      registerCompletedSession: () => {
+        set((state) => {
+          const today = dateKey();
+
+          if (state.lastSessionDate === today) {
+            return { completedSessions: state.completedSessions + 1 };
+          }
+
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const continued = state.lastSessionDate === dateKey(yesterday);
+
+          return {
+            completedSessions: state.completedSessions + 1,
+            streakDays: continued ? state.streakDays + 1 : 1,
+            lastSessionDate: today,
+          };
+        });
       },
 
       syncFromServer: async () => {

@@ -7,9 +7,16 @@
  * 1:1-ben átjönnek, közelítés nélkül. A színek a `palette.json` `shadow`
  * csoportjából jönnek, hogy komponensbe ne kelljen rgba értéket írni.
  */
+import { phaseColors } from './colors';
 import palette from './palette.json';
 
 const s = palette.shadow;
+
+/**
+ * A légződoboz árnyéka fázisonként: `0 8px 24px {szín}55`
+ * (`docs/design-tokens.md`). Az `55` = 33% átlátszatlanság.
+ */
+export const phaseBoxShadows = phaseColors.map((color) => `0 8px 24px ${color}55`);
 
 export const shadows = {
   /** Input mező és kis kártya */
