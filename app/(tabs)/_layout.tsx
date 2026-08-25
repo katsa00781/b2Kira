@@ -10,6 +10,7 @@ export default function TabLayout() {
     <Tabs screenOptions={{ headerShown: false }} tabBar={() => null}>
       <Tabs.Screen name="index" options={{ title: 'Kezdés' }} />
       <Tabs.Screen name="stickers" options={{ title: 'Matricák' }} />
+      <Tabs.Screen name="settings" options={{ title: 'Beállítások' }} />
     </Tabs>
   );
 }

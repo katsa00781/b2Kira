@@ -177,13 +177,13 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ## 10. Szülői beállítások (6. képernyő)
 
-- [ ] `app/(tabs)/settings.tsx` – design szerint pontosan
-- [ ] 3 kapcsoló → `store/useSettingsStore.ts` + `breathing_settings` szinkron
-- [ ] Gyakorlathossz: 1 perc / 2-3 perc / 5 perc (60 / 150 / 300 mp)
-- [ ] Napi emlékeztető idő választó
-- [ ] `expo-notifications` – napi helyi értesítés a beállított időpontban
-- [ ] Szülői zár: egyszerű matematikai kérdés (pl. „Mennyi 7 × 8?") a beállítások előtt
-- [ ] Kijelentkezés a szülői zár mögött
+- [x] `app/(tabs)/settings.tsx` – design szerint (két eltéréssel: D-043, D-044)
+- [x] **4** kapcsoló → `store/useSettingsStore.ts` + `breathing_settings` szinkron
+- [x] Gyakorlathossz: 1 perc / 2-3 perc / 5 perc (60 / 150 / 300 mp)
+- [x] Napi emlékeztető idő választó (15 perces léptető – D-045)
+- [x] `expo-notifications` – napi helyi értesítés a beállított időpontban
+- [x] Szülői zár: matematikai kérdés a beállítások előtt
+- [x] Kijelentkezés a szülői zár mögött
 
 ---
 
@@ -234,6 +234,72 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-25 – 10. Szülői beállítások
+
+**Mit:** Elkészült a beállítás képernyő, a szülői zárral együtt. A képernyőre
+csak egy matematikai kérdés helyes megválaszolása után lehet belépni
+(`components/ParentGate.tsx`): két 3–9 közötti szám szorzata, három
+válaszlehetőséggel. Rossz válasznál nincs „elrontottad” hangulat és nincs
+próbálkozás-limit, csak új feladat jön.
+
+A `useSettingsStore` kibővült az emlékeztetővel és a gyakorlathosszal, és
+kapott egy `version: 1` migrációt, mert a korábbi verzió csak a három
+kapcsolót ismerte. A gyakorlat hossza mostantól tényleg érvényesül: a
+`session.tsx` a store-ból veszi, de **a gyakorlat indulásakor rögzíti**, hogy
+egy menet közbeni átállítás ne rántsa ki a visszaszámlálót a gyerek alól.
+
+Az emlékeztető `expo-notifications`-szel, kizárólag **helyi** értesítésként:
+nincs push, nincs token, nincs szerver. Az értesítés szövege nem tartalmazza a
+gyerek nevét, és nem utal a beszédére vagy a teljesítményére.
+
+Új dependency: `expo-notifications` (a feladatlista nevesíti).
+
+**Fájlok:** app/(tabs)/settings.tsx (új), components/ParentGate.tsx (új),
+lib/notifications.ts (új), lib/settings.ts (új), store/useSettingsStore.ts,
+data/sessionLengths.ts, lib/sync.ts, app/_layout.tsx, app/session.tsx,
+app/(tabs)/_layout.tsx, app/(tabs)/index.tsx, package.json,
+docs/feature-tasks.md
+
+**Tesztelve:** iPad mini szimulátor (Expo Go) és valódi Supabase.
+- **Szülői zár:** hideg indításból a `/settings` route-ra lépve a zár jelenik
+  meg („Mennyi 5 × 4?”, három válasz: 12, 27, 20), a beállítások nem látszanak.
+- **Beállítás képernyő:** mind a négy kapcsoló (Hangeffektek, Hangos útmutatás,
+  Rezgés, Napi emlékeztető), a „Gyakorlat hossza” szegmens választó a
+  `2-3 perc`-en, a 17:30-as emlékeztető kártya és a „Kijelentkezés” gomb a
+  design szerint jelenik meg.
+- **Szerver szinkron, valódi klienssel, RLS alatt** (teszt fiókkal, utána
+  törölve): a séma triggere létrehozta a `breathing_settings` sort az
+  alapértékekkel; a módosított beállítás (hang ki, rezgés ki, 07:15,
+  `long`) hiba nélkül felment és **ugyanúgy olvasható vissza**; érvénytelen
+  hossz-kulcsot a séma `23514`-gyel elutasít; idegen `child_id`-vel az
+  update egyetlen sort sem érint.
+
+**Menet közben javított hiba:** az emlékeztető engedélykérése eredetileg **app
+indításkor**, a kezdőképernyőn, a gyerek előtt ugrott fel. Ez rossz — az
+engedélyt a szülőnek kell megkapnia, a zár mögött. Javítva: indításkor csak
+akkor ütemezünk, ha az engedély már megvan, és **soha nem kérdezünk**;
+kérdezni csak a beállítás képernyő szabad (D-047).
+
+`npm run typecheck` és `npm run lint` hibátlan.
+
+**Nyitva maradt:**
+- **Az `expo-notifications` Expo Go-ban figyelmeztet** („functionality is not
+  fully supported in Expo Go”). A helyi értesítés ütemezése lefut, de hogy a
+  17:30-as értesítés **tényleg megérkezik-e**, azt csak dev buildben vagy
+  TestFlighten lehet igazolni — szimulátoron nem vártuk ki.
+- Az `app.json`-ba nem került `expo-notifications` config plugin. Helyi
+  értesítéshez iOS-en nem kötelező, de EAS build előtt érdemes átnézni
+  (ikon, hang, Android csatorna).
+- **A szülői zár minden belépéskor kérdez**, nincs „ne kérdezd 5 percig”
+  emlékezés. Egyszerűbb, és a szülő ritkán megy be.
+- A zár válaszlehetőségei között a helyes válasz mindig szerepel — egy
+  ügyesebb 9 éves kitalálhatja. A CLAUDE.md kifejezetten „egyszerű matematikai
+  kérdést, nem PIN-t” kért, tehát ez tudatos.
+- A teljes kör (bejelentkezés → beállítás → gyakorlat) továbbra sincs
+  végigjátszva a futó appban, ugyanazon auth ok miatt, mint a 8–9. szakasznál.
+
+**Commit:** feat: szülői beállítások, szülői zár és napi emlékeztető
 
 ## 2026-08-25 – 9. Matricák és streak
 
@@ -1755,3 +1821,79 @@ designban nem szereplő elem lenne.
 gomb, ugyanolyan, mint a gyakorlat képernyőn. A kártya megjelenése nem
 változott, csak érinthető lett.
 **Visszavonható?** Igen.
+
+## D-043 – Négy kapcsoló három helyett: a rezgés is kapcsolható
+
+**Dátum:** 2026-08-25
+**Döntés:** a beállítás kártyában négy kapcsoló van — Hangeffektek, Hangos
+útmutatás, **Rezgés**, Napi emlékeztető.
+**Miért:** a design három kapcsolót rajzol (hang, beszéd, emlékeztető), a
+CLAUDE.md viszont a „Hang, beszéd, haptika” szakaszban kimondja: „Mindhárom
+külön kapcsolható a beállításokban.” A `breathing_settings.haptics_on` oszlop
+is erre vár. A CLAUDE.md a mérvadó, tehát a rezgés kapott egy saját sort.
+**Alternatíva:** maradni háromnál — design-hű, de a haptika kapcsolhatatlan
+lenne, és az oszlop használatlan maradna.
+**Eltérés a designtól:** a kártya egy sorral magasabb.
+**Visszavonható?** Igen, egy `ToggleRow` törlése.
+
+## D-044 – Az alsó gomb „Kijelentkezés”, nem „Szülői zár kezelése”
+
+**Dátum:** 2026-08-25
+**Döntés:** a design alsó gombjának helyén, ugyanabban a stílusban
+(lila pill, `purple.100` háttér) a „Kijelentkezés” áll.
+**Miért:** a CLAUDE.md szerint „Kijelentkezés csak a szülői zár mögül érhető
+el”, de a designban nincs kijelentkezés gomb. A „Szülői zár kezelése” viszont
+funkció nélkül maradna: a zár egy fix matematikai kérdés, nincs rajta mit
+konfigurálni.
+**Alternatíva:** megtartani mindkettőt, és a zárat ki-be kapcsolhatóvá tenni —
+ez új funkció lenne, ami nincs a feladatlistán, és gyengítené is a zárat.
+**Visszavonható?** Igen.
+
+## D-045 – Az emlékeztető ideje 15 perces léptetővel, nem rendszer-időválasztóval
+
+**Dátum:** 2026-08-25
+**Döntés:** az emlékeztető kártyája a designnak megfelelően néz ki (bal oldalt
+az idő, jobbra „Minden nap”), és érintésre alatta nyílik egy `− idő +` sor,
+15 perces lépésekkel.
+**Miért:** a design csak a nyugalmi állapotot rajzolja, időválasztót nem. Egy
+rendszer-időválasztóhoz a `@react-native-community/datetimepicker` kellene,
+ami újabb dependency (a CLAUDE.md célszáma max 10 fő; jelenleg 21-nél tartunk).
+Egy naponta egyszeri emlékeztetőhöz a negyedórás pontosság bőven elég.
+**Alternatíva 1:** `datetimepicker` — pontosabb, natív érzet, +1 könyvtár.
+**Alternatíva 2:** néhány előre megadott időpont szegmens választóban —
+kevesebb szabadság, és nem fér ki szépen.
+**Eltérés a designtól:** csak nyitott állapotban, a kártya nyugalmi képe
+változatlan.
+**Visszavonható?** Igen.
+
+## D-046 – A szerver beállításai csak app indításkor írják felül a lokálisat
+
+**Dátum:** 2026-08-25
+**Döntés:** a `pullSettings()` egyszer fut, app indításkor, és **csak akkor**
+ír, ha tényleg van szerver oldali sor. A beállítás képernyőn minden
+változtatás azonnal felmegy (`pushSettings()`), de vissza már nem olvasunk.
+**Miért:** offline-first. Ha minden szinkronkor visszaolvasnánk, egy offline
+indítás vagy egy lassú válasz visszaállíthatná a szülő imént megváltoztatott
+beállítását. Egy eszközzel (v1) a lokális állapot a megbízhatóbb.
+**Alternatíva:** kétirányú szinkron időbélyeggel (`updated_at`) — pontosabb
+több eszköznél, de v1-ben egy gyerek egy eszközön gyakorol.
+**Ismert korlát:** ha a szülő két eszközön állít be különbözőt, az utoljára
+indított eszköz állapota nyer.
+**Visszavonható?** Igen.
+
+## D-047 – Értesítési engedélyt csak a szülői zár mögül kérünk
+
+**Dátum:** 2026-08-25
+**Döntés:** app indításkor a napi emlékeztetőt csak akkor ütemezzük be, ha az
+értesítési engedély **már megvan**; engedélyt kérni kizárólag a beállítás
+képernyőről szabad (`scheduleDailyReminder(..., { prompt: true })`).
+**Miért:** az első változatban az indításkori újraütemezés felhozta a rendszer
+engedélykérő ablakát a **kezdőképernyőn, a gyerek előtt** — ezt szimulátoron
+láttuk meg. Egy 7–9 éves gyereknek nem kell rendszerpárbeszéddel szembesülnie,
+és a döntés amúgy is a szülőé.
+**Alternatíva:** engedélyt kérni az első gyakorlat után — még mindig a gyerek
+képernyőjén jönne fel.
+**Következmény:** ha a szülő sosem nyitja meg a beállításokat, az emlékeztető
+alapból be van kapcsolva a store-ban, de értesítés nem megy ki, mert nincs
+engedély. Ez tudatos: inkább néma, mint tolakodó.
+**Visszavonható?** Igen, egy paraméter.

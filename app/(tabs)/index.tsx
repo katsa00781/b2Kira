@@ -65,8 +65,7 @@ export default function HomeScreen() {
           </Text>
           <View style={styles.headerActions}>
             <StreakChip days={streak} />
-            {/* A beállítások képernyő a 10. szakaszban készül el, addig nem visz sehova. */}
-            <GearButton />
+            <GearButton onPress={() => router.push('/settings')} />
           </View>
         </View>
 

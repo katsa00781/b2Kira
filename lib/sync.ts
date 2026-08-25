@@ -13,7 +13,10 @@ import { stickers, unlockedCount } from '@/data/stickers';
 import { useChildStore } from '@/store/useChildStore';
 import { useSessionStore, type PendingSession } from '@/store/useSessionStore';
 
+import { settingsSnapshot, useSettingsStore } from '@/store/useSettingsStore';
+
 import { saveProgress } from './child';
+import { fetchSettings, saveSettings } from './settings';
 import { saveUnlockedStickers } from './stickers';
 import { supabase } from './supabase';
 
@@ -111,4 +114,43 @@ async function uploadSessions(childId: string, pending: PendingSession[]): Promi
     .upsert(rows, { onConflict: 'id', ignoreDuplicates: true });
 
   return error ? [] : pending.map((session) => session.id);
+}
+
+/**
+ * A beállítások felküldése. A beállítás képernyő minden változtatás után
+ * hívja — a UI nem várja meg, hiba esetén a lokális érték marad érvényes.
+ */
+export async function pushSettings(): Promise<void> {
+  try {
+    const childId = await resolveChildId();
+    if (!childId) {
+      return;
+    }
+
+    await saveSettings(childId, settingsSnapshot());
+  } catch {
+    // Offline: a szülő a beállítást lokálisan már látja érvényesnek.
+  }
+}
+
+/**
+ * A beállítások átvétele a szerverről, **app indításkor egyszer**.
+ *
+ * Csak akkor írjuk felül a lokális állapotot, ha van szerver oldali sor —
+ * enélkül egy offline indítás kinullázná a szülő beállításait (D-046).
+ */
+export async function pullSettings(): Promise<void> {
+  try {
+    const childId = useChildStore.getState().childId;
+    if (!childId) {
+      return;
+    }
+
+    const settings = await fetchSettings(childId);
+    if (settings) {
+      useSettingsStore.getState().applyServerSettings(settings);
+    }
+  } catch {
+    // Marad a lokális állapot.
+  }
 }

@@ -13,7 +13,7 @@ import { colors, gradients } from '@/constants/colors';
 import { contentMaxWidth, s } from '@/constants/layout';
 import { shadows } from '@/constants/shadows';
 import { phaseLabels } from '@/data/phases';
-import { defaultSessionSeconds } from '@/data/sessionLengths';
+import { sessionSeconds } from '@/data/sessionLengths';
 import { useBreathingCycle } from '@/hooks/useBreathingCycle';
 import { usePressed } from '@/hooks/usePressed';
 import { notifySessionFinished, useSessionFeedback } from '@/hooks/useSessionFeedback';
@@ -21,6 +21,7 @@ import { syncPendingSessions } from '@/lib/sync';
 import { formatDuration, useSessionTimer } from '@/hooks/useSessionTimer';
 import { useChildStore } from '@/store/useChildStore';
 import { useSessionStore } from '@/store/useSessionStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 /**
  * Élő légzőgyakorlat (`00-teljes-canvas.html`, 4. képernyő). A ritmust a
@@ -36,8 +37,9 @@ export default function SessionScreen() {
   const characterId = useChildStore((state) => state.characterId);
   const recordSession = useSessionStore((state) => state.recordSession);
 
-  // A hosszt a 10. szakasz beállítás képernyője fogja adni.
-  const totalSeconds = defaultSessionSeconds;
+  // A szülő által beállított hossz. A gyakorlat indulásakor rögzítjük, hogy
+  // egy menet közbeni átállítás ne rántsa ki a gyerek alól a visszaszámlálót.
+  const [totalSeconds] = useState(() => sessionSeconds(useSettingsStore.getState().sessionLengthKey));
 
   const [paused, setPaused] = useState(false);
   const [finished, setFinished] = useState(false);

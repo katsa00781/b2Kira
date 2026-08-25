@@ -8,7 +8,9 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { syncPendingSessions } from '@/lib/sync';
+import { scheduleDailyReminder } from '@/lib/notifications';
+import { pullSettings, syncPendingSessions } from '@/lib/sync';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 import '../global.css';
 
@@ -63,6 +65,13 @@ export default function RootLayout() {
     }
 
     void syncPendingSessions();
+
+    // A szerver beállításai csak indításkor jönnek át (D-046), utána az
+    // emlékeztetőt a rendszerben is újraütemezzük.
+    void pullSettings().then(() => {
+      const { reminderOn, reminderTime } = useSettingsStore.getState();
+      return scheduleDailyReminder(reminderOn, reminderTime);
+    });
 
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
