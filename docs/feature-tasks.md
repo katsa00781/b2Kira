@@ -235,6 +235,55 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-26 – Alkalmazás ikon a megadott SVG-ből
+
+**Mit:** Az `assets/images/app-icon.svg` (lila-rózsaszín gradiens, fehér doboz
+keret, sárga pötty a tetején, zöld karikás fehér kör középen) lett az app ikonja
+az Expo sablon kék nyíl placeholderje helyett. Az Expo ikonként **csak PNG-t**
+fogad, ezért az SVG-t 1024×1024-re raszterizáltam.
+
+*Raszterizálás:* headless Chrome-mal, nem ImageMagickkel. A gépen lévő
+ImageMagick nem librsvg-vel fordult (`magick -list delegate` szerint az `svg`
+delegate `rsvg-convert`-et hívna, ami nincs telepítve), a beépített MSVG
+renderer pedig a `gradientUnits="userSpaceOnUse"` gradienseket és a
+`stroke="url(#boxStroke)"` hivatkozást nem adja vissza helyesen. A Chrome
+pontosan azt rajzolja, amit a böngésző. Új dependency nem kellett.
+
+*Négy variáns készült, mind ugyanabból a geometriából:*
+- `icon.png` – iOS és a fő ikon. **Teli négyzet, lekerekítés nélkül** (D-051).
+- `android-icon-background.png` – csak a gradiens és a lágy fénykör.
+- `android-icon-foreground.png` – csak a jel, átlátszó háttéren.
+- `android-icon-monochrome.png` – egyszínű fehér sziluett a témázott ikonhoz.
+- `favicon.png` – 48×48, a lekerekített változatból.
+
+Az `app.json`-ban az `adaptiveIcon.backgroundColor` a sablon `#E6F4FE`-jéről a
+gradiens középértékére (`#DCA0E5`) váltott, hogy a tartalék háttér se lógjon ki.
+
+**Fájlok:** app.json, assets/images/app-icon.svg (a forrás, a repóban marad),
+assets/images/icon.png, assets/images/android-icon-background.png,
+assets/images/android-icon-foreground.png,
+assets/images/android-icon-monochrome.png, assets/images/favicon.png,
+docs/feature-tasks.md
+
+**Tesztelve:** `npx expo config --json` mind az öt útvonalat feloldja. Az
+`icon.png` és az Android háttér `magick identify` szerint **alfa csatorna
+nélküli** (`srgb`, `alpha=Undefined`) — ez iOS-en követelmény. Az Android
+előteret a rendszer kör maszkjával kivágva is megnéztem (középső 66,7% + kör):
+a jel nem lóg ki, a doboz sarka a biztonságos sugáron belül marad (a lekerekítés
+miatt a tényleges legkülső pont ~314 px a 341 px-es határ helyett).
+**Éles eszközön még nincs megnézve** — az ikon csak natív buildben (EAS) látszik,
+Expo Go-ban nem.
+
+**Nyitva maradt:**
+- Az ikon valódi ellenőrzése EAS buildből, a telefon kezdőképernyőjén.
+- **A `splash-icon.png` továbbra is az Expo sablon képe.** Az indítóképernyő
+  tehát nem illik az ikonhoz. Ugyanebből az SVG-ből egy perc alatt kitehető,
+  de ez külön kérés — szóljatok, ha kell.
+- **Az app neve a telefonon `b2kira`**, mert az `app.json` `name` mezője ez.
+  Az ikon alatt ez fog állni, nem az, hogy „Doboz Légzés". Szándékos-e?
+- Az iOS 18 sötét és tónusos ikonvariánsa (`ios.icon` objektum alak) nincs
+  megadva; a rendszer a világos ikonból generálja.
+
 ## 2026-08-26 – fix: a gyerek neve nem jelent meg a kezdőképernyő üdvözlésében
 
 **Mit:** A kezdőképernyő „Szia, [név]! 🌸" üdvözlése névtelen maradt. Két, egymást
@@ -2221,5 +2270,31 @@ indításkor is újra próbálkozik, nem csak be- vagy kijelentkezéskor.
 mutatni, de rossz fiókba belépve a szülő csak az app törlésével tud kiszállni.
 **Visszavonható?** Igen. A képernyő és az irányítás egy-egy blokk; a `setChild`
 hívások viszont maradjanak, azok önmagukban is helyes javítások.
+
+## D-051 – Az iOS ikon teli négyzet, a lekerekítést a rendszer adja
+
+**Dátum:** 2026-08-26
+**Döntés:** a megadott `app-icon.svg` háttere `rx="224"`-gyel lekerekített, az
+ebből készült `icon.png`-ben viszont a háttér **teljes, lekerekítés nélküli
+négyzet**. A többi elem (gradiens, fénykör, doboz keret, pöttyök) pixelre
+ugyanaz.
+**Miért:** az iOS a saját squircle maszkját teszi az ikonra. Ha a PNG sarka
+átlátszó, az iOS azt **feketére** tölti, és mivel a squircle a sarkoknál kicsit
+kijjebb ér, mint egy sima lekerekített téglalap, egy vékony fekete sarok-sáv
+látszana. Az App Store ráadásul alfa csatornás ikont nem is fogad el. Teli
+négyzettel a végeredmény pont az, amit az SVG szánt — a lekerekítést a rendszer
+rajzolja, a saját pontos formájával.
+**Alternatíva:** az SVG-t változatlanul raszterizálni és a sarkokat egy
+háttérszínre lapítani — nem működik, mert a gradiens miatt minden saroknak más
+színe van, tehát nincs egyetlen jó tartalék szín.
+**Eltérés a megadott forrástól:** csak a háttér `rx` értéke, és csak az
+`icon.png`-ben. A `favicon.png` megtartja a lekerekítést, mert a böngésző nem
+maszkol.
+**Raszterizálás:** headless Chrome (`--headless --screenshot
+--window-size=1024,1024`), mert a gépen az ImageMagick librsvg nélkül fordult,
+és a belső MSVG renderere a `userSpaceOnUse` gradienseket rosszul adja vissza.
+Ez fejlesztői eszköz, nem dependency — a repóba csak a kész PNG-k kerülnek, a
+forrás SVG mellé.
+**Visszavonható?** Igen, az SVG a repóban marad, bármikor újrarajzolható.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
