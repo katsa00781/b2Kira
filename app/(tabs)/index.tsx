@@ -107,7 +107,7 @@ export default function HomeScreen() {
           </Text>
           <PrimaryButton
             label="Kezdjük a gyakorlást →"
-            onPress={() => router.push('/session')}
+            onPress={() => router.push('/exercises')}
             variant="purple"
           />
         </View>

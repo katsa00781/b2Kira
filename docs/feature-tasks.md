@@ -194,7 +194,7 @@ feladatlapja. Az 1. gyakorlat (doboz légzés) már megvolt, ez a szakasz a más
 hármat viszi be, és a gyakorlatokat kategóriákra bontja.
 
 - [x] `db`: `breathing_sessions.exercise_key` oszlop + típusgenerálás (D-057)
-- [ ] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
+- [x] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
 - [ ] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
 - [ ] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
 - [ ] `CLAUDE.md` frissítése a gyakorlatkatalógussal
@@ -254,6 +254,26 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – 11. Gyakorlatválasztó képernyő
+
+**Mit:** A kezdőképernyő CTA-ja már nem egyenesen a doboz légzésre visz, hanem
+az `/exercises` választóra, ahol a gyakorlatok kártyaként állnak. Egyelőre
+egyetlen kártya van (doboz légzés) — a másik három a következő commitokban
+kerül a katalógusba, ahogy a képernyőjük elkészül, így minden commit önmagában
+működik. A kezdőképernyőn ez az egyetlen változás: egy sor.
+
+**Fájlok:** `app/exercises/index.tsx`, `components/ExerciseCard.tsx`,
+`components/BackButton.tsx`, `app/(tabs)/index.tsx`, `data/exercises.ts`
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Éles eszközön
+még nem futott.
+
+**Nyitva maradt:** a vissza gomb régi, kézzel másolt példánya megmaradt az
+`app/session.tsx`-ben és az `app/(tabs)/stickers.tsx`-ben — az új
+`BackButton`-re cserélhetők, de az két működő képernyő átírása lenne.
+
+**Commit:** feat: gyakorlatválasztó képernyő
 
 ## 2026-08-26 – 11. Melyik gyakorlat volt? (`exercise_key`)
 
@@ -2420,5 +2440,20 @@ elkezdi küldeni a mezőt, különben az egész köteg hibára fut, és a feltö
 beragad (a köteg egyben megy — D-039).
 **Amihez nem nyúltam:** a `sessionLengthKey` beállítás továbbra is **csak a doboz
 légzésre** vonatkozik; a többi gyakorlat hosszát az ismétlésszám adja.
+
+## D-053 – Gyakorlatválasztó képernyő a kezdőképernyő CTA-ja mögött
+
+**Dátum:** 2026-08-26
+**Döntés:** a kezdőképernyő „Kezdjük a gyakorlást →" gombja már nem egyenesen a
+doboz légzésre visz, hanem az `/exercises` választóra, ahol mind a négy
+gyakorlat kártyaként áll. A kezdőképernyőn ez az **egyetlen** változás (egy sor).
+**Miért:** a logopédus lapján négy gyakorlat van, és nem tudjuk, melyiket kéri
+mikor. A választó rugalmas: a gyerek (vagy a szülő) dönt, és a lista bővíthető
+anélkül, hogy bármelyik meglévő képernyő szerkezetéhez hozzá kellene nyúlni.
+**Alternatíva:** egyben végigvitt „mai gyakorlatsor", ami pont a lap sorrendjét
+követné. Elvetve: hosszabb egy ülésben (kb. 5–6 perc), és egy megszakítás után
+nincs jó pont, ahonnan folytatni lehetne.
+**Amihez nem nyúltam:** a doboz légzés `app/session.tsx` képernyője változatlan,
+csak a session mentés kapott `exerciseKey: 'box'`-ot.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
