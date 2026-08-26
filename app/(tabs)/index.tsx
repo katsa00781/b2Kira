@@ -35,9 +35,16 @@ export default function HomeScreen() {
   const clearJustUnlocked = useChildStore((state) => state.clearJustUnlocked);
 
   // A képernyő a lokális állapotból már kirajzolódott, ez csak utólag frissít.
+  // Ha a szerver megerősíti, hogy nincs gyerek profil, és lokálisan sincs név,
+  // a szülőt a profil létrehozására küldjük — enélkül az üdvözlés név nélkül
+  // maradna (D-050). Offline ez nem fut le: olyankor nem tudjuk, van-e profil.
   useEffect(() => {
-    void syncFromServer();
-  }, [syncFromServer]);
+    void syncFromServer().then((profileMissing) => {
+      if (profileMissing && !useChildStore.getState().name) {
+        router.replace('/child-profile');
+      }
+    });
+  }, [syncFromServer, router]);
 
   const Character = characterComponents[characterId];
   const level = levelProgress(completedSessions);

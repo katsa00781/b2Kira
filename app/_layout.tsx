@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 
 import { useAuthSession } from '@/hooks/useAuthSession';
+import { ensureChildProfile } from '@/lib/auth';
 import { scheduleDailyReminder } from '@/lib/notifications';
 import { pullSettings, syncPendingSessions } from '@/lib/sync';
 import { useSettingsStore } from '@/store/useSettingsStore';
@@ -64,6 +65,9 @@ export default function RootLayout() {
       return;
     }
 
+    // A regisztrációkor megadott gyerek profilja itt is újra próbálkozik, ha
+    // korábban nem sikerült felvinni (pl. nem volt net) — D-050.
+    void ensureChildProfile();
     void syncPendingSessions();
 
     // A szerver beállításai csak indításkor jönnek át (D-046), utána az

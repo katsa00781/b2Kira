@@ -7,6 +7,8 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useChildStore } from '@/store/useChildStore';
+
 import { supabase } from './supabase';
 
 /**
@@ -136,6 +138,9 @@ export async function signUp({
     return { ok: false, message: toMessage(error) };
   }
 
+  // A név azonnal a lokális store-ba is bekerül: a kezdőképernyő üdvözlése
+  // így nem függ attól, hogy a `breathing_children` sor létrejött-e már (D-050).
+  useChildStore.getState().setChild({ name, age });
   await savePendingChild({ name, age });
 
   // Ha a projekt e-mail megerősítést kér, itt még nincs session — a profil a
@@ -170,6 +175,38 @@ export async function resetPassword(email: string): Promise<AuthResult> {
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
+  // A gyerek neve és haladása ne maradjon ott a következő bejelentkezőnek.
+  useChildStore.getState().clear();
+  await clearPendingChild();
+}
+
+/**
+ * A gyerek profiljának létrehozása **már bejelentkezett** szülőnek. Akkor kell,
+ * ha a szülő olyan fiókkal lépett be, amihez még nincs `breathing_children` sor
+ * — például egy korábbi fiókkal, vagy új eszközön, ahol nincs függő adat.
+ *
+ * A név azonnal a lokális store-ba kerül (offline-first), a szerver oldali sor
+ * best-effort jön létre utána. Lásd docs/feature-tasks.md – D-050.
+ */
+export async function createChildProfile(
+  childName: string,
+  childAge: string
+): Promise<AuthResult> {
+  const name = childName.trim();
+  const age = Number.parseInt(childAge, 10);
+
+  if (!name) {
+    return { ok: false, message: 'Írd be a gyermek nevét.' };
+  }
+  if (!Number.isFinite(age) || age < MIN_AGE || age > MAX_AGE) {
+    return { ok: false, message: `Az életkor ${MIN_AGE} és ${MAX_AGE} év között lehet.` };
+  }
+
+  useChildStore.getState().setChild({ name, age });
+  await savePendingChild({ name, age });
+  await ensureChildProfile();
+
+  return { ok: true };
 }
 
 /**
@@ -211,6 +248,8 @@ export async function ensureChildProfile(): Promise<void> {
 
     if (!insertError) {
       await clearPendingChild();
+      // A frissen létrejött sor id-je kell a session feltöltéshez.
+      await useChildStore.getState().syncFromServer();
     }
   } catch {
     // Offline-first: a profil létrehozása sosem akaszthatja meg a belépést.

@@ -235,6 +235,61 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-26 – fix: a gyerek neve nem jelent meg a kezdőképernyő üdvözlésében
+
+**Mit:** A kezdőképernyő „Szia, [név]! 🌸" üdvözlése névtelen maradt. Két, egymást
+erősítő ok volt, mindkettő javítva.
+
+*1. A név csak a szerverről jött.* A `signUp()` a nevet és az életkort kizárólag
+AsyncStorage-ba tette (`doboz-legzes.pending-child`, D-021), a `useChildStore`-ba
+soha — oda csak a `syncFromServer()` írt, a `breathing_children` sorból. Amíg tehát
+a sor nem jött létre (e-mail megerősítés, nincs net, RLS), az üdvözlés név nélkül
+maradt, holott a szülő az imént írta be. Ez ellentmond az offline-first elvnek is:
+a UI hálózatra várt egy olyan adatért, ami már a kezében volt. Mostantól a `signUp()`
+azonnal a store-ba is beírja a nevet (`setChild`), a szerver oldali sor pedig
+utólag, best-effort jön létre, ahogy eddig.
+
+*2. Nem volt hova irányítani, ha nincs profil.* Az adatbázisban a
+`breathing_children` tábla **üres**, és az `auth.users`-ben 2025 óta nincs új
+felhasználó — tehát a szülő egy meglévő (familyBudget) fiókkal jelentkezett be, nem
+az app regisztrációján át. Ilyenkor nincs függő adat a telefonon, az
+`ensureChildProfile()` csendben visszalép, és a gyerek neve sehol nem kérhető be.
+Ezt a hiányt a munkanapló kétszer is rögzítette („A profil létrehozó képernyő
+továbbra is hiányzik"), a CLAUDE.md pedig elő is írja: „Bejelentkezés után, ha
+nincs gyerek profil, irányíts a profil létrehozására". Elkészült az `app/child-profile.tsx`
+(D-050): név + életkor, a regisztráció vizuális nyelvén.
+
+A megkülönböztetéshez a `fetchChildProfile()` mostantól nem `null`-t ad vissza
+mindenre, hanem `ok` / `missing` / `unknown` státuszt — a „nincs sor" és a „nem
+értük el a szervert" eset nem ugyanaz: az elsőre irányítunk, a másodikra
+offline-first módon nem csinálunk semmit.
+
+Két kapcsolódó hiba is javítva menet közben: a `signOut()` eddig nem ürítette a
+`useChildStore`-t (a gyerek neve és haladása ottmaradt a következő bejelentkezőnek
+— a store saját kommentje szerint is ez lett volna a dolga), és a függő gyerek
+profil csak be- vagy kijelentkezéskor próbálkozott újra, indításkor nem.
+
+**Fájlok:** app/child-profile.tsx (új), app/(tabs)/index.tsx, app/_layout.tsx,
+lib/auth.ts, lib/child.ts, store/useChildStore.ts, docs/feature-tasks.md
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Az iOS production
+export lefut (4,76 MB Hermes bytecode), és a bundle tartalmazza az új képernyő
+szövegeit és a `child-profile` route-ot (a nem ASCII stringek UTF-16-ban, ahogy a
+Hermes tárolja). A `breathing_children` RLS insert policy-ját lekérdeztem:
+`with_check (parent_id = auth.uid())`, tehát a bejelentkezett szülő a saját sorát
+beszúrhatja — a képernyő működni fog. **Éles eszközön még nincs végigjátszva.**
+
+**Nyitva maradt:**
+- A teljes folyamat éles iPhone-on: bejelentkezés a meglévő fiókkal → profil
+  képernyő → név → kezdőképernyő. Ez a javítás lényege, ezt kell látni.
+- A profil képernyőn nincs kilépési út (se vissza gomb, se kijelentkezés). Ez
+  szándékos — profil nélkül nincs mit mutatni —, de ha a szülő mégis rossz
+  fiókba lépett be, csak az app törlésével tud kiszállni.
+- Több gyerek egy fiók alatt továbbra sem támogatott (a séma bírja, a UI nem);
+  a képernyő mindig az elsőt hozza létre.
+- A profil képernyő nincs a designban. Ha kell hozzá pontos canvas, szólj, és
+  hozzáigazítom.
+
 ## 2026-08-26 – Ship előtt: titok- és analitika-ellenőrzés
 
 **Mit:** A „Ship előtt" lista titok-tétele lezárva. Az 1. szakaszban már volt
@@ -2129,5 +2184,42 @@ a néma kapcsoló állását pedig Expo Go-ban JS-ből nem lehet lekérdezni.
 az app ettől még megszólal. Ezt a beállításokban tudja kezelni: a „Hangeffektek"
 és a „Hangos útmutatás" kapcsoló külön-külön kikapcsolható.
 **Visszavonható?** Igen, egyetlen mező a `lib/sounds.ts`-ben.
+
+## D-050 – A gyerek neve lokálisan is tárolódik, és van profil létrehozó képernyő
+
+**Dátum:** 2026-08-26
+**Döntés:** (1) a regisztrációkor megadott név és életkor **azonnal** a
+`useChildStore`-ba kerül, nem csak a `pending-child` AsyncStorage kulcsba; (2) a
+`fetchChildProfile()` háromállapotú eredményt ad (`ok` / `missing` / `unknown`);
+(3) ha a szerver megerősíti, hogy nincs gyerek profil **és** lokálisan sincs név,
+a kezdőképernyő az új `app/child-profile.tsx`-re irányít.
+**Miért:** a D-021 a nevet a szerver oldali sor létrejöttéig a telefonon tartotta,
+de sosem tette be a store-ba — így a kezdőképernyő üdvözlése a hálózatra várt egy
+adatra, amit a szülő az előbb gépelt be. Ez az offline-first elv megsértése volt
+(„a UI soha ne várjon hálózatra"). A D-021 maga is rögzítette a másik ágat ismert
+korlátként: „ha a szülő új eszközön lép be először, a függő adat nincs meg, így
+nem jön létre profil" — ez most nem elméleti eset, hanem a valóság: a
+`breathing_children` üres, mert a szülő egy meglévő fiókkal lépett be.
+A háromállapotú eredmény azért kell, mert a „nincs sor" és a „nincs net" eddig
+ugyanúgy `null` volt, és offline soha nem szabad profil képernyőre dobni a szülőt.
+**Alternatíva 1:** a nevet a szülői beállításokban kérni be — a szülői zár mögött
+van, és a gyerek addig névtelen üdvözlést lát, ráadásul semmi nem jelzi, hol
+javíthatja.
+**Alternatíva 2:** a nevet a `signUp` `options.data`-jába tenni és triggerrel
+létrehozni a sort — a D-021 ezt már elvetette, mert a gyerek neve bekerülne az
+auth felhasználó metaadatai közé, ami a gyerekadat-elvek ellen megy.
+**Eltérés a designtól:** a `child-profile` a **7. képernyő**, a canvas nem
+rajzolja meg. Ezért nem is talál ki új design értéket: a regisztráció keretét
+(zöld gradiens, 72/26/32 padding), mezőit és gombját használja újra, két mezőre
+szűkítve. A CLAUDE.md viszont kifejezetten előírja („Bejelentkezés után, ha nincs
+gyerek profil, irányíts a profil létrehozására"), és a munkanapló kétszer is
+nyitott tételként tartotta számon.
+**Mellékesen javítva:** a `signOut()` mostantól üríti a `useChildStore`-t (a
+store kommentje szerint is ez lett volna a dolga), és a függő gyerek profil app
+indításkor is újra próbálkozik, nem csak be- vagy kijelentkezéskor.
+**Ismert korlát:** a profil képernyőről nincs kiút — profil nélkül nincs mit
+mutatni, de rossz fiókba belépve a szülő csak az app törlésével tud kiszállni.
+**Visszavonható?** Igen. A képernyő és az irányítás egy-egy blokk; a `setChild`
+hívások viszont maradjanak, azok önmagukban is helyes javítások.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

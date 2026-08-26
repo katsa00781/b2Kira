@@ -35,6 +35,13 @@ type ChildState = {
    */
   justUnlocked: StickerKey | null;
 
+  /**
+   * A regisztrációkor (vagy a profil létrehozó képernyőn) megadott név és
+   * életkor. Azonnal, hálózat nélkül is: a `breathing_children` sor utólag,
+   * best-effort jön létre, de a gyerek addig is a nevén van szólítva.
+   * Lásd docs/feature-tasks.md – D-050.
+   */
+  setChild: (child: { name: string; age: number }) => void;
   setCharacter: (characterId: CharacterId) => void;
   /**
    * Egy befejezett gyakorlat: szintet és sorozatot lép. A megszakított
@@ -43,8 +50,13 @@ type ChildState = {
   registerCompletedSession: () => void;
   /** Az ünneplés lefutott, ne jelenjen meg újra. */
   clearJustUnlocked: () => void;
-  /** Frissítés a szerverről. Hiba esetén nem nyúl a lokális állapothoz. */
-  syncFromServer: () => Promise<void>;
+  /**
+   * Frissítés a szerverről. Hiba esetén nem nyúl a lokális állapothoz.
+   * `true`, ha a szerver megerősítette, hogy **nincs** gyerek profil — erre a
+   * kezdőképernyő a profil létrehozására irányít (D-050). Offline vagy hibás
+   * lekérdezésnél `false`, mert olyankor nem tudjuk.
+   */
+  syncFromServer: () => Promise<boolean>;
   /** Kijelentkezéskor (10. szakasz) ürítjük — a gyerek adata ne maradjon ott. */
   clear: () => void;
 };
@@ -60,6 +72,7 @@ const initialState = {
   justUnlocked: null,
 } satisfies Omit<
   ChildState,
+  | 'setChild'
   | 'setCharacter'
   | 'registerCompletedSession'
   | 'clearJustUnlocked'
@@ -71,6 +84,8 @@ export const useChildStore = create<ChildState>()(
   persist(
     (set, get) => ({
       ...initialState,
+
+      setChild: ({ name, age }) => set({ name, age }),
 
       setCharacter: (characterId) => {
         set({ characterId });
@@ -112,10 +127,12 @@ export const useChildStore = create<ChildState>()(
       clearJustUnlocked: () => set({ justUnlocked: null }),
 
       syncFromServer: async () => {
-        const profile = await fetchChildProfile();
-        if (!profile) {
-          return;
+        const result = await fetchChildProfile();
+        if (result.status !== 'ok') {
+          return result.status === 'missing';
         }
+
+        const { profile } = result;
 
         set((state) => ({
           childId: profile.id,
@@ -129,6 +146,8 @@ export const useChildStore = create<ChildState>()(
           streakDays: Math.max(state.streakDays, profile.streakDays),
           lastSessionDate: laterDate(state.lastSessionDate, profile.lastSessionDate),
         }));
+
+        return false;
       },
 
       clear: () => set({ ...initialState }),

@@ -2,8 +2,8 @@
  * A gyerek profiljának olvasása és írása a `breathing_children` táblán.
  *
  * Minden hívás best-effort: hálózati vagy jogosultsági hiba esetén csendben
- * `null`-lal (illetve semmivel) tér vissza, mert az app offline-first — a
- * kezdőképernyő a lokálisan tárolt adatból már megjelent, mire ez lefut.
+ * visszalép (`status: 'unknown'`, illetve semmi), mert az app offline-first —
+ * a kezdőképernyő a lokálisan tárolt adatból már megjelent, mire ez lefut.
  */
 import type { CharacterId } from '@/data/characters';
 import { defaultCharacterId } from '@/data/characters';
@@ -21,6 +21,19 @@ export type ChildProfile = {
   completedSessions: number;
 };
 
+/**
+ * A profil lekérdezésének kimenete. A „nincs sor" és a „nem értük el a
+ * szervert" eset **nem** ugyanaz: az elsőre a kezdőképernyő a profil
+ * létrehozására irányít, a másodikra offline-first módon nem csinál semmit.
+ * Lásd docs/feature-tasks.md – D-050.
+ */
+export type ChildProfileResult =
+  | { status: 'ok'; profile: ChildProfile }
+  /** A szerver válaszolt: ehhez a szülőhöz nincs `breathing_children` sor. */
+  | { status: 'missing' }
+  /** Nincs bejelentkezett szülő, vagy a lekérdezés elhasalt (pl. nincs net). */
+  | { status: 'unknown' };
+
 const CHARACTER_IDS: readonly CharacterId[] = ['bunny', 'panda', 'monkey', 'lion'];
 
 function toCharacterId(value: string): CharacterId {
@@ -29,12 +42,12 @@ function toCharacterId(value: string): CharacterId {
 }
 
 /** A bejelentkezett szülő első gyerekének profilja, a befejezett gyakorlatok számával. */
-export async function fetchChildProfile(): Promise<ChildProfile | null> {
+export async function fetchChildProfile(): Promise<ChildProfileResult> {
   try {
     const { data: sessionData } = await supabase.auth.getSession();
     const parentId = sessionData.session?.user.id;
     if (!parentId) {
-      return null;
+      return { status: 'unknown' };
     }
 
     const { data, error } = await supabase
@@ -45,21 +58,28 @@ export async function fetchChildProfile(): Promise<ChildProfile | null> {
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) {
-      return null;
+    if (error) {
+      return { status: 'unknown' };
+    }
+
+    if (!data) {
+      return { status: 'missing' };
     }
 
     return {
-      id: data.id,
-      name: data.name,
-      age: data.age,
-      characterId: toCharacterId(data.character_id),
-      streakDays: data.streak_days,
-      lastSessionDate: data.last_session_date,
-      completedSessions: await countCompletedSessions(data.id),
+      status: 'ok',
+      profile: {
+        id: data.id,
+        name: data.name,
+        age: data.age,
+        characterId: toCharacterId(data.character_id),
+        streakDays: data.streak_days,
+        lastSessionDate: data.last_session_date,
+        completedSessions: await countCompletedSessions(data.id),
+      },
     };
   } catch {
-    return null;
+    return { status: 'unknown' };
   }
 }
 
