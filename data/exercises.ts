@@ -45,4 +45,18 @@ export const exercises: readonly Exercise[] = [
     icon: 'swap-horizontal-outline',
     route: '/exercises/nose-mouth',
   },
+  {
+    key: 'weekdays',
+    title: 'A hét napjai',
+    subtitle: 'Egy levegővel, elejétől a végéig',
+    icon: 'calendar-outline',
+    route: '/exercises/one-breath?key=weekdays',
+  },
+  {
+    key: 'syllables',
+    title: 'Szótagok',
+    subtitle: 'Pá-pá-pá, bá-bá-bá — egy levegővel',
+    icon: 'chatbubbles-outline',
+    route: '/exercises/one-breath?key=syllables',
+  },
 ] as const;

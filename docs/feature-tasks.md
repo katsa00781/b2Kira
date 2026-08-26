@@ -196,7 +196,7 @@ hármat viszi be, és a gyakorlatokat kategóriákra bontja.
 - [x] `db`: `breathing_sessions.exercise_key` oszlop + típusgenerálás (D-057)
 - [x] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
 - [x] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
-- [ ] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
+- [x] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
 - [ ] `CLAUDE.md` frissítése a gyakorlatkatalógussal
 - [ ] Teszt éles iPhone-on: mind a 4 gyakorlat végig, offline is
 
@@ -254,6 +254,32 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – 11. „Egy levegővel" gyakorlatok (a lap 3. és 4. pontja)
+
+**Mit:** A hét napjai és a szótagsorok (p–b–m–t–d–k–g) egy levegővel. A két
+gyakorlat mechanikája azonos, ezért közös képernyőt kaptak
+(`/exercises/one-breath?key=weekdays|syllables`). Soronként két lépés: vezetett
+belégzés 4 mp alatt (`useGuidedInhale` — egyszer fut le, nem körbe, mint a
+`useBreathingCycle`), majd a sor nagyban a képernyőn, és a gyerek nyom
+„Kész"-t. A hely előre le van foglalva, hogy a szöveg megjelenésekor ne
+ugorjon a layout.
+
+**Itt semmit nem mérünk:** nincs stopper, nincs visszaszámláló, nincs számolás
+és nincs értékelés — a képernyőn sehol nem jelenik meg idő. A `durationSeconds`
+bekerül a naplóba, de csak oda. Van egy „Hallgasd meg" gomb, ami kérésre
+felolvassa a sort, és csak akkor látszik, ha a beszéd kapcsoló be van kapcsolva.
+
+**Fájlok:** `app/exercises/one-breath.tsx`, `data/oneBreath.ts`,
+`hooks/useGuidedInhale.ts`, `data/exercises.ts`
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Éles eszközön
+még nem futott.
+
+**Nyitva maradt:** nem tudjuk, hány kört kér a logopédus a hét napjaiból —
+most 3. A szótagsorok a lap sorrendjét követik, 10 sor.
+
+**Commit:** feat: egy levegővel gyakorlatok (hét napjai, szótagsorok)
 
 ## 2026-08-26 – 11. Orron/szájon légzés (a lap 2. gyakorlata)
 
@@ -2534,5 +2560,23 @@ légzés hívása egyik helyen sem változott, tehát a 4-4-4-4 ritmus érintetl
 `app/session.tsx`-ben és az `app/(tabs)/stickers.tsx`-ben — az új
 `components/BackButton.tsx`-re cserélhetők, de az két működő képernyő átírása
 lenne, amit ez a feladat nem indokol.
+
+## D-055 – Az „egy levegővel" gyakorlatok semmit nem mérnek
+
+**Dátum:** 2026-08-26
+**Döntés:** a 3. és 4. gyakorlatnál (hét napjai, szótagsorok) nincs stopper,
+nincs visszaszámláló, nincs „meddig bírtad", nincs „sikerült?" kérdés és nincs
+pontszám. Vezetett belégzés után a sor nagyban megjelenik, és a gyerek nyom
+„Kész"-t, amikor elmondta. A haladást csak a néma alsó sáv mutatja.
+**Miért:** ez a két gyakorlat **beszédes**, a gyerek pedig dadogással
+foglalkozik. A CLAUDE.md tiltja az időnyomást és a teljesítmény-visszajelzést,
+és ez itt nem UX-ízlés kérdése: a beszéd körüli plusz feszültség kifejezetten
+árt. A mért idő ettől még bekerül a naplóba (`durationSeconds`) — csak a
+képernyőn nem jelenik meg soha.
+**Alternatíva:** fix idő után automatikus továbblépés. Elvetve: rejtett
+időnyomás, a gyerek érezné, hogy sietnie kell.
+**Extra:** a „Hallgasd meg" gomb kérésre felolvassa a sort (`expo-speech`), és
+csak akkor látszik, ha a beszéd kapcsoló be van kapcsolva. Kérésre szól, nem
+magától — így segítség, nem minta, amihez mérni kell magát.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
