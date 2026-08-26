@@ -196,8 +196,8 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 - [ ] Lint + typecheck hibák nélkül
 - [ ] CodeRabbit code review az AI által írt feature-ökre
 - [ ] Dev utilities eltávolítása (teszt gombok, `console.log`-ok, mock data)
-- [ ] Analitika: **gyereknév és e-mail soha ne kerüljön eventbe**
-- [ ] Secrets ellenőrzése: kliens bundle + teljes git history
+- [x] Analitika: **gyereknév és e-mail soha ne kerüljön eventbe**
+- [x] Secrets ellenőrzése: kliens bundle + teljes git history
 - [ ] RLS újraellenőrzése: két külön fiókkal, hogy A ne lássa B gyerekének adatait
 - [ ] EAS Build production binary, tesztelés éles eszközön
 - [ ] TestFlight feltöltés
@@ -234,6 +234,56 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – Ship előtt: titok- és analitika-ellenőrzés
+
+**Mit:** A „Ship előtt" lista titok-tétele lezárva. Az 1. szakaszban már volt
+egy ilyen ellenőrzés, de az a **mai kód előtti** bundle-re vonatkozott, ezért
+mindent újrafuttattam a jelenlegi állapoton.
+
+*Production bundle* (`npx expo export --platform ios`, 4,75 MB Hermes bytecode
+— mellesleg ez az első alkalom, hogy a production export végigfut ezen a
+projekten, a 0. szakasz óta nyitott Hermes export kérdés tehát megválaszolva):
+a bundle-ben **egyetlen JWT** van, a payloadja
+`{"iss":"supabase","ref":"eguhipjgnhbajbmnrskm","role":"anon"}` — vagyis csak
+az anon kulcs, ahogy kell. `service_role` és `SUPABASE_SERVICE` minta nulla
+találat. Az egyetlen `sb_secret_` találat a `supabase-js` saját
+kulcsformátum-ellenőrző konstansa, nem érték.
+
+*Teljes git history* (minden commit, minden fájl): JWT-szerű token (`eyJ…`)
+nulla találat; a `service_role` szó csak a `docs/feature-tasks.md` korábbi
+audit-bejegyzésében fordul elő, prózaként. A `.env` soha nem volt commitolva
+(a `.gitignore` fedi), a `.env.example` pedig üres kulcsértékkel van benne.
+
+*Forráskód:* beégetett kulcs vagy Supabase URL sehol; a kliens kizárólag a
+`process.env.EXPO_PUBLIC_*` értékekből dolgozik (`lib/supabase.ts`).
+
+*Analitika:* a tétel triviálisan teljesül, és ez így is marad, amíg valaki
+nem tesz be analitikát: a projektben **nincs** analitika vagy hibajelentő
+könyvtár (se Sentry, se Firebase, se PostHog…), és a `supabase-js` kliensen
+kívül **egyetlen saját hálózati hívás sincs** — nincs `fetch`, nincs `axios`.
+A gyerek neve tehát nem tud sehova kikerülni. Ha később bekerül analitika, ez a
+tétel újranyitandó.
+
+**Menet közben talált tétel:** a `console.*` és mock-adat átvizsgálás tiszta —
+az egyetlen `console.warn` a `lib/devWarn.ts`-ben van, `__DEV__` mögött. **A két
+`scratch-*` képernyő viszont benne van a production bundle-ben**
+(`scratch-ui.tsx`, `scratch-characters.tsx`), route-ként elérhetően. Ez a
+„Dev utilities eltávolítása" tétel, ami még nyitva van — a törlésük a szülő
+döntése, mert amíg eszközön tesztel, még használhatja őket.
+
+**Fájlok:** docs/feature-tasks.md (kód nem változott)
+
+**Tesztelve:** a fenti keresések a mai HEAD-en és a belőle exportált production
+bundle-ön futottak.
+
+**Nyitva maradt:**
+- A „Lint + typecheck hibák nélkül" tétel **szándékosan nincs kipipálva**: most
+  hibátlan, de ez ship előtt újra ellenőrzendő gate, nem egyszer megszerezhető
+  pipa.
+- A dev utilities tétel a scratch képernyők miatt nyitva.
+
+**Commit:** chore: ship előtti titok- és analitika-ellenőrzés
 
 ## 2026-08-25 – fix: iOS Expo Go — fizikai iPhone-on se hang, se rezgés
 
