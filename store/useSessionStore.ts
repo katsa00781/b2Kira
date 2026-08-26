@@ -8,6 +8,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { CharacterId } from '@/data/characters';
+import type { ExerciseKey } from '@/data/exercises';
 import { CYCLE_SECONDS } from '@/data/phases';
 import { useChildStore } from '@/store/useChildStore';
 
@@ -18,9 +19,15 @@ export type PendingSession = {
    * egy megismételt feltöltés nem hoz létre duplikátumot (D-039).
    */
   id: string;
+  /** Melyik gyakorlat volt (D-057). */
+  exerciseKey: ExerciseKey;
   /** ISO időbélyeg, a gyakorlat indulása. */
   startedAt: string;
   durationSeconds: number;
+  /**
+   * Befejezett ismétlések száma: a doboz légzésnél a 16 mp-es ciklusok, a
+   * többi gyakorlatnál a végigvitt körök vagy sorok.
+   */
   cyclesCompleted: number;
   /** `true`, ha a gyerek végigcsinálta a beállított hosszt. */
   completed: boolean;
@@ -28,9 +35,15 @@ export type PendingSession = {
 };
 
 type SessionRecord = {
+  exerciseKey: ExerciseKey;
   durationSeconds: number;
   completed: boolean;
   characterId: CharacterId;
+  /**
+   * Befejezett ismétlések. A doboz légzés nem adja meg — ott az eltelt időből
+   * jön ki, mert a ciklus mindig pontosan 16 mp.
+   */
+  cyclesCompleted?: number;
 };
 
 type SessionState = {
@@ -47,7 +60,7 @@ export const useSessionStore = create<SessionState>()(
     (set) => ({
       pending: [],
 
-      recordSession: ({ durationSeconds, completed, characterId }) => {
+      recordSession: ({ exerciseKey, durationSeconds, completed, characterId, cyclesCompleted }) => {
         const seconds = Math.max(0, Math.round(durationSeconds));
 
         // A 0 mp-es „gyakorlat" (a gyerek azonnal visszalépett) nem gyakorlat.
@@ -57,9 +70,10 @@ export const useSessionStore = create<SessionState>()(
 
         const session: PendingSession = {
           id: createSessionId(),
+          exerciseKey,
           startedAt: new Date(Date.now() - seconds * 1000).toISOString(),
           durationSeconds: seconds,
-          cyclesCompleted: Math.floor(seconds / CYCLE_SECONDS),
+          cyclesCompleted: cyclesCompleted ?? Math.floor(seconds / CYCLE_SECONDS),
           completed,
           characterId,
         };
@@ -77,13 +91,15 @@ export const useSessionStore = create<SessionState>()(
     {
       name: 'doboz-legzes.sessions',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
       /**
-       * A 0. verzió id-je `${Date.now()}-${random}` alakú volt, ami nem uuid.
-       * Ilyen sorral a feltöltés `invalid input syntax`-ra futna, és — mivel
-       * egy kötegben megy minden — **örökre megakasztaná a sort**. Ezért a régi
-       * id-ket új uuid-ra cseréljük. Ezek a sorok még sosem voltak fenn, tehát
-       * duplikátum nem keletkezhet belőle.
+       * 0 → 1: a 0. verzió id-je `${Date.now()}-${random}` alakú volt, ami nem
+       * uuid. Ilyen sorral a feltöltés `invalid input syntax`-ra futna, és —
+       * mivel egy kötegben megy minden — **örökre megakasztaná a sort**. Ezért
+       * a régi id-ket új uuid-ra cseréljük. Ezek a sorok még sosem voltak fenn,
+       * tehát duplikátum nem keletkezhet belőle.
+       *
+       * 1 → 2: a `exerciseKey` mező előtt csak doboz légzés létezett.
        */
       migrate: (persisted, version) => {
         const state = persisted as { pending?: PendingSession[] };
@@ -92,6 +108,10 @@ export const useSessionStore = create<SessionState>()(
           state.pending = state.pending.map((session) =>
             UUID_PATTERN.test(session.id) ? session : { ...session, id: createSessionId() }
           );
+        }
+
+        if (version < 2 && state.pending) {
+          state.pending = state.pending.map((session) => ({ ...session, exerciseKey: 'box' }));
         }
 
         return state as SessionState;

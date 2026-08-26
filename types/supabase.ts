@@ -72,6 +72,7 @@ export type Database = {
           created_at: string
           cycles_completed: number
           duration_seconds: number
+          exercise_key: string
           id: string
           started_at: string
         }
@@ -82,6 +83,7 @@ export type Database = {
           created_at?: string
           cycles_completed?: number
           duration_seconds: number
+          exercise_key?: string
           id?: string
           started_at?: string
         }
@@ -92,6 +94,7 @@ export type Database = {
           created_at?: string
           cycles_completed?: number
           duration_seconds?: number
+          exercise_key?: string
           id?: string
           started_at?: string
         }

@@ -102,6 +102,7 @@ async function uploadSessions(childId: string, pending: PendingSession[]): Promi
   const rows = pending.map((session) => ({
     id: session.id,
     child_id: childId,
+    exercise_key: session.exerciseKey,
     started_at: session.startedAt,
     duration_seconds: session.durationSeconds,
     cycles_completed: session.cyclesCompleted,

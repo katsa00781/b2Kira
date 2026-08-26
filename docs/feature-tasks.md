@@ -187,6 +187,26 @@ más logopédiai elemet — pl. hangindítást — is be akarnátok építeni):
 
 ---
 
+## 11. További logopédiai gyakorlatok (a lap 2–4. pontja)
+
+Forrás: `docs/legzogyakorlatok-2026-08-26.md` — a gyerek 2026-08-26-án kapott
+feladatlapja. Az 1. gyakorlat (doboz légzés) már megvolt, ez a szakasz a másik
+hármat viszi be, és a gyakorlatokat kategóriákra bontja.
+
+- [x] `db`: `breathing_sessions.exercise_key` oszlop + típusgenerálás (D-057)
+- [ ] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
+- [ ] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
+- [ ] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
+- [ ] `CLAUDE.md` frissítése a gyakorlatkatalógussal
+- [ ] Teszt éles iPhone-on: mind a 4 gyakorlat végig, offline is
+
+> **Kérdés a logopédusnak** (nem blokkoló, de a D-054 rá vár): a 2. gyakorlatnál
+> hány másodperc a be- és a kilégzés, és kombinációnként hány kört kér? A lapon
+> nincs időzítés, addig a doboz légzés 4 mp-es alapütemét visszük tovább.
+> Ugyanígy nyitott, hány kört kér a hét napjaiból.
+
+---
+
 ## Ship előtt
 
 - [ ] Teljes flow tesztelése éles iPhone-on: regisztráció → gyakorlat → matrica → beállítás
@@ -234,6 +254,30 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – 11. Melyik gyakorlat volt? (`exercise_key`)
+
+**Mit:** A session sorokból eddig nem derült ki, melyik gyakorlatot végezte a
+gyerek — eddig nem is kellett, mert csak egy volt. A lap többi gyakorlata előtt
+ez a plumbing: új `exercise_key` oszlop `'box'` alapértékkel, a lokális sorban
+`exerciseKey` mező (persist 1 → 2, a régi sorok `'box'`-ot kapnak), és a
+`cyclesCompleted` jelentése általánosodott „befejezett ismétlésekre".
+A `data/exercises.ts` egyelőre csak a doboz légzést tartalmazza — a katalógus a
+következő commitokban nő, ahogy a képernyők elkészülnek.
+
+**Fájlok:** `supabase/migrations/0003_breathing_exercise_key.sql`,
+`types/supabase.ts`, `store/useSessionStore.ts`, `lib/sync.ts`,
+`app/session.tsx`, `data/exercises.ts`, `.gitignore`
+
+**Tesztelve:** a migráció lefutott a familyBudget projekten (a friss
+típusgenerálás visszaigazolta az oszlopot); `npm run typecheck` és
+`npm run lint` hibátlan. Éles eszközön még nem futott.
+
+**Nyitva maradt:** a `types/supabase.ts` a D-007 szerint szűrt fájl, ezért a
+generálás kimenetéből csak a három `exercise_key` sort vezettem át kézzel — a
+többi `breathing_` tábla típusa bitre azonos maradt.
+
+**Commit:** db: breathing_sessions exercise_key oszlop
 
 ## 2026-08-26 – Indítóképernyő és az app neve a telefonon
 
@@ -2357,5 +2401,24 @@ egy ikoncsere körét.
 visszaállító deep link URL sémája múlik rajtuk, azok átírása törné a
 konfigurációt anélkül, hogy bárhol látszana.
 **Visszavonható?** Igen, mindkettő egy-egy sor az `app.json`-ban, plusz egy PNG.
+
+## D-057 – `exercise_key` oszlop a `breathing_sessions`-ön
+
+**Dátum:** 2026-08-26
+**Döntés:** a session sorok új `exercise_key text not null default 'box'`
+oszlopot kaptak, `check` megkötéssel a négy kulcsra
+(`0003_breathing_exercise_key.sql`). A `PendingSession` is kapott `exerciseKey`
+mezőt, a persist verzió 1 → 2, és a migráció a régi sorokra `'box'`-ot ír.
+**Miért:** a katalógus a kliensben van (mint a matricáknál), az adatbázisnak
+csak a kulcsot kell tárolnia. Az alapérték azért `'box'`, mert az eddigi sorok
+kivétel nélkül doboz légzések voltak — így nem kell külön adatjavítás.
+**A `cyclesCompleted` jelentése általánosodott:** „befejezett ismétlések" — a
+doboznál a 16 mp-es ciklusok, az orr/szájnál a körök, az egy levegővel
+gyakorlatoknál az elmondott sorok.
+**Fontos sorrend:** a migrációnak **előbb** kell lefutnia, mint ahogy a kliens
+elkezdi küldeni a mezőt, különben az egész köteg hibára fut, és a feltöltési sor
+beragad (a köteg egyben megy — D-039).
+**Amihez nem nyúltam:** a `sessionLengthKey` beállítás továbbra is **csak a doboz
+légzésre** vonatkozik; a többi gyakorlat hosszát az ismétlésszám adja.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

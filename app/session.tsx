@@ -70,6 +70,7 @@ export default function SessionScreen() {
       }
       endedRef.current = true;
       recordSession({
+        exerciseKey: 'box',
         durationSeconds: elapsedRef.current,
         completed,
         characterId,
