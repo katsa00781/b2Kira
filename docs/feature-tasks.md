@@ -235,6 +235,43 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-26 – Indítóképernyő és az app neve a telefonon
+
+**Mit:** Lezárult az előző bejegyzés két nyitott pontja — az app így már sehol
+nem mutatja az Expo sablont.
+
+*Indítóképernyő:* a `splash-icon.png` eddig a sablon szürke rácsos
+placeholderje volt. Helyette ugyanaz az ikon került oda, de a **lekerekített**
+változatban (az `app-icon.svg` eredeti `rx="224"` sarkával) — az indítóképernyőn
+ugyanis nincs rendszer maszk, ott a lekerekítés a mi dolgunk. Ez pont az
+ellenkezője annak, amit az `icon.png` igényel (D-051). A splash beállításaihoz
+(`imageWidth: 200`, `backgroundColor`) nem nyúltam.
+
+*Név:* az `app.json` `name` mezője `b2kira`-ról „Doboz Légzés"-re változott —
+ez az, ami az ikon alatt látszik a telefonon. Ez a 0. szakasz óta nyitott pont
+volt, a munkanapló kétszer is javasolta. A `slug` (`b2kira`) és a `scheme`
+(`b2kira://`, a jelszó-visszaállító deep linké) **szándékosan változatlan**:
+azok projekt- és URL-azonosítók, nem megjelenítendő szöveg.
+
+**Fájlok:** app.json, assets/images/splash-icon.png, docs/feature-tasks.md
+
+**Tesztelve:** `npx expo config --json` a nevet `Doboz Légzés`-ként adja vissza,
+a `slug` és a `scheme` maradt `b2kira`, a splash képének útvonala feloldódik.
+**Éles eszközön még nincs megnézve** — az indítóképernyő és a név is csak natív
+buildben (EAS) látszik, Expo Go-ban nem.
+
+**Nyitva maradt:**
+- A név hossza a telefon kezdőképernyőjén: a „Doboz Légzés" 12 karakter, az iOS
+  nagyjából ennyit mutat truncálás nélkül. Ha mégis levágja, egy rövidebb
+  változat kell (pl. „Doboz Légzés" → „Dobozlégzés"). EAS buildből derül ki.
+- Az `userInterfaceStyle` továbbra is `"automatic"`, miközben a design csak
+  világos módra készült — ezt a 0. szakasz óta jelzi a napló, és a splash sötét
+  háttere (`dark.backgroundColor: "#000000"`) is ebből jön. Nem nyúltam hozzá,
+  mert viselkedést változtat, nem csak megjelenést.
+- Az `expo-splash-screen` háttérszíne fehér maradt, nem az app pasztell
+  palettájából való. A `docs/design-tokens.md` indítóképernyőt nem definiál,
+  ezért nem találtam ki hozzá értéket.
+
 ## 2026-08-26 – Alkalmazás ikon a megadott SVG-ből
 
 **Mit:** Az `assets/images/app-icon.svg` (lila-rózsaszín gradiens, fehér doboz
@@ -2296,5 +2333,29 @@ maszkol.
 Ez fejlesztői eszköz, nem dependency — a repóba csak a kész PNG-k kerülnek, a
 forrás SVG mellé.
 **Visszavonható?** Igen, az SVG a repóban marad, bármikor újrarajzolható.
+
+## D-052 – Az indítóképernyő az ikont használja újra, lekerekítve
+
+**Dátum:** 2026-08-26
+**Döntés:** a `splash-icon.png` nem önálló grafika, hanem ugyanaz az ikon, a
+lekerekített (`rx="224"`) változatban. A splash háttérszíne és mérete
+(`#ffffff` / `#000000`, `imageWidth: 200`) változatlan maradt.
+**Miért:** a `docs/design-tokens.md` indítóképernyőt nem definiál, tehát nincs
+mihez tartani magunkat — a CLAUDE.md szerint ilyenkor kérdezni kell, nem
+közelíteni. A meglévő ikon újrahasználata viszont nem közelítés: nulla új design
+értéket vezet be, és pont azt mutatja, amit a felhasználó egy pillanattal előbb
+megnyomott. A lekerekítés itt **kell**, ellentétben az `icon.png`-vel (D-051):
+az indítóképernyőn nincs rendszer maszk, a kép a háttérre kerül rá.
+**Alternatíva:** csak a jelet (doboz + pöttyök) kitenni háttér nélkül — nem
+működik, mert a doboz kerete fehér (`#FFFFFF`–`#FDEBFF`), és a fehér splash
+háttéren láthatatlan lenne.
+**Amihez nem nyúltam:** a splash háttérszíne és az `userInterfaceStyle`. Az
+utóbbi viselkedést változtat (a design csak világos módra készült), az meghaladja
+egy ikoncsere körét.
+**Az app neve:** az `app.json` `name` mezője lett „Doboz Légzés". A `slug` és a
+`scheme` maradt `b2kira` — az EAS projekt azonosítója, illetve a jelszó-
+visszaállító deep link URL sémája múlik rajtuk, azok átírása törné a
+konfigurációt anélkül, hogy bárhol látszana.
+**Visszavonható?** Igen, mindkettő egy-egy sor az `app.json`-ban, plusz egy PNG.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->
