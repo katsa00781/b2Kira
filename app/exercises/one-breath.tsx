@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BACK_BUTTON_SIZE, BackButton } from '@/components/BackButton';
 import { BreathingBox } from '@/components/BreathingBox';
+import { OneBreathSequence } from '@/components/OneBreathSequence';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { ProgressBar } from '@/components/ProgressBar';
 import { gradients } from '@/constants/colors';
@@ -32,6 +33,10 @@ import { useSettingsStore } from '@/store/useSettingsStore';
  * Soronként két lépés: vezetett belégzés, majd a sor nagyban a képernyőn, és a
  * gyerek nyom „Kész”-t, amikor elmondta. **Nincs stopper, nincs számolás,
  * nincs értékelés** — a továbblépés üteme teljesen a gyereké (D-055).
+ *
+ * A szótagsoroknál a teljes sorozat is látszik, az aktuális sor kiemelve
+ * (`OneBreathSequence`, D-059) — a hét napjainál nem, mert ott ugyanaz a sor
+ * ismétlődik.
  */
 export default function OneBreathScreen() {
   const insets = useSafeAreaInsets();
@@ -141,19 +146,25 @@ export default function OneBreathScreen() {
 
           <BreathingBox scale={scale} phase={inhalePattern.colorPhase[0]} characterId={characterId} />
 
-          {/* A sor csak akkor jelenik meg, amikor mondani kell — belégzés
-              közben ne vonja el a figyelmet a levegővételről. A hely előre le
-              van foglalva, hogy a szöveg megjelenésekor ne ugorjon a layout. */}
-          <View style={styles.itemSlot}>
-            {breathing ? null : (
-              <Text
-                style={styles.item}
-                className="text-center font-baloo-extrabold text-text-heading"
-              >
-                {item}
-              </Text>
-            )}
-          </View>
+          {set.layout === 'list' ? (
+            /* A szótagsorok egymás után: a gyerek látja, hol tart és mi jön.
+               Belégzés közben is látszik, hogy tudja, mire készül. */
+            <OneBreathSequence items={set.items} index={index} />
+          ) : (
+            /* Egyetlen ismétlődő sor. Csak akkor jelenik meg, amikor mondani
+               kell — belégzés közben ne vonja el a figyelmet a levegővételről.
+               A hely előre le van foglalva, hogy ne ugorjon a layout. */
+            <View style={styles.itemSlot}>
+              {breathing ? null : (
+                <Text
+                  style={styles.item}
+                  className="text-center font-baloo-extrabold text-text-heading"
+                >
+                  {item}
+                </Text>
+              )}
+            </View>
+          )}
         </View>
 
         <View style={styles.footer}>

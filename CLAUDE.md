@@ -250,7 +250,7 @@ hardcoded: `data/exercises.ts`, a paraméterek pedig `data/phases.ts`,
 | `box` | Doboz légzés | 4 fázis × 4 mp, a beállított hosszig |
 | `nose-mouth` | Orr/száj kombinációk | 4 mp be / 4 mp ki, a 4 kombináció sorban, 4× |
 | `weekdays` | A hét napjai egy levegővel | vezetett belégzés + 3 sor, méricskélés nélkül |
-| `syllables` | Szótagsorok egy levegővel | vezetett belégzés + 10 sor (p–b–m–t–d–k–g) |
+| `syllables` | Szótagsorok egy levegővel | 10 sor egymás után, egy körben (p–b–m–t–d–k–g) |
 
 **Ugyanaz a szabály él mindegyikre, ami a 4-4-4-4-re:** ezek terapeuta által
 kiadott feladatok, a másodperceket, az ismétlésszámot és a szótagsorokat

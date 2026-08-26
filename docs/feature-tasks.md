@@ -255,6 +255,28 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-26 – 11. A szótagsorok egymás után, látható sorozatként
+
+**Mit:** A szótaggyakorlat eddig egyesével mutatta a sorokat, egymástól
+elszigetelten. Mostantól látszik a sorozat: az aktuális sor nagyban, előtte és
+utána két-két szomszéd halványan, és a tíz sor egyszer megy végig — az egész
+lista egy kör. A léptetés marad a „Kész" gomb, tehát semmit nem mérünk
+(D-055). A hét napjainál nem változott semmi: ott ugyanaz a sor ismétlődik
+háromszor, listaként három azonos sor lenne.
+
+**Fájlok:** `components/OneBreathSequence.tsx` (új),
+`app/exercises/one-breath.tsx`, `data/oneBreath.ts` (`layout` mező), `CLAUDE.md`
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Éles eszközön
+még nem futott — a magasságot iPhone SE-re számoltam ki (kb. 13 pt tartalék),
+ezt érdemes megnézni a kis képernyőn.
+
+**Nyitva maradt:** a sorok szövege a lapé maradt (a rövidebbeket nem nyújtottuk
+meg), és a szótagsorozat egy kört megy — ha a logopédus többet kér, a
+`data/oneBreath.ts`-ben egy sor.
+
+**Commit:** feat: a szótagsorok listaként, egymás után
+
 ## 2026-08-26 – 11. fix: az orr/száj kombinációk folyamatosan váltakoznak
 
 **Mit:** A 2. gyakorlat eddig kombinációnként 3 egymás utáni kört ment
@@ -2624,5 +2646,24 @@ légzés hívása egyik helyen sem változott, tehát a 4-4-4-4 ritmus érintetl
 `app/session.tsx`-ben és az `app/(tabs)/stickers.tsx`-ben — az új
 `components/BackButton.tsx`-re cserélhetők, de az két működő képernyő átírása
 lenne, amit ez a feladat nem indokol.
+
+## D-059 – A szótagsorok listaként, a sorozat látszik
+
+**Dátum:** 2026-08-26
+**Döntés:** a szótagsoroknál a gyerek nem egy magányos sort lát, hanem a
+sorozatot: az aktuális sor nagyban, kiemelve, előtte és utána két-két szomszéd
+halványan (`components/OneBreathSequence.tsx`). A tíz sor egyszer megy végig —
+**az egész lista egy kör**. A léptetés marad a „Kész" gomb (D-055).
+**Miért:** a felhasználó pontosítása szerint a szótagok „egymás után"
+jönnek — a sorozat maga a gyakorlat, nem tíz különálló feladat. Ha látja, mi
+következik, fel tud készülni rá, és érzi, hogy halad.
+**Miért csak ablak, nem a teljes tíz sor:** a doboz 220 pt, és a teljes lista
+mellette kitolná a képernyőről iPhone SE-n. Az öt soros ablak magassága
+állandó, tehát a layout sem ugrál sorváltáskor.
+**A hét napjainál marad az egy nagy sor** (`layout: 'single'`): ott ugyanaz a
+szöveg ismétlődik háromszor, listaként három azonos sor lenne.
+**A sorok szövege a lapé maradt** — a rövidebbeket (`papapa`, `pepepe`,
+`mamama`) nem nyújtottuk meg egységes hosszúra. Ez terápiás tartalom, nem a
+miénk.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

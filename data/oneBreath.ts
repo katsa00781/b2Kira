@@ -20,6 +20,12 @@ export type OneBreathSet = {
   instruction: string;
   /** Sorok, mindegyik egy levegővel. A lap sorrendjében. */
   items: readonly string[];
+  /**
+   * `list`: a sorok egymás után jönnek, és a gyerek látja a sorozatot — az
+   * aktuális kiemelve, előtte-utána a szomszédok. `single`: egyetlen sor
+   * nagyban, mert ugyanaz ismétlődik.
+   */
+  layout: 'single' | 'list';
 };
 
 /** A vezetett belégzés hossza másodpercben — a doboz légzés alapüteme. */
@@ -48,11 +54,15 @@ export const oneBreathSets: Record<OneBreathKey, OneBreathSet> = {
     instruction: 'Mondd el egy levegővel!',
     // Háromszor ugyanaz a sor: a lapon egy feladat, de egy kör kevés lenne.
     items: [WEEKDAYS, WEEKDAYS, WEEKDAYS],
+    layout: 'single',
   },
   syllables: {
     key: 'syllables',
+    // A tíz sor **egymás után**, egy körben: ez a teljes gyakorlat. A sorok
+    // szövege pontosan a lapé — a rövidebbeket sem nyújtjuk meg.
     title: 'Szótagok',
     instruction: 'Mondd el egy levegővel!',
+    layout: 'list',
     items: [
       'pápápápá',
       'papapa',
