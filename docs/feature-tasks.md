@@ -197,7 +197,7 @@ hármat viszi be, és a gyakorlatokat kategóriákra bontja.
 - [x] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
 - [x] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
 - [x] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
-- [ ] `CLAUDE.md` frissítése a gyakorlatkatalógussal
+- [x] `CLAUDE.md` frissítése a gyakorlatkatalógussal
 - [ ] Teszt éles iPhone-on: mind a 4 gyakorlat végig, offline is
 
 > **Kérdés a logopédusnak** (nem blokkoló, de a D-054 rá vár): a 2. gyakorlatnál
@@ -254,6 +254,27 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – 11. A gyakorlatkatalógus átvezetése a CLAUDE.md-be
+
+**Mit:** A CLAUDE.md eddig egyetlen gyakorlatról szólt. Bekerült egy
+„Gyakorlatkatalógus" szakasz a négy gyakorlattal és a paramétereikkel, a
+képernyőtábla három sorral bővült, és a mappastruktúra is követi az új
+fájlokat. A szakasz kimondja, hogy **ugyanaz a szabály él mind a négyre, ami a
+4-4-4-4-re**: terapeuta által kiadott feladatok, engedély nélkül nem
+variálhatók. A logopédus feladatlapjának elemzése a repo gyökeréből a
+`docs/legzogyakorlatok-2026-08-26.md` alá került — ez a gyakorlatok
+forrásdokumentuma.
+
+**Fájlok:** `CLAUDE.md`, `docs/legzogyakorlatok-2026-08-26.md` (átnevezve)
+
+**Tesztelve:** —, dokumentáció.
+
+**Nyitva maradt:** a feladatlap elemzésében szereplő bizonytalan pontok
+(a 4. gyakorlat címszava, az elvárt ismétlésszámok) továbbra is nyitottak, és
+a D-054 is a logopédus válaszára vár.
+
+**Commit:** docs: gyakorlatkatalógus átvezetése a CLAUDE.md-be
 
 ## 2026-08-26 – 11. „Egy levegővel" gyakorlatok (a lap 3. és 4. pontja)
 
@@ -2475,25 +2496,6 @@ visszaállító deep link URL sémája múlik rajtuk, azok átírása törné a
 konfigurációt anélkül, hogy bárhol látszana.
 **Visszavonható?** Igen, mindkettő egy-egy sor az `app.json`-ban, plusz egy PNG.
 
-## D-057 – `exercise_key` oszlop a `breathing_sessions`-ön
-
-**Dátum:** 2026-08-26
-**Döntés:** a session sorok új `exercise_key text not null default 'box'`
-oszlopot kaptak, `check` megkötéssel a négy kulcsra
-(`0003_breathing_exercise_key.sql`). A `PendingSession` is kapott `exerciseKey`
-mezőt, a persist verzió 1 → 2, és a migráció a régi sorokra `'box'`-ot ír.
-**Miért:** a katalógus a kliensben van (mint a matricáknál), az adatbázisnak
-csak a kulcsot kell tárolnia. Az alapérték azért `'box'`, mert az eddigi sorok
-kivétel nélkül doboz légzések voltak — így nem kell külön adatjavítás.
-**A `cyclesCompleted` jelentése általánosodott:** „befejezett ismétlések" — a
-doboznál a 16 mp-es ciklusok, az orr/szájnál a körök, az egy levegővel
-gyakorlatoknál az elmondott sorok.
-**Fontos sorrend:** a migrációnak **előbb** kell lefutnia, mint ahogy a kliens
-elkezdi küldeni a mezőt, különben az egész köteg hibára fut, és a feltöltési sor
-beragad (a köteg egyben megy — D-039).
-**Amihez nem nyúltam:** a `sessionLengthKey` beállítás továbbra is **csak a doboz
-légzésre** vonatkozik; a többi gyakorlat hosszát az ismétlésszám adja.
-
 ## D-053 – Gyakorlatválasztó képernyő a kezdőképernyő CTA-ja mögött
 
 **Dátum:** 2026-08-26
@@ -2526,6 +2528,23 @@ tartást tenne bele, ami nincs a feladatban.
 „javítani", sem variálni nem szabad — ugyanaz a szabály él rá, mint a 4-4-4-4-re
 (D-003).
 
+## D-055 – Az „egy levegővel" gyakorlatok semmit nem mérnek
+
+**Dátum:** 2026-08-26
+**Döntés:** a 3. és 4. gyakorlatnál (hét napjai, szótagsorok) nincs stopper,
+nincs visszaszámláló, nincs „meddig bírtad", nincs „sikerült?" kérdés és nincs
+pontszám. Vezetett belégzés után a sor nagyban megjelenik, és a gyerek nyom
+„Kész"-t, amikor elmondta. A haladást csak a néma alsó sáv mutatja.
+**Miért:** ez a két gyakorlat **beszédes**, a gyerek pedig dadogással
+foglalkozik. A CLAUDE.md tiltja az időnyomást és a teljesítmény-visszajelzést,
+és ez itt nem UX-ízlés kérdése: a beszéd körüli plusz feszültség kifejezetten
+árt. A mért idő ettől még bekerül a naplóba (`durationSeconds`) — csak a
+képernyőn nem jelenik meg soha.
+**Alternatíva:** fix idő után automatikus továbblépés. Elvetve: rejtett
+időnyomás, a gyerek érezné, hogy sietnie kell.
+**Extra:** a „Hallgasd meg" gomb kérésre felolvassa a sort (`expo-speech`), és
+csak akkor látszik, ha a beszéd kapcsoló be van kapcsolva. Kérésre szól, nem
+magától — így segítség, nem minta, amihez mérni kell magát.
 
 ## D-056 – Minden befejezett gyakorlat egyformán léptet
 
@@ -2539,6 +2558,24 @@ több képernyő hívja a `recordSession`-ön keresztül.
 **Alternatíva 2:** a nap csak akkor kész, ha mind a négy megvan — a legszigorúbb,
 és egyetlen kihagyott gyakorlat elvinné a sorozatot.
 
+## D-057 – `exercise_key` oszlop a `breathing_sessions`-ön
+
+**Dátum:** 2026-08-26
+**Döntés:** a session sorok új `exercise_key text not null default 'box'`
+oszlopot kaptak, `check` megkötéssel a négy kulcsra
+(`0003_breathing_exercise_key.sql`). A `PendingSession` is kapott `exerciseKey`
+mezőt, a persist verzió 1 → 2, és a migráció a régi sorokra `'box'`-ot ír.
+**Miért:** a katalógus a kliensben van (mint a matricáknál), az adatbázisnak
+csak a kulcsot kell tárolnia. Az alapérték azért `'box'`, mert az eddigi sorok
+kivétel nélkül doboz légzések voltak — így nem kell külön adatjavítás.
+**A `cyclesCompleted` jelentése általánosodott:** „befejezett ismétlések" — a
+doboznál a 16 mp-es ciklusok, az orr/szájnál a körök, az egy levegővel
+gyakorlatoknál az elmondott sorok.
+**Fontos sorrend:** a migrációnak **előbb** kell lefutnia, mint ahogy a kliens
+elkezdi küldeni a mezőt, különben az egész köteg hibára fut, és a feltöltési sor
+beragad (a köteg egyben megy — D-039).
+**Amihez nem nyúltam:** a `sessionLengthKey` beállítás továbbra is **csak a doboz
+légzésre** vonatkozik; a többi gyakorlat hosszát az ismétlésszám adja.
 
 ## D-058 – Az új képernyők nem vezetnek be új design értéket
 
@@ -2560,23 +2597,5 @@ légzés hívása egyik helyen sem változott, tehát a 4-4-4-4 ritmus érintetl
 `app/session.tsx`-ben és az `app/(tabs)/stickers.tsx`-ben — az új
 `components/BackButton.tsx`-re cserélhetők, de az két működő képernyő átírása
 lenne, amit ez a feladat nem indokol.
-
-## D-055 – Az „egy levegővel" gyakorlatok semmit nem mérnek
-
-**Dátum:** 2026-08-26
-**Döntés:** a 3. és 4. gyakorlatnál (hét napjai, szótagsorok) nincs stopper,
-nincs visszaszámláló, nincs „meddig bírtad", nincs „sikerült?" kérdés és nincs
-pontszám. Vezetett belégzés után a sor nagyban megjelenik, és a gyerek nyom
-„Kész"-t, amikor elmondta. A haladást csak a néma alsó sáv mutatja.
-**Miért:** ez a két gyakorlat **beszédes**, a gyerek pedig dadogással
-foglalkozik. A CLAUDE.md tiltja az időnyomást és a teljesítmény-visszajelzést,
-és ez itt nem UX-ízlés kérdése: a beszéd körüli plusz feszültség kifejezetten
-árt. A mért idő ettől még bekerül a naplóba (`durationSeconds`) — csak a
-képernyőn nem jelenik meg soha.
-**Alternatíva:** fix idő után automatikus továbblépés. Elvetve: rejtett
-időnyomás, a gyerek érezné, hogy sietnie kell.
-**Extra:** a „Hallgasd meg" gomb kérésre felolvassa a sort (`expo-speech`), és
-csak akkor látszik, ha a beszéd kapcsoló be van kapcsolva. Kérésre szól, nem
-magától — így segítség, nem minta, amihez mérni kell magát.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

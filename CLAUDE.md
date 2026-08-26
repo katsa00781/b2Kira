@@ -29,6 +29,10 @@ feladatot digitalizálja játékosan. Ez két dolgot jelent a fejlesztésre néz
 
 Lásd a döntést részletesen: `docs/feature-tasks.md`, Döntésnapló `D-003`.
 
+A logopédus 2026-08-26-án egy négy gyakorlatból álló lapot adott
+(`docs/legzogyakorlatok-2026-08-26.md`), ezért az app azóta **gyakorlatkatalógust**
+kezel, nem egyetlen gyakorlatot — lásd lent, „Gyakorlatkatalógus".
+
 Az app a következőket tartalmazza:
 
 - Szülői bejelentkezés és regisztráció (Supabase Auth)
@@ -136,7 +140,11 @@ app/
     index.tsx          # kezdőképernyő
     stickers.tsx       # matricagyűjtemény
     settings.tsx       # szülői beállítások
-  session.tsx          # légzőgyakorlat (teljes képernyő, nincs tab bar)
+  exercises/
+    index.tsx          # gyakorlatválasztó
+    nose-mouth.tsx     # orr/száj kombinációk
+    one-breath.tsx     # a hét napjai / szótagsorok egy levegővel
+  session.tsx          # doboz légzés (teljes képernyő, nincs tab bar)
   _layout.tsx
 components/
   characters/          # Bunny, Panda, Monkey, Lion
@@ -157,8 +165,13 @@ data/
   stickers.ts
   characters.ts
   sessionLengths.ts
+  exercises.ts         # gyakorlatkatalógus
+  phases.ts            # doboz légzés + a BreathPattern típus
+  noseMouth.ts
+  oneBreath.ts
 hooks/
   useBreathingCycle.ts
+  useGuidedInhale.ts
   useSessionTimer.ts
 lib/
   supabase.ts
@@ -206,7 +219,10 @@ AsyncStorage-gal perzisztálva.
 - A színeket **mindig** a `constants/colors.ts`-ből használd, sose írj be hex értéket
   komponensbe.
 
-### A 6 képernyő
+### A képernyők
+
+Az első hat képernyő a designból van, az utolsó három a logopédus lapjához
+készült, design referencia nélkül, kizárólag meglévő tokenekből (D-058).
 
 | # | Route | Leírás |
 |---|---|---|
@@ -216,6 +232,38 @@ AsyncStorage-gal perzisztálva.
 | 4 | `app/session.tsx` | Élő gyakorlat: vissza gomb, hátralévő idő, fázis felirat, animált doboz + karakter, fázispöttyök, session bar, Szünet gomb. |
 | 5 | `app/(tabs)/stickers.tsx` | 3×3 matricarács, streak sor, „következő jelvény" kártya. |
 | 6 | `app/(tabs)/settings.tsx` | 3 kapcsoló, gyakorlathossz választó, napi emlékeztető idő, szülői zár gomb. |
+| 7 | `app/exercises/index.tsx` | Gyakorlatválasztó: a négy gyakorlat kártyaként. A kezdőképernyő CTA-ja ide visz (D-053). |
+| 8 | `app/exercises/nose-mouth.tsx` | Orron/szájon be- és kilégzés 4 kombinációja (D-054). |
+| 9 | `app/exercises/one-breath.tsx` | A hét napjai / szótagsorok egy levegővel, „Kész" gombbal (D-055). |
+
+---
+
+## Gyakorlatkatalógus
+
+A négy gyakorlat a **logopédus feladatlapjáról** való
+(`docs/legzogyakorlatok-2026-08-26.md`), nem mi találtuk ki őket. A katalógus
+hardcoded: `data/exercises.ts`, a paraméterek pedig `data/phases.ts`,
+`data/noseMouth.ts` és `data/oneBreath.ts` fájlokban, egy-egy helyen.
+
+| Kulcs | Gyakorlat | Paraméterek |
+|---|---|---|
+| `box` | Doboz légzés | 4 fázis × 4 mp, a beállított hosszig |
+| `nose-mouth` | Orr/száj kombinációk | 4 mp be / 4 mp ki, 4 kombináció × 3 kör |
+| `weekdays` | A hét napjai egy levegővel | vezetett belégzés + 3 sor, méricskélés nélkül |
+| `syllables` | Szótagsorok egy levegővel | vezetett belégzés + 10 sor (p–b–m–t–d–k–g) |
+
+**Ugyanaz a szabály él mindegyikre, ami a 4-4-4-4-re:** ezek terapeuta által
+kiadott feladatok, a másodperceket, az ismétlésszámot és a szótagsorokat
+engedély nélkül **nem** „javítjuk" és nem variáljuk. A 2. gyakorlat ütemezése
+ráadásul még a logopédus megerősítésére vár (D-054).
+
+A 3. és 4. gyakorlat **beszédes**. Ott semmit nem mérünk: nincs stopper, nincs
+számolás, nincs értékelés, a gyerek maga lép tovább (D-055). A `sessionLengthKey`
+beállítás csak a doboz légzésre vonatkozik.
+
+Minden befejezett gyakorlat egyformán lépteti a sorozatot, a szintet és a
+matricákat (D-056), és a `breathing_sessions.exercise_key` őrzi, melyik volt
+(D-057).
 
 ---
 
