@@ -5,22 +5,27 @@ import { s } from '@/constants/layout';
 import { PHASE_COUNT, phaseLabels } from '@/data/phases';
 
 type PhaseDotsProps = {
-  /** 0–3, az aktuális fázis indexe. */
+  /** Az aktuális fázis indexe. */
   phase: number;
+  /** Hány fázisból áll a minta. Alapértelmezésben a doboz légzés négye. */
+  count?: number;
+  /** Az aktuális fázis felirata a képernyőolvasónak. */
+  label?: string;
 };
 
 /**
- * Négy pötty a doboz alatt, az aktív fázis kiemelve
- * (`00-teljes-canvas.html`, 4. képernyő).
+ * Pöttyök a doboz alatt, az aktív fázis kiemelve
+ * (`00-teljes-canvas.html`, 4. képernyő). A doboz légzésnél négy, más
+ * gyakorlatnál annyi, ahány fázisa van a mintának.
  */
-export function PhaseDots({ phase }: PhaseDotsProps) {
+export function PhaseDots({ phase, count = PHASE_COUNT, label }: PhaseDotsProps) {
   return (
     <View
       accessibilityRole="progressbar"
-      accessibilityLabel={`${phaseLabels[phase]} – ${phase + 1}. fázis a ${PHASE_COUNT}-ből`}
+      accessibilityLabel={`${label ?? phaseLabels[phase]} – ${phase + 1}. fázis a ${count}-ből`}
       style={styles.row}
     >
-      {Array.from({ length: PHASE_COUNT }, (_, index) => (
+      {Array.from({ length: count }, (_, index) => (
         <View
           key={index}
           style={[styles.dot, index === phase ? styles.dotActive : styles.dotInactive]}

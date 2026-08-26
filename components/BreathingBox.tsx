@@ -12,7 +12,11 @@ import type { CharacterId } from '@/data/characters';
 type BreathingBoxProps = {
   /** 0.55 – 1.00, a `useBreathingCycle` közös shared value-ja. */
   scale: SharedValue<number>;
-  /** 0–3. A doboz színét és árnyékát adja. */
+  /**
+   * 0–3, a doboz légzés fázisindexe: ez adja a doboz színét és árnyékát. Más
+   * gyakorlat a mintája `colorPhase` leképezését adja át, hogy ne kelljen új
+   * design értéket kitalálni (D-058).
+   */
   phase: number;
   characterId: CharacterId;
 };

@@ -195,7 +195,7 @@ hármat viszi be, és a gyakorlatokat kategóriákra bontja.
 
 - [x] `db`: `breathing_sessions.exercise_key` oszlop + típusgenerálás (D-057)
 - [x] `data/exercises.ts` – gyakorlatkatalógus, `app/exercises/index.tsx` választó (D-053)
-- [ ] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
+- [x] 2. gyakorlat: orron/szájon be- és kilégzés 4 kombinációja (D-054)
 - [ ] 3–4. gyakorlat: a hét napjai és a szótagsorok egy levegővel (D-055)
 - [ ] `CLAUDE.md` frissítése a gyakorlatkatalógussal
 - [ ] Teszt éles iPhone-on: mind a 4 gyakorlat végig, offline is
@@ -254,6 +254,33 @@ Sablon:
 ```
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
+
+## 2026-08-26 – 11. Orron/szájon légzés (a lap 2. gyakorlata)
+
+**Mit:** Négy orr/száj kombináció, kombinációnként 3 kör, körönként 4 mp be és
+4 mp ki — összesen 96 mp. A képernyő a gyakorlat képernyő felépítését követi,
+hogy ismerős legyen; a fejlécben a visszaszámláló helyén az aktuális kombináció
+áll, és a kimondott szöveg is az („Szájon ki").
+
+Ehhez a légzésmotor általánosodott: a `useBreathingCycle` mostantól
+`BreathPattern`-t kap (fázisszám, hossz, feliratok, `scale` töréspontok, és a
+meglévő fázisszínekre mutató `colorPhase`), alapértelmezésben a doboz mintáját.
+**A `session.tsx` hívása nem változott, tehát a 4-4-4-4 ritmus érintetlen.**
+A hook ciklusszámot is ad — a fázis körbefordulásából, nem a `withRepeat`
+belső callbackjéből, mert az ismétlésenként nem megbízható.
+
+**Fájlok:** `app/exercises/nose-mouth.tsx`, `data/noseMouth.ts`,
+`data/phases.ts`, `hooks/useBreathingCycle.ts`, `hooks/useSessionFeedback.ts`,
+`components/PhaseDots.tsx`, `components/BreathingBox.tsx`, `data/exercises.ts`
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Éles eszközön
+még nem futott.
+
+**Nyitva maradt:** a **legfontosabb** teszt a doboz légzés regressziója — 5 perc
+végig, és a ritmus a végén is pontos. A motor általánosítása azt is érinti.
+A 2. gyakorlat ütemezése és ismétlésszáma a logopédus megerősítésére vár.
+
+**Commit:** feat: orron/szájon légzés gyakorlat
 
 ## 2026-08-26 – 11. Gyakorlatválasztó képernyő
 
@@ -2455,5 +2482,57 @@ követné. Elvetve: hosszabb egy ülésben (kb. 5–6 perc), és egy megszakít�
 nincs jó pont, ahonnan folytatni lehetne.
 **Amihez nem nyúltam:** a doboz légzés `app/session.tsx` képernyője változatlan,
 csak a session mentés kapott `exerciseKey: 'box'`-ot.
+
+## D-054 – Az orr/száj gyakorlat 4 mp be / 4 mp ki, kombinációnként 3 kör
+
+**Dátum:** 2026-08-26
+**Döntés:** a 2. gyakorlat két fázisból áll (belégzés, kilégzés), fázisonként
+4 mp, tartás nélkül; a négy orr/száj kombináció mindegyike 3 kört kap, tehát az
+egész 96 mp. Az értékek a `data/noseMouth.ts`-ben, egy helyen állnak.
+**Miért:** a lapon **nincs időzítés és nincs ismétlésszám** — csak a négy
+kombináció felsorolása. A 4 mp nem a mi ötletünk, hanem a doboz légzés már
+kiadott alapüteme: a gyereknek ismerős, és nem visz be új, kitalált tempót. A
+tartás azért marad ki, mert a lapon sem szerepel — a doboz légzés az 1. pont,
+ez pedig külön feladat.
+**Alternatíva:** a teljes 4-4-4-4 ciklust ráhúzni erre is. Elvetve, mert az
+tartást tenne bele, ami nincs a feladatban.
+**Nyitva:** ez a szám a logopédus megerősítésére vár. Amíg nincs válasz, sem
+„javítani", sem variálni nem szabad — ugyanaz a szabály él rá, mint a 4-4-4-4-re
+(D-003).
+
+
+## D-056 – Minden befejezett gyakorlat egyformán léptet
+
+**Dátum:** 2026-08-26
+**Döntés:** bármelyik befejezett gyakorlat lépteti a napi sorozatot, a szintet és
+a matricákat. A `useChildStore.registerCompletedSession` változatlan maradt, csak
+több képernyő hívja a `recordSession`-ön keresztül.
+**Miért:** a gyereknek mind a négy gyakorlat ugyanaz a feladat, csak más formában
+— értelmetlen lenne, ha a szótagsorért nem járna semmi. Nulla új logika kellett.
+**Alternatíva 1:** csak a doboz légzés számít — a többi jutalom nélkül maradna.
+**Alternatíva 2:** a nap csak akkor kész, ha mind a négy megvan — a legszigorúbb,
+és egyetlen kihagyott gyakorlat elvinné a sorozatot.
+
+
+## D-058 – Az új képernyők nem vezetnek be új design értéket
+
+**Dátum:** 2026-08-26
+**Döntés:** a három új képernyőre nincs design referencia
+(`design-reference/00-teljes-canvas.html` hat képernyőt tartalmaz), ezért
+kizárólag a meglévő tokenekből építkeznek: ugyanaz a gradiens háttér, ugyanaz a
+62/22/28 padding, ugyanaz a doboz, sáv, gomb és tipográfia. A légzésminták
+`colorPhase` mezője a **meglévő** fázisszínekre és hangokra mutat (belégzés
+`#FFB347`, kilégzés `#94E3C9`), tehát új szín sem született.
+**Miért:** a CLAUDE.md szerint hiányzó design értéknél kérdezni kell, nem
+közelíteni. A meglévő tokenek újrahasználata nem közelítés — nulla új értéket
+vezet be, és a gyereknek is ismerős marad a képernyő.
+**Amit ez maga után von:** a `useBreathingCycle` mostantól `BreathPattern`-t
+kap (alapértelmezésben a doboz mintáját), a `PhaseDots` `count`/`label` propot,
+a `useSessionFeedback` pedig opcionális `label`/`soundPhase` felülírást. A doboz
+légzés hívása egyik helyen sem változott, tehát a 4-4-4-4 ritmus érintetlen.
+**Nyitva maradt:** a vissza gomb korábbi, kézzel másolt példánya megmaradt az
+`app/session.tsx`-ben és az `app/(tabs)/stickers.tsx`-ben — az új
+`components/BackButton.tsx`-re cserélhetők, de az két működő képernyő átírása
+lenne, amit ez a feladat nem indokol.
 
 <!-- ÚJ DÖNTÉSEK IDE, ALULRA, NÖVEKVŐ SORSZÁMMAL -->

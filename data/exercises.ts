@@ -38,4 +38,11 @@ export const exercises: readonly Exercise[] = [
     icon: 'square-outline',
     route: '/session',
   },
+  {
+    key: 'nose-mouth',
+    title: 'Orr és száj',
+    subtitle: 'Négyféle be- és kilégzés, sorban',
+    icon: 'swap-horizontal-outline',
+    route: '/exercises/nose-mouth',
+  },
 ] as const;
