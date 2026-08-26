@@ -248,7 +248,7 @@ hardcoded: `data/exercises.ts`, a paraméterek pedig `data/phases.ts`,
 | Kulcs | Gyakorlat | Paraméterek |
 |---|---|---|
 | `box` | Doboz légzés | 4 fázis × 4 mp, a beállított hosszig |
-| `nose-mouth` | Orr/száj kombinációk | 4 mp be / 4 mp ki, 4 kombináció × 3 kör |
+| `nose-mouth` | Orr/száj kombinációk | 4 mp be / 4 mp ki, a 4 kombináció sorban, 4× |
 | `weekdays` | A hét napjai egy levegővel | vezetett belégzés + 3 sor, méricskélés nélkül |
 | `syllables` | Szótagsorok egy levegővel | vezetett belégzés + 10 sor (p–b–m–t–d–k–g) |
 

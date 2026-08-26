@@ -28,10 +28,13 @@ import { useSessionStore } from '@/store/useSessionStore';
 /**
  * 2. gyakorlat: orron/szájon be- és kilégzés négy kombinációban (D-054).
  *
+ * A négy kombináció **folyamatosan váltakozik**: minden be-ki légzés után a
+ * következő jön, a négy együtt egy kör, és a kör megy 4-szer.
+ *
  * A gyakorlat képernyő (`app/session.tsx`) felépítését követi, hogy a gyereknek
  * ismerős legyen — csak a fejlécben a visszaszámláló helyett az aktuális
- * kombináció áll, és a kör számlálása bent marad: a képernyőn nincs kiírt
- * „3/12", csak a néma alsó sáv.
+ * kombináció áll, és a számlálás bent marad: a képernyőn nincs kiírt
+ * „5/16", csak a néma alsó sáv.
  */
 export default function NoseMouthScreen() {
   const insets = useSafeAreaInsets();
@@ -111,7 +114,7 @@ export default function NoseMouthScreen() {
     return () => subscription.remove();
   }, []);
 
-  // Megvan mind a 12 kör: lezárjuk és visszamegyünk.
+  // Megvan mind a 16 légzés (4 kör): lezárjuk és visszamegyünk.
   useEffect(() => {
     if (finished || cycles < TOTAL_ROUNDS) {
       return;
@@ -163,7 +166,7 @@ export default function NoseMouthScreen() {
   );
 }
 
-/** 12 kör × (4 mp be + 4 mp ki) = 96 mp. Csak a haladásjelző sávhoz kell. */
+/** 16 légzés × (4 mp be + 4 mp ki) = 128 mp. Csak a haladásjelző sávhoz kell. */
 const TOTAL_SECONDS = TOTAL_ROUNDS * BREATH_SECONDS * 2;
 
 /** A design keretében a tartalom 62 / 22 / 28 px-re van a képernyő szélétől. */

@@ -255,6 +255,25 @@ Sablon:
 
 <!-- ÚJ BEJEGYZÉSEK IDE, LEGFELÜLRE -->
 
+## 2026-08-26 – 11. fix: az orr/száj kombinációk folyamatosan váltakoznak
+
+**Mit:** A 2. gyakorlat eddig kombinációnként 3 egymás utáni kört ment
+(orron be–orron ki ×3, aztán orron be–szájon ki ×3, …). A felhasználó
+pontosítása szerint a lap úgy értendő, hogy a négy kombináció **sorban,
+egymás után** jön, és ez a négyes sorozat megy 4-szer: 16 légzés, 128 mp.
+Így a fejlécben a kombináció minden 8 másodpercben vált, nem 24-enként.
+
+**Fájlok:** `data/noseMouth.ts` (`ROUNDS_PER_COMBO` → `SEQUENCE_REPEATS`,
+`comboAt` mostantól maradékos osztással forgat), `app/exercises/nose-mouth.tsx`
+
+**Tesztelve:** `npm run typecheck` és `npm run lint` hibátlan. Éles eszközön
+még nem futott.
+
+**Nyitva maradt:** a 4 mp-es ütem és a 4 ismétlés továbbra is a logopédus
+megerősítésére vár (D-054).
+
+**Commit:** fix: az orr/száj kombinációk folyamatosan váltakoznak
+
 ## 2026-08-26 – 11. A gyakorlatkatalógus átvezetése a CLAUDE.md-be
 
 **Mit:** A CLAUDE.md eddig egyetlen gyakorlatról szólt. Bekerült egy
@@ -2515,8 +2534,16 @@ csak a session mentés kapott `exerciseKey: 'box'`-ot.
 
 **Dátum:** 2026-08-26
 **Döntés:** a 2. gyakorlat két fázisból áll (belégzés, kilégzés), fázisonként
-4 mp, tartás nélkül; a négy orr/száj kombináció mindegyike 3 kört kap, tehát az
-egész 96 mp. Az értékek a `data/noseMouth.ts`-ben, egy helyen állnak.
+4 mp, tartás nélkül. **A négy kombináció folyamatosan váltakozik** — minden
+be-ki légzés után a következő jön —, a négy együtt egy kör, és ez a kör megy
+4-szer: összesen 16 légzés, 128 mp. Az értékek a `data/noseMouth.ts`-ben, egy
+helyen állnak.
+
+**Frissítés (2026-08-26):** eredetileg kombinációnként 3 egymás utáni kör volt
+(4×3 = 12 légzés, csoportosítva). A felhasználó pontosította: a lap úgy
+értendő, hogy a négy kombináció **sorban, egymás után** megy, és ez a sorozat
+ismétlődik. A csoportosított változat abból a félreolvasásból jött, hogy a lap
+felsorolásként írja le a négyet.
 **Miért:** a lapon **nincs időzítés és nincs ismétlésszám** — csak a négy
 kombináció felsorolása. A 4 mp nem a mi ötletünk, hanem a doboz légzés már
 kiadott alapüteme: a gyereknek ismerős, és nem visz be új, kitalált tempót. A
